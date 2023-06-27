@@ -1,15 +1,3 @@
-function SetupAPI()
-    local CoreServerApi = {}
-    CoreServerApi.Discord = {}
-    CoreServerApi.Discord.Webhook = DiscordWebHookAPI
-    
-    CoreServerApi = SetupSharedAPI(CoreServerApi)
-
-    exports('initiate',function()
-        return CoreServerApi
-    end)
-end
-
 function SetupCLHeader()
     PrettyPrint([[^5
                           .--.                    

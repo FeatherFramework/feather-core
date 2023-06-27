@@ -1,6 +1,6 @@
 function RunCore()
     SetupCLHeader()
-    SetupAPI()
+    StartAPI()
     SetupCache()
     SetupPlayerEvents()
 end
