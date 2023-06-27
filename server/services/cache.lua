@@ -14,7 +14,7 @@ function SetupCache()
 end
 
 function ReloadRoleCache()
-        local temproles = MySQL.query.await("SELECT * FROM roles")
+        local temproles = RoleController.GetAllRoles()
         for _, value in ipairs(temproles) do
             RoleCache[value.ID] = value
         end
