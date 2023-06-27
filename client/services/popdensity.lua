@@ -48,6 +48,8 @@ end
 RegisterNetEvent("bcc:popdensity:clientsync")
 AddEventHandler("bcc:popdensity:clientsync", SetupDensities)
 
-Citizen.CreateThread(function()
-	TriggerServerEvent("bcc:popdensity:sync")
-end)
+function StartPopulationDensity()
+    Citizen.CreateThread(function()
+        TriggerServerEvent("bcc:popdensity:sync")
+    end)
+end

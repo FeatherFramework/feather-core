@@ -1,10 +1,8 @@
-
--- Global Initiators
-CoreClientApi = SetupAPI()
-
-exports('initiate',function()
-    return CoreClientApi
-end)
+function RunCore()
+    StartAPI()
+    StartPopulationDensity()
+end
+RunCore()
 
 AddEventHandler('playerSpawned', function()
 
