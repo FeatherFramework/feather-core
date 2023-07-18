@@ -1,6 +1,7 @@
 function RunCore()
     StartAPI()
     StartPopulationDensity()
+    StartInteriorsFix()
 end
 RunCore()
 
