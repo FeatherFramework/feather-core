@@ -3,10 +3,16 @@
 -- OG Script: https://github.com/egerdnc/redm-rpc
 -----------------------------------
 
+--  Track all queued callbacks
 local pendingCallbacks = {}
+
+-- Track the number of queued callbacks
 local pendingCallbackCount = 0
+
+-- Tracks any callbacks that were called before resourcestarted
 local pendingActivation = {}
 
+-- Tracks if the resource has started.
 local isResourceStarted = false
 
 -- Remote methods table
@@ -133,10 +139,13 @@ end)
 --------------------
 --    RPC API     --
 --------------------
+
+-- Register the procedure/method
 function RPCAPI.Register(name, callback)
     return CallMethod(RegisterMethod, name, callback)
 end
 
+-- Send a single RPC but emit a callback
 function RPCAPI.Notify(name, params, source)
     if not params then
         params = {}
@@ -144,6 +153,7 @@ function RPCAPI.Notify(name, params, source)
     return CallMethod(CallRemoteMethod, name, params, nil, source)
 end
 
+-- Send a single rpc
 function RPCAPI.Call(name, params, callback, source)
     if not params then
         params = {}
@@ -151,15 +161,20 @@ function RPCAPI.Call(name, params, callback, source)
     return CallMethod(CallRemoteMethod, name, params, callback, source)
 end
 
+-- Send a single rpc but with async 
 function RPCAPI.CallAsync(name, params, source)
     if not params then
         params = {}
     end
+
+    -- Create a new promise "thread". Learn More: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
     local p = promise.new()
 
     CallMethod(CallRemoteMethod, name, params, function (...)
+        -- Resolve the promise (tell the promise that it is done and can now proceed.)
         p:resolve({...})
     end, source)
 
+    -- Unpack the "awaited" promise. (Waits for the promise to be "done"/resolved)
     return table.unpack(Citizen.Await(p))
 end
