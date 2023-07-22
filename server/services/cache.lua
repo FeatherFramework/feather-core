@@ -8,7 +8,7 @@ function SetupCache()
             ReloadRoleCache()
             ReloadUserCache()
 
-            wait(30000) --Refresh Cache Every X miliseconds (Currently 30 seconds)
+            Wait(30000) --Refresh Cache Every X miliseconds (Currently 30 seconds)
         end
     end)
 end
