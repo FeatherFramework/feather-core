@@ -8,6 +8,7 @@ author 'Feather @Bytesizd'
 version '0.0.1'
 
 shared_scripts {
+    "/shared/data/*.lua",
     "/shared/helpers/*.lua",
     "/shared/services/*.lua",
     "/shared/main.lua"

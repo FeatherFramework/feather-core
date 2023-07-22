@@ -1,7 +1,3 @@
-------- File Information --------
--- Type: API
------------------------------------
-
 DiscordWebHookAPI = {}
 local _internalSendMessage = function (webhookurl, webhookname, webhookavatar, name, description, embeds)
     if embeds == nil then
