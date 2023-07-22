@@ -12,3 +12,7 @@ function StringChain(...)
 
     return comb
 end
+
+function IsOnServer()
+    return IsDuplicityVersion()
+end

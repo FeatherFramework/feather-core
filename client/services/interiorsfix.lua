@@ -1,5 +1,4 @@
 ------- File Information --------
--- Type: Self Running
 
 -- Interiors: Fix missing interiors in RedM
 -- OG Script: https://github.com/MissBehavin/interiors

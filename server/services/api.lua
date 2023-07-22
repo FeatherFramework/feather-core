@@ -4,7 +4,6 @@ function StartAPI()
     CoreServerApi.Discord.Webhook = DiscordWebHookAPI
     CoreServerApi.User = UserAPI
 
-
     CoreServerApi = SetupSharedAPI(CoreServerApi)
     
     exports('initiate', function()
