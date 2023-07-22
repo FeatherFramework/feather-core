@@ -1,4 +1,7 @@
--- Code is taken from and inspired by https://github.com/kibook/popdensity
+------- File Information --------
+-- inspired by popdensity by kibook
+-- OG Script: https://github.com/kibook/popdensity
+-----------------------------------
 local densityMultipliers = Config.densityMultipliers
 
 RegisterNetEvent("bcc:popdensity:sync")
