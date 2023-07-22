@@ -3,6 +3,7 @@ function SetupSharedAPI(SharedApi)
     SharedApi.RPC = RPCAPI
     SharedApi.DataView = DataView
     SharedApi.EventsAPI = EventsAPI
+    SharedApi.Keys = Keys
 
     return SharedApi
 end
