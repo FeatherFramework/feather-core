@@ -6,6 +6,7 @@ EventsDevMode = {
 	false
 }
 
+--TODO: Test this! This might only work client side.
 
 --? These functions are for DataView memory allocation
 local function pullData(event, eventDataStruct) -- Memory address pull
@@ -79,6 +80,11 @@ local function startGlobalEventListeners(eventgroup)
 	end)
 end
 
+function StartGlobalListeners()
+	startGlobalEventListeners(0) -- 0 = Client Side Events
+	startGlobalEventListeners(1) -- 1 = Network Events
+end
+
 --? Register events to be listened for
 function EventsAPI:RegisterEventListener(eventname, cb)
 	local key = GetHashKey(eventname)
@@ -120,9 +126,4 @@ function EventsAPI:DevMode(state, type)
 		EventsDevMode[0] = state
 		EventsDevMode[1] = state
 	end
-end
-
-function StartGlobalListeners()
-	startGlobalEventListeners(0) -- 0 = Client Side Events
-	startGlobalEventListeners(1) -- 1 = Network Events
 end

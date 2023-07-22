@@ -3,6 +3,8 @@
 -- OG Script: https://github.com/kibook/popdensity
 -----------------------------------
 
+-- TODO: Refactor this to use RPC.
+
 function SetAmbientAnimalDensityMultiplierThisFrame(multiplier)
 	Citizen.InvokeNative(0xC0258742B034DFAF, multiplier)
 end
