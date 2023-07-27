@@ -4,58 +4,66 @@ UserAPI = {
     GetUserByID = GetUserByID
 }
 
+function GetIdentifiers(src)
+    local identifiers = GetPlayerIdentifiers(src)
+    local license
+
+    for _, v in pairs(identifiers) do
+        if string.find(v, 'license') then
+            license = v
+        end
+
+        if license then
+            break
+        end
+    end
+
+    return {
+        license = license
+    }
+end
+
 -- User Events
 function SetupPlayerEvents()
     AddEventHandler('playerJoining', function()
         local src = source
+        local identifiers = GetIdentifiers(src)
+
+        local timestamp = os.date("%Y-%m-%d %H:%M:%S");
+        CacheAPI.AddToCache("user", src, identifiers.license, timestamp)
+        print("Added source", src)
+
     end)
     
     AddEventHandler('playerDropped', function()
         local src = source
-        RemoveFromUserCache(src)
+        CacheAPI.ReloadCacheRecord("user", src)
+        CacheAPI.RemoveFromCache("user", src)
+        print("Dropped User Source", src)
     end)
     
     -- TODO: Whitelist check (either our own, or we check txadmin whitelist somehow)
     AddEventHandler('playerConnecting', function(name, kickreason, deferrals)
         local src = source
-        local license, steam
         local username = string.gsub(name, "%s+", "")
-        local identifiers = GetPlayerIdentifiers(src)
-        local timestamp = os.date("%Y-%m-%d %H:%M:%S");
-    
+
         deferrals.defer()
         Wait(0)
-    
+
         deferrals.update("Checking Credentials")
-        for _, v in pairs(identifiers) do
-            if string.find(v, 'license') then
-                license = v
-            end
-    
-            if string.find(v, "steam") then
-                steam = v
-            end
-    
-            if steam and license then
-                break
-            end
-        end
-    
+        local identifiers = GetIdentifiers(src)
         Wait(0)
-    
-        if not license then
+
+        if not identifiers.license then
             deferrals.done("Invalid License")
+            return
         elseif not username then
             deferrals.done("Invalid Username")
             return
-        elseif not steam then
-            deferrals.done("Invalid SteamID")
-            return
         else
-            deferrals.update("Loading Player")
-            AddToUserCache(src, license, steam, timestamp)
-
+            deferrals.update("Connecting to server...")
             deferrals.done()
+            return
         end
     end)
 end

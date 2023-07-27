@@ -10,7 +10,8 @@
 -- Plouffe            list research/identification
 -----------------------------------
 
-local interiorsActive = false
+InteriorsActive = false
+IMapsActive = false
 local SourceKey = "[Interiors]"
 
 local function ActInterior(int, name, list)
@@ -2541,6 +2542,8 @@ local function UpdateImaps()
     RequestImap(996571604)
     RequestImap(99679839)
     RequestImap(998966461)
+
+    IMapsActive = true
 end
 
 
@@ -2549,10 +2552,10 @@ function StartInteriorsFix()
         while true do
             Citizen.Wait(5000)
             local interior = GetInteriorAtCoords(-308.88, 777.37, 118.77)
-            if interiorsActive == false then
+            if InteriorsActive == false then
                 if IsInteriorReady(interior) then
                     if IsInteriorEntitySetActive(interior, "val_bank_front_windows") then
-                        interiorsActive = true
+                        InteriorsActive = true
                         print(SourceKey, 'Interiors are already active.')
                     else
                         ActInterior(45314, "Emerald Ranch saloon", {
@@ -2567,7 +2570,7 @@ function StartInteriorsFix()
                         getBeechers()
                         getBraManor()
                         getBronte()
-                        interiorsActive = true
+                        InteriorsActive = true
                         print(SourceKey, 'Interiors are now active!')
                     end
                 end
@@ -2580,4 +2583,6 @@ function StartInteriorsFix()
 
 
     UpdateImaps()
+
+
 end

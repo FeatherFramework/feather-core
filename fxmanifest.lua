@@ -4,10 +4,11 @@ rdr3_warning "I acknowledge that this is a prerelease build of RedM, and I am aw
 lua54 "yes"
 
 description 'The Core service for the Feather Framework'
-author 'Feather @Bytesizd'
+author 'BCC Scripts'
 version '0.0.1'
 
 shared_scripts {
+    "/config.lua",
     "/shared/data/*.lua",
     "/shared/helpers/*.lua",
     "/shared/services/*.lua",
@@ -16,7 +17,6 @@ shared_scripts {
 
 server_scripts {
     "@oxmysql/lib/MySQL.lua",
-    "/server/config.lua",
     "/server/helpers/*.lua",
     "/server/controllers/*.lua",
     "/server/services/*.lua",

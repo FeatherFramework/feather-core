@@ -64,7 +64,7 @@ local function startGlobalEventListeners(eventgroup)
 							end
 
                             if EventsDevMode[eventmode] == true then
-								print("EVENT TRIGGERED:", EVENTS[eventAtIndex].name, DumpTable(datafields))
+								PrettyPrint("EVENT TRIGGERED:", EVENTS[eventAtIndex].name, datafields)
 							end
           
 							if EventListeners[eventAtIndex] then
@@ -102,11 +102,12 @@ function EventsAPI:RegisterEventListener(eventname, cb)
 	}
     EventListenerCount = EventListenerCount + 1
 
+	print("EventListener Registered", eventname);
 	return { key, postition }
 end
 
 -- remove event listeners is best practice for memory management. however, this only applies if you are creating temporary listeners.
-function EventsAPI:RenoveEventListener(listener)
+function EventsAPI:RemoveEventListener(listener)
 	if EventListeners[listener[1]] and EventListeners[listener[1]][listener[2]] then
 		EventListeners[listener[1]][listener[2]] = nil
         EventListenerCount = EventListenerCount - 1

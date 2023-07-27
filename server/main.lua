@@ -1,8 +1,12 @@
+ServerReady = false
+
 function RunCore()
     SetupCLHeader()
-    StartAPI()
     SetupCache()
+    StartAPI()
     SetupPlayerEvents()
+    ServerReady = true
+
 end
 
 RunCore()

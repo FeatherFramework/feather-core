@@ -1,7 +1,8 @@
 Config = {}
 
-Config.densityMultipliers = {}
+Config.DevMode = true
 
+Config.densityMultipliers = {}
 --Scale is 0.0-1.0
 Config.densityMultipliers.ambientPeds     = 1.0
 Config.densityMultipliers.scenarioPeds    = 1.0
