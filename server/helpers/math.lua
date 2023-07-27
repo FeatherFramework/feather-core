@@ -5,14 +5,14 @@ function MathI:instanced()
         usedInts = {}
     }
 
-    function inst:GetRandomInt(exclude)
+    function inst:GetRandomInt()
         local rando = math.random(1, 2000)
-    
-        while self.usedInts[rando] and random >= 0 do
+
+        while self.usedInts[rando] do
             rando = math.random(1, 2000)
             Citizen.Wait(1)
         end
-    
+
         return rando
     end
 

@@ -2,6 +2,10 @@
 -- inspired by popdensity by kibook
 -- OG Script: https://github.com/kibook/popdensity
 -----------------------------------
+
+
+--TODO: REDO WITH CALLBACKS
+
 local densityMultipliers = Config.densityMultipliers
 
 RegisterNetEvent("bcc:popdensity:sync")

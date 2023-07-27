@@ -1,8 +1,6 @@
 UserCache = {}
 CharacterCache = {}
 
---TODO: Make cache optional via config.
-
 CacheAPI = {}
 
 if Config.DevMode then

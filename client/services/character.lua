@@ -3,8 +3,24 @@ local PauseOpen = false
 local ActiveCharacterData = {}
 
 
-function ClearUIFeed()
+local function ClearUIFeed()
     Citizen.InvokeNative(0x6035E8FBCA32AC5E) --UiFeedClearAllChannels
+end
+
+local function setupCharacterNatives()
+    CreateThread(function()
+        while true do
+            Wait(0)
+
+            --Disable controller actions within the weapons wheel (This prevents a soft lock)
+            DisableControlAction(0, 0x7DA48D2A, true)
+            DisableControlAction(0, 0x9CC7A1A4, true)
+
+            
+            -- Disable random loot prompts
+            Citizen.InvokeNative(0xFC094EF26DD153FA, 2)
+        end
+    end)
 end
 
 local function setupCharacterMenuIdle()
@@ -65,6 +81,7 @@ end
 local function SpawnHandler(character)
     ActiveCharacterData = character
     startPositionSync()
+    setupCharacterNatives()
     setupCharacterMenuIdle()
 end
 
