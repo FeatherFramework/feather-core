@@ -2,6 +2,11 @@ function StartAPI()
     local CoreClientApi = {}
     
     CoreClientApi.Notify = NotifyAPI
+    CoreClientApi.Blip = BlipAPI
+    CoreClientApi.Object = ObjectAPI
+    CoreClientApi.Ped = PedAPI
+    CoreClientApi.Prompt = PromptsAPI
+    CoreClientApi.Render = RenderAPI
 
     CoreClientApi = SetupSharedAPI(CoreClientApi)
 
