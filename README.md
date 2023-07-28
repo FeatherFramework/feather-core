@@ -1,5 +1,5 @@
 # Feather Core
-> This is the Core system for the Feather Framework. An open source RedM framework for creating the RedM server of your dreams.
+> Welcome to Feather Core, the beating heart of the Feather Framework; An extraordinary open-source RedM framework designed to bring the ultimate RedM server vision to life.
 
 ## Features
 - Interiors Fixes
@@ -12,6 +12,12 @@
     - PrettyPrint
     - Dataview
     - Game Events
+    - Prompts
+    - Pedestrians
+    - Objects
+    - Notifications
+    - Text Rendering
+    - Blips
 
 ## API Documentation and usage
 
