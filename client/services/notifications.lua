@@ -1,9 +1,8 @@
 NotifyAPI = {}
 
---Makes notifications accessible to the server via RPC
-RPCAPI.Register("Notify", function (type, ...)
+RegisterNetEvent("bcc:notify")
+AddEventHandler("bcc:notify", function(type, ...)
     NotifyAPI[type](...)
-    return res(true)
 end)
 
 function NotifyAPI.ToolTip(text, duration)
