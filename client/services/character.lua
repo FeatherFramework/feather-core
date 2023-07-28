@@ -7,16 +7,23 @@ local function ClearUIFeed()
     Citizen.InvokeNative(0x6035E8FBCA32AC5E) --UiFeedClearAllChannels
 end
 
-local function setupCharacterNatives()
+local function preventWeaponSoftlock()
     CreateThread(function()
         while true do
-            Wait(0)
+            Wait(1)
 
             --Disable controller actions within the weapons wheel (This prevents a soft lock)
             DisableControlAction(0, 0x7DA48D2A, true)
             DisableControlAction(0, 0x9CC7A1A4, true)
+        end
+    end)
+end
 
-            
+local function disableRandomLootPrompt()
+    CreateThread(function()
+        while true do
+            Wait(0)
+
             -- Disable random loot prompts
             Citizen.InvokeNative(0xFC094EF26DD153FA, 2)
         end
@@ -60,6 +67,8 @@ function StartCharacterEssentials()
     EventsAPI:RegisterEventListener("EVENT_CHALLENGE_GOAL_COMPLETE", ClearUIFeed)
     EventsAPI:RegisterEventListener("EVENT_CHALLENGE_REWARD", ClearUIFeed)
     EventsAPI:RegisterEventListener("EVENT_DAILY_CHALLENGE_STREAK_COMPLETED", ClearUIFeed)
+
+    preventWeaponSoftlock()
 end
 
 ----------------------------------
@@ -81,8 +90,9 @@ end
 local function SpawnHandler(character)
     ActiveCharacterData = character
     startPositionSync()
-    setupCharacterNatives()
-    setupCharacterMenuIdle()
+
+    if Config.IdleAnimation then setupCharacterMenuIdle() end
+    if Config.DisableRandomLootPrompts then disableRandomLootPrompt() end
 end
 
 RegisterNetEvent("bcc:character:spawn")

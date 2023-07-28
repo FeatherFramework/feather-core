@@ -2,6 +2,8 @@ Config = {}
 
 Config.DevMode = true
 
+Config.IdleAnimation = true
+Config.DisableRandomLootPrompts = true
 
 --Scale is 0.0-1.0
 Config.densityMultipliers = {
