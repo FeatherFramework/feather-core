@@ -13,14 +13,14 @@ end
 function SetupCache()
     Citizen.CreateThread(function()
         while true do
-            CacheAPI.ReloadCache('user')
-            CacheAPI.ReloadCache('character')
+            CacheAPI.ReloadDBFromCache('user')
+            CacheAPI.ReloadDBFromCache('character')
             Wait(30000) --Refresh Cache Every X miliseconds (Currently 30 seconds)
         end
     end)
 end
 
-function CacheAPI.ReloadCacheRecord(type, src)
+function CacheAPI.ReloadDBFromCacheRecord(type, src)
     if type == 'user' then
         local currentUser = UserCache[src]
         local record = UserController.UpdateUser(currentUser)
@@ -34,7 +34,7 @@ function CacheAPI.ReloadCacheRecord(type, src)
     end
 end
 
-function CacheAPI.ReloadCache(type)
+function CacheAPI.ReloadDBFromCache(type)
     local record = nil
     if type == 'user' then
         for key, currentUser in pairs(UserCache) do

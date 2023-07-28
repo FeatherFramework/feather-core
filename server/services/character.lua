@@ -36,7 +36,7 @@ end
 
 function CharacterAPI.RemoveCharacter(src)
     Citizen.CreateThread(function ()
-        CacheAPI.ReloadCacheRecord("character", src)
+        CacheAPI.ReloadDBFromCacheRecord("character", src)
         CacheAPI.RemoveFromCache("character", src)
     end)
 end

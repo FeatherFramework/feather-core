@@ -37,7 +37,7 @@ function SetupPlayerEvents()
     
     AddEventHandler('playerDropped', function()
         local src = source
-        CacheAPI.ReloadCacheRecord("user", src)
+        CacheAPI.ReloadDBFromCacheRecord("user", src)
         CacheAPI.RemoveFromCache("user", src)
         print("Dropped User Source", src)
     end)
