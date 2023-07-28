@@ -1,5 +1,11 @@
 NotifyAPI = {}
 
+--Makes notifications accessible to the server via RPC
+RPCAPI.Register("Notify", function (type, ...)
+    NotifyAPI[type](...)
+    return res(true)
+end)
+
 function NotifyAPI.ToolTip(text, duration)
     local vartext = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", text, Citizen.ResultAsLong())
     local optionscontent = DataView.ArrayBuffer(8 * 7)
