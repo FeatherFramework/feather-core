@@ -6,6 +6,7 @@ function StartAPI()
     CoreServerApi.User = UserAPI
     CoreServerApi.Character = CharacterAPI
     CoreServerApi.Instance = InstanceAPI
+    CoreServerApi.Notify = SNotifyAPI
 
     CoreServerApi = SetupSharedAPI(CoreServerApi)
     
