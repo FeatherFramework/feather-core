@@ -1748,3 +1748,11 @@ feather.RPC.Notify("doSomethingRemote", { text = "World", delay = 1000 }, functi
     print("[Example] Callback result: "..tostring(result))
 end)
 ```
+
+### Key codes
+easy game keycodes are exposed to the API. 
+
+example
+```lua
+feather.Keys.A -- returns 0x7065027D
+```
