@@ -80,7 +80,7 @@ local function startGlobalEventListeners(eventgroup)
 	end)
 end
 
-function StartGlobalListeners()
+function StartGlobalEventListeners()
 	startGlobalEventListeners(0) -- 0 = Client Side Events
 	startGlobalEventListeners(1) -- 1 = Network Events
 end

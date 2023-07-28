@@ -1,5 +1,6 @@
 function RunSharedCore()
-    StartGlobalListeners()
+    StartGlobalEventListeners()
+    SetupCommands()
 end
 
 RunSharedCore()
