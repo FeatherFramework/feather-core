@@ -1,4 +1,4 @@
---TODO: For player spawn, dont spawn (show loadscreen), until ClientReady is true
+--TODO: once initiate player is called, we need to check that interiors and everything is already loaded in properly. (This means poping up a load screen until it is)
 
 --------------------
 -- Character APIs --
@@ -17,9 +17,9 @@ function CharacterAPI.GetAvailableCharactersFromDB(src)
     return CharacterController.GetAvailableCharacters(activeuser.ID)
 end
 
-function CharacterAPI.SpawnCharacter(src, charid)
+function CharacterAPI.InitiateCharacter(src, charid)
     if not src then
-        print("Player src  ust be defined")
+        print("Player src must be defined")
         return
     end
 
@@ -34,7 +34,7 @@ function CharacterAPI.SpawnCharacter(src, charid)
     end
 end
 
-function CharacterAPI.DespawnCharacter(src)
+function CharacterAPI.RemoveCharacter(src)
     Citizen.CreateThread(function ()
         CacheAPI.ReloadCacheRecord("character", src)
         CacheAPI.RemoveFromCache("character", src)
@@ -52,7 +52,7 @@ function CharacterAPI.UpdateAttribute(src, key, val)
 end
 
 ----------------------------------
--- Character RPCS Registrations --
+-- Character RPC Registrations --
 ----------------------------------
 RPCAPI.Register("UpdatePlayerCoords", function (coords, res, player)
     local x, y, z = table.unpack(coords)
@@ -60,17 +60,17 @@ RPCAPI.Register("UpdatePlayerCoords", function (coords, res, player)
     return res("Player Coords Updated!")
 end)
 
-
 AddEventHandler('playerDropped', function()
     local src = source
-    CharacterAPI.DespawnCharacter(src)
+    CharacterAPI.RemoveCharacter(src)
 
     print("Dropped Character Source", src)
 end)
+
+
 ---------------------------------------------------------------------------------------------------
 -- Developer Test Commands (THIS IS TEMPORARY AND WILL NEED TO BE DONE BY THE CHARACTER CREATOR) --
 ---------------------------------------------------------------------------------------------------
-
 if Config.DevMode then
     RegisterCommand('CreateTestCharacter', function(source, args)
         local activeuser = CacheAPI.GetCacheBySrc('user', source)
@@ -83,7 +83,7 @@ if Config.DevMode then
         PrettyPrint(available)
     end)
 
-    RegisterCommand('SpawnCharacter', function(source, args)
-        CharacterAPI.SpawnCharacter(source, args[1])
+    RegisterCommand('InitiateCharacter', function(source, args)
+        CharacterAPI.InitiateCharacter(source, args[1])
     end)
 end
