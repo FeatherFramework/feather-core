@@ -47,14 +47,16 @@ function CharacterAPI.UpdateCharacterPOS(src, x, y, z)
     CacheAPI.UpdateCacheBySrc('character', src, "Z", z)
 end
 
+function CharacterAPI.UpdateAttribute(src, key, val)
+    CacheAPI.UpdateCacheBySrc('character', src, key, val)
+end
+
 ----------------------------------
 -- Character RPCS Registrations --
 ----------------------------------
---TODO:Update POS DB along with cache as pos should always be live.
 RPCAPI.Register("UpdatePlayerCoords", function (coords, res, player)
     local x, y, z = table.unpack(coords)
     CharacterAPI.UpdateCharacterPOS(player, x, y, z)
-
     return res("Player Coords Updated!")
 end)
 
