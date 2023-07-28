@@ -24,7 +24,6 @@ server_scripts {
 }
 
 client_scripts {
-    "/client/config.lua",
     "/client/helpers/*.lua",
     "/client/services/*.lua",
     "/client/main.lua"

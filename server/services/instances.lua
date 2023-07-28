@@ -24,7 +24,7 @@ function InstanceAPI.create(id)
         -- Instance not found, create a new one
          --Generate an instance ID if one was not provided
         if id == nil then
-            id = MathInstance:GetRandomInt(0)
+            id = MathInstance:GetRandomInt()
         end
 
         GameInstances[id] = {

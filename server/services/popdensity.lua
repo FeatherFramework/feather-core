@@ -3,12 +3,6 @@
 -- OG Script: https://github.com/kibook/popdensity
 -----------------------------------
 
-
---TODO: REDO WITH CALLBACKS
-
-local densityMultipliers = Config.densityMultipliers
-
-RegisterNetEvent("bcc:popdensity:sync")
-AddEventHandler("bcc:popdensity:sync", function()
-	TriggerClientEvent("bcc:popdensity:clientsync", source, densityMultipliers)
+RPCAPI.Register("popdensity:sync", function (coords, res, player)
+    return res(Config.densityMultipliers)
 end)
