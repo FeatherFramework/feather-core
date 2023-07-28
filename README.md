@@ -1,6 +1,9 @@
 # Feather Core
 > Welcome to Feather Core, the beating heart of the Feather Framework; An extraordinary open-source RedM framework designed to bring the ultimate RedM server vision to life.
 
+## First time setup
+Run our easy-to-use [txadmin recipe](https://github.com/FeatherFramework/feather-recipe)!
+
 ## Features
 - Interiors Fixes
 - Population density control
@@ -1762,3 +1765,43 @@ example
 ```lua
 feather.Keys.A -- returns 0x7065027D
 ```
+
+### Github Version Control
+You can have feather check if your script is up-to-date by adding the following to your github repo
+
+```
+name 'bcc-anticheat'
+version '0.0.1'
+github 'https://github.com/BryceCanyonCounty/bcc-anticheat'
+github_type 'release' --OR file
+```
+
+The script will check what current version of the script is downloaded via the Version defined in the fxmanifest.
+
+For Example version '1.0'
+
+#### Release(Tag) Based Checks
+
+_How to use [Github Releases](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)_
+
+> Create a Release and tag  with the version number
+
+_Correct: `1.0.0`_
+
+_Wrong: `v1.1.0`_
+
+
+#### Version File Based Checks
+
+> Create a file called `version` with the following contents
+```txt
+<1.3>
+- More awesome updates
+<1.1>
+- Some awesome updates
+<1.0>
+- My first Update
+```
+
+### Notifications
+TBD

@@ -5,7 +5,10 @@ lua54 "yes"
 
 description 'The Core service for the Feather Framework'
 author 'BCC Scripts'
+name 'feather-core'
 version '0.0.1'
+github ''
+github_type ''
 
 shared_scripts {
     "/config.lua",
