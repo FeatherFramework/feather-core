@@ -1,146 +1,19 @@
-------- File Information --------
-
--- Interiors: Fix missing interiors in RedM
--- OG Script: https://github.com/MissBehavin/interiors
-
--- CREDITS:
--- koil              Original IPL list
--- CryptoGenics      list research/identification
--- PitchSean          list research/identification
--- Plouffe            list research/identification
------------------------------------
-
 InteriorsActive = false
 IMapsActive = false
+
 local SourceKey = "[Interiors]"
 
-local function ActInterior(int, name, list)
+local function ActivateInteriorByCoords(x, y, z, name, list)
+    ActivateInterior(GetInteriorAtCoords(x, y, z), name, list)
+end
+
+local function ActivateInterior(int, name, list)
     if IsValidInterior(int) then
         if not IsInteriorEntitySetActive(int, list[1]) then
             for k, v in ipairs(list) do
                 ActivateInteriorEntitySet(int, v)
             end
-        end
-    end
-end
-
-local function getValBank()
-    local interior = GetInteriorAtCoords(-308.88, 777.37, 118.77)
-    local isValid = IsValidInterior(interior)
-    if isValid then
-        if IsInteriorReady(interior) then
-            if IsInteriorEntitySetActive(interior, "val_bank_front_windows") then
-                print(SourceKey, "Valentine Bank Interior Already Active")
-            else
-                ActivateInteriorEntitySet(interior, "val_bank_int_curtainsopen")
-                -- ActivateInteriorEntitySet(interior, "val_bank_mud5_windowblock")
-                ActivateInteriorEntitySet(interior, "val_bank_front_windows")
-                print(SourceKey, "Valentine Bank Interior Activated")
-            end
-        end
-    end
-end
-
-local function getValSaloon()
-    local interior = GetInteriorAtCoords(-310.0119, 802.9316, 117.9846)
-    local isValid = IsValidInterior(interior)
-    if isValid then
-        if IsInteriorReady(interior) then
-            if IsInteriorEntitySetActive(interior, "front_windows") then
-                print(SourceKey, "Valentine Saloon Interior Already Active")
-            else
-                ActivateInteriorEntitySet(interior, "front_windows")
-                ActivateInteriorEntitySet(interior, "val_saloon_br03_bed")
-                ActivateInteriorEntitySet(interior, "6_chair_poker_set")
-                print(SourceKey, "Valentine Saloon Interior Activated")
-            end
-        end
-    end
-end
-
-local function getValJail()
-    local interior = GetInteriorAtCoords(-273.4513, 811.3408, 118.38)
-    local isValid = IsValidInterior(interior)
-    if isValid then
-        if IsInteriorReady(interior) then
-            if IsInteriorEntitySetActive(interior, "val_jail_int_walla") then
-                print(SourceKey, "Valentine Jail Interior Already Active")
-            else
-                ActivateInteriorEntitySet(interior, "val_jail_int_walla")
-                ActivateInteriorEntitySet(interior, "val_jail_int_wallb")
-                print(SourceKey, "Valentine Jail Interior Activated")
-            end
-        end
-    end
-end
-
-local function getValGenstore()
-    local interior = GetInteriorAtCoords(323.0087, 801.0296, 116.8817)
-    local isValid = IsValidInterior(interior)
-    if isValid then
-        if IsInteriorReady(interior) then
-            if IsInteriorEntitySetActive(interior, "val_genstore_night_light") then
-                print(SourceKey, "Valentine Jail Interior Already Active")
-            else
-                ActivateInteriorEntitySet(interior, "val_genstore_night_light")
-                print(SourceKey, "Valentine General Store Nightlight Activated")
-            end
-        end
-    end
-end
-
-local function getKorrigan()
-    local interior = GetInteriorAtCoords(3285.792, -1325.603, 43.08399)
-    local isValid = IsValidInterior(interior)
-    if isValid then
-        if IsInteriorReady(interior) then
-            if IsInteriorEntitySetActive(interior, "korrigan_props_default") then
-                print(SourceKey, "Riverboat Interior Already Active")
-            else
-                ActivateInteriorEntitySet(interior, "korrigan_props_poker")
-                ActivateInteriorEntitySet(interior, "korrigan_props_default")
-                print(SourceKey, "Riverboat Interior Activated")
-            end
-        end
-    end
-end
-
-local function getBeechers()
-    local interior = GetInteriorAtCoords(-1643.893, -1358.232, 86.4541)
-    local isValid = IsValidInterior(interior)
-    if isValid then
-        if IsInteriorReady(interior) then
-            if IsInteriorEntitySetActive(interior, "bee_01_house_fireplace_on") then
-                print(SourceKey, "Beechers Interior Already Active")
-            else
-                ActivateInteriorEntitySet(interior, "bee_01_masterBR_bed01")
-                ActivateInteriorEntitySet(interior, "Beechers_decorated_after_Abigail3")
-                ActivateInteriorEntitySet(interior, "IntGrp_livingrm_furniture_basic")
-                ActivateInteriorEntitySet(interior, "bee_01_house_fireplace_on")
-                print(SourceKey, "Beechers Interior Activated")
-            end
-        end
-    end
-end
-
-local function getBronte()
-    local interior = GetInteriorAtCoords(2385.548, -1221.158, 46.1729)
-    local isValid = IsValidInterior(interior)
-    if isValid then
-        if not IsInteriorEntitySetActive(interior, "bronte_shutters_open") then
-            ActivateInteriorEntitySet(interior, "bronte_shutters_open")
-            ActivateInteriorEntitySet(interior, "bronte_glass_unbreakable")
-        end
-    end
-end
-
-local function getBraManor()
-    local interior = GetInteriorAtCoords(1006.364, -1766.812, 46.5922)
-    local isValid = IsValidInterior(interior)
-    if isValid then
-        if not IsInteriorEntitySetActive(interior, "bra_mansion_WindowsStatic") then
-            ActivateInteriorEntitySet(interior, "bra_mansion_WindowsStatic")
-            ActivateInteriorEntitySet(interior, "bra_int_bedroom_clean")
+            print(SourceKey, name, " Interior Activated!")
         end
     end
 end
@@ -175,211 +48,211 @@ local function UpdateImaps()
     --#### Campaign Missions ####--
     --## Rhodes Story Campaign ##--
     --## German Guys Wagon ##--
-    RemoveImap(-1123811713) -- Campaign -- German Guys Wagon -- Wagon v1  657 -1231 44
-    RemoveImap(1679038623) -- Campaign -- German Guys Wagon -- Wagon v2  657 -1231 44
-    RemoveImap(-546137515) -- Campaign -- German Guys Wagon -- Wagon v3 657 -1231 44  3 Boxes in Back Canopy
-    RemoveImap(-462274808) -- Campaign -- German Guys Wagon -- Small Box in wgaon
-    RemoveImap(-1284301817) -- Campaign -- German Guys Wagon -- Antlers on German Wagon
-    RemoveImap(1169958167) -- Campaign -- German Guys Wagon -- Red Table Cloth German Wagon
+    RemoveImap(-1123811713)  -- Campaign -- German Guys Wagon -- Wagon v1  657 -1231 44
+    RemoveImap(1679038623)   -- Campaign -- German Guys Wagon -- Wagon v2  657 -1231 44
+    RemoveImap(-546137515)   -- Campaign -- German Guys Wagon -- Wagon v3 657 -1231 44  3 Boxes in Back Canopy
+    RemoveImap(-462274808)   -- Campaign -- German Guys Wagon -- Small Box in wgaon
+    RemoveImap(-1284301817)  -- Campaign -- German Guys Wagon -- Antlers on German Wagon
+    RemoveImap(1169958167)   -- Campaign -- German Guys Wagon -- Red Table Cloth German Wagon
     --## Arthurs Wagon ##--
-    RemoveImap(2072112547) -- Campaign -- Arthurs Wagon -- Wagon v1 with Canopy
-    RemoveImap(-2016771661) -- Campaign -- Arthurs Wagon -- Wagon v2
-    RemoveImap(202127432) -- Campaign -- Arthurs Wagon -- Wagon v3 with Shevles Tools
-    RemoveImap(1601820048) -- Campaign -- Arthurs Wagon -- Hide Rug
-    RemoveImap(2025485344) -- Campaign -- Arthurs Wagon -- Table Top
-    RemoveImap(901520480) -- Campaign -- Arthurs Wagon -- Table
-    RemoveImap(-1999465365) -- Campaign -- Arthurs Wagon -- Arthurs Wagon -- Right Skull  Wagon
-    RemoveImap(853723410) -- Campaign -- Arthurs Wagon -- Left Alligator Skull  Wagon
-    RemoveImap(-1774140220) -- Campaign -- Arthurs Wagon -- Chest v1
-    RemoveImap(-262271608) -- Campaign -- Arthurs Wagon -- Chest v2 Striped Shirt
-    RemoveImap(102652153) -- Campaign -- Arthurs Wagon -- Shaving Kit
-    RemoveImap(-1434077648) -- Campaign -- Arthurs Wagon -- Small Containers
-    RemoveImap(-1728638189) -- Campaign -- Arthurs Wagon -- Bigger boxes v1
-    RemoveImap(93121605) -- Campaign -- Arthurs Wagon -- Bigger Boxes v2
-    RemoveImap(-205043526) -- Campaign -- Arthurs Wagon -- Bigger Boxes v3
-    RemoveImap(1027586707) -- Campaign -- Arthurs Wagon -- Bigger Boxes v4
-    RemoveImap(-1570232590) -- Campaign -- Arthurs Wagon -- Open Flipped Small Box
-    RemoveImap(648514907) -- Campaign -- Arthurs Wagon -- Open Box Flipped
-    RemoveImap(1351016737) -- Campaign -- Arthurs Wagon -- Little Box inside Flipped Box
-    RemoveImap(721720861) -- Campaign -- Arthurs Wagon -- Small Box on Ground
-    RemoveImap(1620317782) -- Campaign -- Arthurs Wagon -- v1 Mixture of Boxes
-    RemoveImap(1952267752) -- Campaign -- Arthurs Wagon -- v2 Mixture of Boxes
-    RemoveImap(-1739164071) -- Campaign -- Arthurs Wagon -- Book on Small Table
-    RemoveImap(-1331617405) -- Campaign -- Arthurs Wagon -- Book
-    RemoveImap(-959814975) -- Campaign -- Arthurs Wagon -- Box by Book v1
-    RemoveImap(-1676997321) -- Campaign -- Arthurs Wagon -- Box by book v2
-    RemoveImap(1096093290) -- Campaign -- Arthurs Wagon -- Quiver on Ground
-    RemoveImap(626928579) -- Campaign -- Arthurs Wagon -- Picktures on Ground
-    RemoveImap(313722477) -- Campaign -- Arthurs Wagon -- Tools no wagon
-    RemoveImap(976082270) -- Campaign -- Arthurs Wagon -- Tools, painting, guns
-    RemoveImap(153759048) -- Campaign -- Arthurs Wagon -- Chair
-    RemoveImap(-1147256587) -- Campaign -- Arthurs Wagon -- Map
-    RemoveImap(1676971154) -- Campaign -- Arthurs Wagon -- Photo
+    RemoveImap(2072112547)   -- Campaign -- Arthurs Wagon -- Wagon v1 with Canopy
+    RemoveImap(-2016771661)  -- Campaign -- Arthurs Wagon -- Wagon v2
+    RemoveImap(202127432)    -- Campaign -- Arthurs Wagon -- Wagon v3 with Shevles Tools
+    RemoveImap(1601820048)   -- Campaign -- Arthurs Wagon -- Hide Rug
+    RemoveImap(2025485344)   -- Campaign -- Arthurs Wagon -- Table Top
+    RemoveImap(901520480)    -- Campaign -- Arthurs Wagon -- Table
+    RemoveImap(-1999465365)  -- Campaign -- Arthurs Wagon -- Arthurs Wagon -- Right Skull  Wagon
+    RemoveImap(853723410)    -- Campaign -- Arthurs Wagon -- Left Alligator Skull  Wagon
+    RemoveImap(-1774140220)  -- Campaign -- Arthurs Wagon -- Chest v1
+    RemoveImap(-262271608)   -- Campaign -- Arthurs Wagon -- Chest v2 Striped Shirt
+    RemoveImap(102652153)    -- Campaign -- Arthurs Wagon -- Shaving Kit
+    RemoveImap(-1434077648)  -- Campaign -- Arthurs Wagon -- Small Containers
+    RemoveImap(-1728638189)  -- Campaign -- Arthurs Wagon -- Bigger boxes v1
+    RemoveImap(93121605)     -- Campaign -- Arthurs Wagon -- Bigger Boxes v2
+    RemoveImap(-205043526)   -- Campaign -- Arthurs Wagon -- Bigger Boxes v3
+    RemoveImap(1027586707)   -- Campaign -- Arthurs Wagon -- Bigger Boxes v4
+    RemoveImap(-1570232590)  -- Campaign -- Arthurs Wagon -- Open Flipped Small Box
+    RemoveImap(648514907)    -- Campaign -- Arthurs Wagon -- Open Box Flipped
+    RemoveImap(1351016737)   -- Campaign -- Arthurs Wagon -- Little Box inside Flipped Box
+    RemoveImap(721720861)    -- Campaign -- Arthurs Wagon -- Small Box on Ground
+    RemoveImap(1620317782)   -- Campaign -- Arthurs Wagon -- v1 Mixture of Boxes
+    RemoveImap(1952267752)   -- Campaign -- Arthurs Wagon -- v2 Mixture of Boxes
+    RemoveImap(-1739164071)  -- Campaign -- Arthurs Wagon -- Book on Small Table
+    RemoveImap(-1331617405)  -- Campaign -- Arthurs Wagon -- Book
+    RemoveImap(-959814975)   -- Campaign -- Arthurs Wagon -- Box by Book v1
+    RemoveImap(-1676997321)  -- Campaign -- Arthurs Wagon -- Box by book v2
+    RemoveImap(1096093290)   -- Campaign -- Arthurs Wagon -- Quiver on Ground
+    RemoveImap(626928579)    -- Campaign -- Arthurs Wagon -- Picktures on Ground
+    RemoveImap(313722477)    -- Campaign -- Arthurs Wagon -- Tools no wagon
+    RemoveImap(976082270)    -- Campaign -- Arthurs Wagon -- Tools, painting, guns
+    RemoveImap(153759048)    -- Campaign -- Arthurs Wagon -- Chair
+    RemoveImap(-1147256587)  -- Campaign -- Arthurs Wagon -- Map
+    RemoveImap(1676971154)   -- Campaign -- Arthurs Wagon -- Photo
     --## Pearsons Wagon ##--
-    RemoveImap(764763647) -- Campaign -- Pearsons Wagon -- Provisions Wagon v1
-    RemoveImap(1742990618) -- Campaign -- Pearsons Wagon -- Provisions Wagon v2
-    RemoveImap(-751959361) -- Campaign -- Pearsons Wagon -- Provisons Wagon v3
-    RemoveImap(-1279618207) -- Campaign -- Pearsons Wagon -- Provisions Wagon v4 Empty
-    RemoveImap(-492479795) -- Campaign -- Pearsons Wagon -- Skull Provisions Wagon
-    RemoveImap(-320577790) -- Campaign -- Pearsons Wagon -- Barrel with Lantern
-    RemoveImap(1246210400) -- Campaign -- Pearsons Wagon -- Provision Boxes Large
-    RemoveImap(-172246728) -- Campaign -- Pearsons Wagon -- Table - Cutting Board - Barrel of Salt v1
-    RemoveImap(-850189983) -- Campaign -- Pearsons Wagon -- Table - Cutting Board - Barrel of Salt v2
-    RemoveImap(126970802) -- Campaign -- Pearsons Wagon -- Two Boxes Provisions
-    RemoveImap(715730031) -- Campaign -- Pearsons Wagon -- Pans and Blue Table Cloth for Table v1
-    RemoveImap(349896400) -- Campaign -- Pearsons Wagon -- Pans and Table Cloth for Table v2
-    RemoveImap(110400393) -- Campaign -- Pearsons Wagon -- Provisions, keg, rope for Table v1 (will work with v2 as well but clips)
-    RemoveImap(482931525) -- Campaign -- Pearsons Wagon -- Provisions, Fruits, Milk, red cloth
-    RemoveImap(-1291679096) -- Campaign -- Pearsons Wagon -- Potato Bags for Wagon v3
-    RemoveImap(-387018143) -- Campaign -- Pearsons Wagon -- Two Barrels
-    RemoveImap(5585502)  -- Campaign -- Pearsons Wagon -- Red Cloth v2 watermelons, pumpkins flour
-    RemoveImap(1309652195) -- Campaign -- Pearsons Wagon -- Water and Dishes
-    RemoveImap(-112364237) -- Campaign -- Pearsons Wagon -- Ammo Tools
-    RemoveImap(-1983416665) -- Campaign -- Pearsons Wagon -- Spilled Flour
-    RemoveImap(438624963) -- Campaign -- Pearsons Wagon -- Supplies
-    RemoveImap(82769080) -- Campaign -- Pearsons Wagon -- Plate and Spilled Flour
-    RemoveImap(1125807846) -- Campaign -- Pearsons Wagon -- Bag of Flour
-    RemoveImap(-1894946791) -- Campaign -- Pearsons Wagon -- Plate
-    RemoveImap(-1362716862) -- Campaign -- Pearsons Wagon -- red cloth v3 provisions
-    RemoveImap(-624219879) -- Campaign -- Pearsons Wagon -- Pans open can ammo for v1 table
-    RemoveImap(977061573) -- Campaign -- Pearsons Wagon -- Pans open can ammo for v2 table
-    RemoveImap(1729014506) -- Campaign -- Pearsons Wagon -- Provisions for table v1
-    RemoveImap(-916538063) -- Campaign -- Pearsons Wagon -- Provisions for table v2
-    RemoveImap(1886481528) -- Campaign -- Pearsons Wagon -- Spilled flour
-    RemoveImap(-1507376753) -- Campaign -- Pearsons Wagon -- Bag of Flour
-    RemoveImap(-1370620659) -- Campaign -- Pearsons Wagon -- Pans for table v1
-    RemoveImap(1074130180) -- Campaign -- Pearsons Wagon -- Pans for table v2
-    RemoveImap(652735549) -- Campaign -- Pearsons Wagon -- Provisions for table v1
+    RemoveImap(764763647)    -- Campaign -- Pearsons Wagon -- Provisions Wagon v1
+    RemoveImap(1742990618)   -- Campaign -- Pearsons Wagon -- Provisions Wagon v2
+    RemoveImap(-751959361)   -- Campaign -- Pearsons Wagon -- Provisons Wagon v3
+    RemoveImap(-1279618207)  -- Campaign -- Pearsons Wagon -- Provisions Wagon v4 Empty
+    RemoveImap(-492479795)   -- Campaign -- Pearsons Wagon -- Skull Provisions Wagon
+    RemoveImap(-320577790)   -- Campaign -- Pearsons Wagon -- Barrel with Lantern
+    RemoveImap(1246210400)   -- Campaign -- Pearsons Wagon -- Provision Boxes Large
+    RemoveImap(-172246728)   -- Campaign -- Pearsons Wagon -- Table - Cutting Board - Barrel of Salt v1
+    RemoveImap(-850189983)   -- Campaign -- Pearsons Wagon -- Table - Cutting Board - Barrel of Salt v2
+    RemoveImap(126970802)    -- Campaign -- Pearsons Wagon -- Two Boxes Provisions
+    RemoveImap(715730031)    -- Campaign -- Pearsons Wagon -- Pans and Blue Table Cloth for Table v1
+    RemoveImap(349896400)    -- Campaign -- Pearsons Wagon -- Pans and Table Cloth for Table v2
+    RemoveImap(110400393)    -- Campaign -- Pearsons Wagon -- Provisions, keg, rope for Table v1 (will work with v2 as well but clips)
+    RemoveImap(482931525)    -- Campaign -- Pearsons Wagon -- Provisions, Fruits, Milk, red cloth
+    RemoveImap(-1291679096)  -- Campaign -- Pearsons Wagon -- Potato Bags for Wagon v3
+    RemoveImap(-387018143)   -- Campaign -- Pearsons Wagon -- Two Barrels
+    RemoveImap(5585502)      -- Campaign -- Pearsons Wagon -- Red Cloth v2 watermelons, pumpkins flour
+    RemoveImap(1309652195)   -- Campaign -- Pearsons Wagon -- Water and Dishes
+    RemoveImap(-112364237)   -- Campaign -- Pearsons Wagon -- Ammo Tools
+    RemoveImap(-1983416665)  -- Campaign -- Pearsons Wagon -- Spilled Flour
+    RemoveImap(438624963)    -- Campaign -- Pearsons Wagon -- Supplies
+    RemoveImap(82769080)     -- Campaign -- Pearsons Wagon -- Plate and Spilled Flour
+    RemoveImap(1125807846)   -- Campaign -- Pearsons Wagon -- Bag of Flour
+    RemoveImap(-1894946791)  -- Campaign -- Pearsons Wagon -- Plate
+    RemoveImap(-1362716862)  -- Campaign -- Pearsons Wagon -- red cloth v3 provisions
+    RemoveImap(-624219879)   -- Campaign -- Pearsons Wagon -- Pans open can ammo for v1 table
+    RemoveImap(977061573)    -- Campaign -- Pearsons Wagon -- Pans open can ammo for v2 table
+    RemoveImap(1729014506)   -- Campaign -- Pearsons Wagon -- Provisions for table v1
+    RemoveImap(-916538063)   -- Campaign -- Pearsons Wagon -- Provisions for table v2
+    RemoveImap(1886481528)   -- Campaign -- Pearsons Wagon -- Spilled flour
+    RemoveImap(-1507376753)  -- Campaign -- Pearsons Wagon -- Bag of Flour
+    RemoveImap(-1370620659)  -- Campaign -- Pearsons Wagon -- Pans for table v1
+    RemoveImap(1074130180)   -- Campaign -- Pearsons Wagon -- Pans for table v2
+    RemoveImap(652735549)    -- Campaign -- Pearsons Wagon -- Provisions for table v1
     --## Javiers Tent ##--
-    RemoveImap(-347518940) -- Campaign -- Javiers Tent -- Skull near Banjo
-    RemoveImap(-1887167048) -- Campaign -- Javiers Tent -- Banjo
-    RemoveImap(530288130) -- Campaign -- Javiers Tent -- Cushion Top near log
-    RemoveImap(1538837441) -- Campaign -- Javiers Tent -- Fur seat for Log near Banjo
-    RemoveImap(-1999825729) -- Campaign -- Javiers Tent -- Brown Cow Hide near Banjo
+    RemoveImap(-347518940)   -- Campaign -- Javiers Tent -- Skull near Banjo
+    RemoveImap(-1887167048)  -- Campaign -- Javiers Tent -- Banjo
+    RemoveImap(530288130)    -- Campaign -- Javiers Tent -- Cushion Top near log
+    RemoveImap(1538837441)   -- Campaign -- Javiers Tent -- Fur seat for Log near Banjo
+    RemoveImap(-1999825729)  -- Campaign -- Javiers Tent -- Brown Cow Hide near Banjo
     --## Hosea ##--
-    RemoveImap(2728487)  -- Campaign -- Hosea -- Tent v1 Supplies 660 -1256 43
-    RemoveImap(1674800958) -- Campaign -- Hosea -- Tent v2 Empty 660 -1256 43
-    RemoveImap(-782359587) -- Campaign -- Hosea -- Tent v3 Patches
-    RemoveImap(510052409) -- Campaign -- Hosea -- Tent v4 Opened at front only
-    RemoveImap(291770965) -- Campaign -- Hosea -- Tent v5 closed
-    RemoveImap(-2143243848) -- Campaign -- Hosea -- Tent v6 Open on front
-    RemoveImap(1209017192) -- Campaign -- Hosea -- Tent v7 open front
-    RemoveImap(-644575724) -- Campaign -- Hosea -- Tevt v8 closed
-    RemoveImap(1700661865) -- Campaign -- Hosea -- Tent v9 Closed
-    RemoveImap(-2001921071) -- Campaign -- Hosea -- Square Rug near round table top
-    RemoveImap(1210820782) -- Campaign -- Hosea -- Barrel with Latntern
+    RemoveImap(2728487)      -- Campaign -- Hosea -- Tent v1 Supplies 660 -1256 43
+    RemoveImap(1674800958)   -- Campaign -- Hosea -- Tent v2 Empty 660 -1256 43
+    RemoveImap(-782359587)   -- Campaign -- Hosea -- Tent v3 Patches
+    RemoveImap(510052409)    -- Campaign -- Hosea -- Tent v4 Opened at front only
+    RemoveImap(291770965)    -- Campaign -- Hosea -- Tent v5 closed
+    RemoveImap(-2143243848)  -- Campaign -- Hosea -- Tent v6 Open on front
+    RemoveImap(1209017192)   -- Campaign -- Hosea -- Tent v7 open front
+    RemoveImap(-644575724)   -- Campaign -- Hosea -- Tevt v8 closed
+    RemoveImap(1700661865)   -- Campaign -- Hosea -- Tent v9 Closed
+    RemoveImap(-2001921071)  -- Campaign -- Hosea -- Square Rug near round table top
+    RemoveImap(1210820782)   -- Campaign -- Hosea -- Barrel with Latntern
     --## Bills Sleeping Area ##--
-    RemoveImap(-1292493167) -- Campaign -- Bills Sleeping Area -- Rope and Boxes near Dream Catcher
-    RemoveImap(-1451784475) -- Campaign -- Bills Sleeping Area -- v1 Canopy inbetween bucket and blue chairs
-    RemoveImap(1028224932) -- Campaign -- Bills Sleeping Area -- v2 Canopy inbetween bucket and blue chairs
-    RemoveImap(1128417383) -- Campaign -- Bills Sleeping Area -- v3 Canopy with Candle
-    RemoveImap(292845400) -- Campaign -- Bills Sleeping Area -- Skull and bucket Near Rope and Boxes
-    RemoveImap(1609975546) -- Campaign -- Bills Sleeping Area -- Crates and Gun Table
-    RemoveImap(-948006506) -- Campaign -- Bills Sleeping Area -- Blue Towel Dynamite
-    RemoveImap(1700045179) -- Campaign -- Bills Sleeping Area -- Dynamite
-    RemoveImap(-1045678888) -- Campaign -- Bills Sleeping Area -- Small Tables
-    RemoveImap(-1663177928) -- Campaign -- Bills Sleeping Area -- Lure Kit
+    RemoveImap(-1292493167)  -- Campaign -- Bills Sleeping Area -- Rope and Boxes near Dream Catcher
+    RemoveImap(-1451784475)  -- Campaign -- Bills Sleeping Area -- v1 Canopy inbetween bucket and blue chairs
+    RemoveImap(1028224932)   -- Campaign -- Bills Sleeping Area -- v2 Canopy inbetween bucket and blue chairs
+    RemoveImap(1128417383)   -- Campaign -- Bills Sleeping Area -- v3 Canopy with Candle
+    RemoveImap(292845400)    -- Campaign -- Bills Sleeping Area -- Skull and bucket Near Rope and Boxes
+    RemoveImap(1609975546)   -- Campaign -- Bills Sleeping Area -- Crates and Gun Table
+    RemoveImap(-948006506)   -- Campaign -- Bills Sleeping Area -- Blue Towel Dynamite
+    RemoveImap(1700045179)   -- Campaign -- Bills Sleeping Area -- Dynamite
+    RemoveImap(-1045678888)  -- Campaign -- Bills Sleeping Area -- Small Tables
+    RemoveImap(-1663177928)  -- Campaign -- Bills Sleeping Area -- Lure Kit
     --## Back Wagons ##--
-    RemoveImap(1084869405) -- Campaign -- Back Wagons -- Two Wagons v1 Supplies 674 -1267 43
-    RemoveImap(1636281938) -- Campaign -- Back Wagons -- Two Wagons v2 Empty 674 -1267 43
-    RemoveImap(-1642249622) -- Campaign -- Back Wagons -- Two wagons v3 empty Canopy
+    RemoveImap(1084869405)   -- Campaign -- Back Wagons -- Two Wagons v1 Supplies 674 -1267 43
+    RemoveImap(1636281938)   -- Campaign -- Back Wagons -- Two Wagons v2 Empty 674 -1267 43
+    RemoveImap(-1642249622)  -- Campaign -- Back Wagons -- Two wagons v3 empty Canopy
     --## Dutchs tent ##--
-    RemoveImap(-109425099) -- Campaign -- Dutchs tent -- Tent v1 Empty Open Both ends
-    RemoveImap(539843907) -- Campaign -- Dutchs tent -- Tent v2 Empty Right Side Opened
-    RemoveImap(180356041) -- Campaign -- Dutchs tent -- Tent v3 Opened Both Ends
-    RemoveImap(-71508135) -- Campaign -- Dutchs tent -- Tent v4 Flaps Closed
-    RemoveImap(40009123) -- Campaign -- Dutchs tent -- Tent v5 Flaps Closed
-    RemoveImap(1070723367) -- Campaign -- Dutchs tent -- Tent v6 Flaps Closed
-    RemoveImap(-146943962) -- Campaign -- Dutchs tent -- Tent v7 Open both ends
-    RemoveImap(1261237250) -- Campaign -- Dutchs tent -- Tent v8 open front
-    RemoveImap(-692521236) -- Campaign -- Dutchs tent -- Tent v9 open on back
-    RemoveImap(1049842342) -- Campaign -- Dutchs tent -- Inside Tent Bear Rug Stove Books Barrels and Canopy
-    RemoveImap(1034009086) -- Campaign -- Dutchs tent -- Inside  Tent Boxes, Stove Lanturn, Canopy
-    RemoveImap(-160392273) -- Campaign -- Dutchs tent -- Tent Inside Music Box Canopy
-    RemoveImap(2119205605) -- Campaign -- Dutchs tent -- Cash Box behind Dutchs Tent 1
-    RemoveImap(-619637948) -- Campaign -- Dutchs tent -- Cash box behind Dutchs tent 2
-    RemoveImap(-1639921686) -- Campaign -- Dutchs tent -- Tent Flap
+    RemoveImap(-109425099)   -- Campaign -- Dutchs tent -- Tent v1 Empty Open Both ends
+    RemoveImap(539843907)    -- Campaign -- Dutchs tent -- Tent v2 Empty Right Side Opened
+    RemoveImap(180356041)    -- Campaign -- Dutchs tent -- Tent v3 Opened Both Ends
+    RemoveImap(-71508135)    -- Campaign -- Dutchs tent -- Tent v4 Flaps Closed
+    RemoveImap(40009123)     -- Campaign -- Dutchs tent -- Tent v5 Flaps Closed
+    RemoveImap(1070723367)   -- Campaign -- Dutchs tent -- Tent v6 Flaps Closed
+    RemoveImap(-146943962)   -- Campaign -- Dutchs tent -- Tent v7 Open both ends
+    RemoveImap(1261237250)   -- Campaign -- Dutchs tent -- Tent v8 open front
+    RemoveImap(-692521236)   -- Campaign -- Dutchs tent -- Tent v9 open on back
+    RemoveImap(1049842342)   -- Campaign -- Dutchs tent -- Inside Tent Bear Rug Stove Books Barrels and Canopy
+    RemoveImap(1034009086)   -- Campaign -- Dutchs tent -- Inside  Tent Boxes, Stove Lanturn, Canopy
+    RemoveImap(-160392273)   -- Campaign -- Dutchs tent -- Tent Inside Music Box Canopy
+    RemoveImap(2119205605)   -- Campaign -- Dutchs tent -- Cash Box behind Dutchs Tent 1
+    RemoveImap(-619637948)   -- Campaign -- Dutchs tent -- Cash box behind Dutchs tent 2
+    RemoveImap(-1639921686)  -- Campaign -- Dutchs tent -- Tent Flap
     --## Base ##--
-    RemoveImap(1802272784) -- Campaign -- Base -- Camp Extras (MUST LOAD FOR NORMAL SETUP)
-    RemoveImap(2108368013) -- Campaign -- Base -- Tent frames for Dutch, Hosea and Arthurs Bed (Must Load for Normal Setup)
-    RemoveImap(1402472902) -- Campaign -- Base -- Setting Up Camp v1
-    RemoveImap(-1458944281) -- Campaign -- Base -- Setting Up Camp v2
-    RemoveImap(1691578074) -- Campaign -- Base -- Log Fire Pit Trash Broken Barrels
-    RemoveImap(810684093) -- Campaign -- Base -- Blue Trash Barrels on Beach
-    RemoveImap(321594819) -- Campaign -- Base -- Broken Table on Beach
-    RemoveImap(-385999832) -- Campaign -- Base -- Blue Trash Barrels on Beach
-    RemoveImap(-1656481590) -- Campaign -- Base -- Target Shooting on Beach (Missing what hanging targets are tied to)
-    RemoveImap(1706275010) -- Campaign -- Base -- Round Table
-    RemoveImap(-792944828) -- Campaign -- Base -- Round Table Top
-    RemoveImap(-1836870707) -- Campaign -- Base -- Round Table Seats no light
-    RemoveImap(1290371072) -- Campaign -- Base -- Seats and light for round table
-    RemoveImap(-1880340209) -- Campaign -- Base -- Camp Fire, 3 stools, 2 sleeping bags beside Arthurs site
-    RemoveImap(-2000080725) -- Campaign -- Base -- Chicken Coop
-    RemoveImap(719147410) -- Campaign -- Base -- Blue Chair and Stool for gaming table
-    RemoveImap(-989202374) -- Campaign -- Base -- Antlers on Big Center Tree
-    RemoveImap(-1010466481) -- Campaign -- Base -- Supplies in Lean Tos
-    RemoveImap(-1247551347) -- Campaign -- Base -- Broken Chest
-    RemoveImap(1717489303) -- Campaign -- Base -- Three Lean Tos
-    RemoveImap(1692451176) -- Campaign -- Base -- Lantern Game Table on a Post
-    RemoveImap(220566669) -- Campaign -- Base -- Lantern Game Table
-    RemoveImap(-1045282549) -- Campaign -- Base -- White Animal Skin Rugs near sitting rock
-    RemoveImap(2123887232) -- Campaign -- Base -- Fire pit near white skins
-    RemoveImap(-809371454) -- Campaign -- Base -- Small barrel and table to Banjo
-    RemoveImap(-436009554) -- Campaign -- Base -- Piece of Paper near Banjo
-    RemoveImap(1997423854) -- Campaign -- Base -- Map near Paper
-    RemoveImap(157361403) -- Campaign -- Base -- Large Dream Catcher
-    RemoveImap(-814821283) -- Campaign -- Base -- Fishing Stuff
+    RemoveImap(1802272784)   -- Campaign -- Base -- Camp Extras (MUST LOAD FOR NORMAL SETUP)
+    RemoveImap(2108368013)   -- Campaign -- Base -- Tent frames for Dutch, Hosea and Arthurs Bed (Must Load for Normal Setup)
+    RemoveImap(1402472902)   -- Campaign -- Base -- Setting Up Camp v1
+    RemoveImap(-1458944281)  -- Campaign -- Base -- Setting Up Camp v2
+    RemoveImap(1691578074)   -- Campaign -- Base -- Log Fire Pit Trash Broken Barrels
+    RemoveImap(810684093)    -- Campaign -- Base -- Blue Trash Barrels on Beach
+    RemoveImap(321594819)    -- Campaign -- Base -- Broken Table on Beach
+    RemoveImap(-385999832)   -- Campaign -- Base -- Blue Trash Barrels on Beach
+    RemoveImap(-1656481590)  -- Campaign -- Base -- Target Shooting on Beach (Missing what hanging targets are tied to)
+    RemoveImap(1706275010)   -- Campaign -- Base -- Round Table
+    RemoveImap(-792944828)   -- Campaign -- Base -- Round Table Top
+    RemoveImap(-1836870707)  -- Campaign -- Base -- Round Table Seats no light
+    RemoveImap(1290371072)   -- Campaign -- Base -- Seats and light for round table
+    RemoveImap(-1880340209)  -- Campaign -- Base -- Camp Fire, 3 stools, 2 sleeping bags beside Arthurs site
+    RemoveImap(-2000080725)  -- Campaign -- Base -- Chicken Coop
+    RemoveImap(719147410)    -- Campaign -- Base -- Blue Chair and Stool for gaming table
+    RemoveImap(-989202374)   -- Campaign -- Base -- Antlers on Big Center Tree
+    RemoveImap(-1010466481)  -- Campaign -- Base -- Supplies in Lean Tos
+    RemoveImap(-1247551347)  -- Campaign -- Base -- Broken Chest
+    RemoveImap(1717489303)   -- Campaign -- Base -- Three Lean Tos
+    RemoveImap(1692451176)   -- Campaign -- Base -- Lantern Game Table on a Post
+    RemoveImap(220566669)    -- Campaign -- Base -- Lantern Game Table
+    RemoveImap(-1045282549)  -- Campaign -- Base -- White Animal Skin Rugs near sitting rock
+    RemoveImap(2123887232)   -- Campaign -- Base -- Fire pit near white skins
+    RemoveImap(-809371454)   -- Campaign -- Base -- Small barrel and table to Banjo
+    RemoveImap(-436009554)   -- Campaign -- Base -- Piece of Paper near Banjo
+    RemoveImap(1997423854)   -- Campaign -- Base -- Map near Paper
+    RemoveImap(157361403)    -- Campaign -- Base -- Large Dream Catcher
+    RemoveImap(-814821283)   -- Campaign -- Base -- Fishing Stuff
     --## Central Union Train Mission ##--
-    RequestImap(2077623691) -- Railroad -- Central Union Train Mission -- Track Bed - Full Legnth
-    RequestImap(-555736180) -- Railroad -- Central Union Train Mission -- Crossing 1818
-    RequestImap(-693812694) -- Railroad -- Central Union Train Mission -- Section 1 1875
+    RequestImap(2077623691)  -- Railroad -- Central Union Train Mission -- Track Bed - Full Legnth
+    RequestImap(-555736180)  -- Railroad -- Central Union Train Mission -- Crossing 1818
+    RequestImap(-693812694)  -- Railroad -- Central Union Train Mission -- Section 1 1875
     RequestImap(-1386614896) -- Railroad -- Central Union Train Mission -- Section 2 Track at 2070
-    RequestImap(2080640229) -- Railroad -- Central Union Train Mission -- Section 3 2156
-    RequestImap(-805522215) -- Railroad -- Central Union Train Mission -- Section 4 2177
-    RequestImap(499044444) -- Railroad -- Central Union Train Mission -- Section 5
-    RequestImap(-196117122) -- Railroad -- Central Union Train Mission -- Section 6 2184
+    RequestImap(2080640229)  -- Railroad -- Central Union Train Mission -- Section 3 2156
+    RequestImap(-805522215)  -- Railroad -- Central Union Train Mission -- Section 4 2177
+    RequestImap(499044444)   -- Railroad -- Central Union Train Mission -- Section 5
+    RequestImap(-196117122)  -- Railroad -- Central Union Train Mission -- Section 6 2184
     RequestImap(-1022518533) -- Railroad -- Central Union Train Mission -- Section 7 2201
-    RequestImap(691955519) -- Railroad -- Central Union Train Mission -- Section 8 with bridge 2203
-    RequestImap(-142900294) -- Railroad -- Central Union Train Mission -- Section 9 2229.82
+    RequestImap(691955519)   -- Railroad -- Central Union Train Mission -- Section 8 with bridge 2203
+    RequestImap(-142900294)  -- Railroad -- Central Union Train Mission -- Section 9 2229.82
     --## Hole Near Rhodes - Woman's Rights Mission Start ##--
-    RequestImap(1277540472) -- 1433 -1591 69
+    RequestImap(1277540472)  -- 1433 -1591 69
     --#### End of Campaign Missions ####--
 
 
     --#### Misc ####--
     --## GRASS & GROUND ##--
     --RequestImap(-1496619689)-- Green Ground 670 -1236 44
-    RequestImap(-61896664) -- Worn Brown Ground 670 -1236 44
-    RequestImap(-648893593) -- Version 1 of Grass and Ferns
-    RequestImap(1534006738) -- Version 2 of Grass and Ferns
-    RequestImap(-376056363) -- Version 3 of Grass and Ferns
-    RequestImap(519091847) -- Version 4 of Grass and Ferns
+    RequestImap(-61896664)   -- Worn Brown Ground 670 -1236 44
+    RequestImap(-648893593)  -- Version 1 of Grass and Ferns
+    RequestImap(1534006738)  -- Version 2 of Grass and Ferns
+    RequestImap(-376056363)  -- Version 3 of Grass and Ferns
+    RequestImap(519091847)   -- Version 4 of Grass and Ferns
     RequestImap(-1225606266) -- Adds bush to 692 -1263 44
     RequestImap(-1874720370) -- Lots of ferns, weeds and tall grass
     RequestImap(-1936937394) -- Grass, Flowers and weeds]]
     RequestImap(-1496619689) -- Green Ground 670 -1236 44
-    RemoveImap(-61896664) -- Worn Brown Ground 670 -1236 44
+    RemoveImap(-61896664)    -- Worn Brown Ground 670 -1236 44
     --## First Camp - Winter Area -1346 2407 311 ##--
     RequestImap(-1331012521) -- Ground After Snowfall Winter
     RequestImap(-1991237877) -- Boxes
     RequestImap(-1670453688) -- Broken Wagons
-    RequestImap(-743781837) -- Fire in Pit
-    RequestImap(2114706334) -- Fire Pit
+    RequestImap(-743781837)  -- Fire in Pit
+    RequestImap(2114706334)  -- Fire Pit
     RequestImap(-1306375743) -- Forge Fire
-    RemoveImap(867231253) -- Ground Spring Melt
-    RemoveImap(1248111234) -- Ground Early Spring Melt
-    RemoveImap(474287981) -- Ground Standard Winter
-    RemoveImap(-2119625926) -- Barrels and Crates
-    RemoveImap(1113693078) -- Snow on Two Crates
-    RemoveImap(660686456) -- Crates for use with Snow Cover Crates (FOR USE WITH Snow on Crates)
-    RemoveImap(-8749224) -- Torches Boxes and Crates (DO NOT USE SNOW ON CRATES WITH THIS)
+    RemoveImap(867231253)    -- Ground Spring Melt
+    RemoveImap(1248111234)   -- Ground Early Spring Melt
+    RemoveImap(474287981)    -- Ground Standard Winter
+    RemoveImap(-2119625926)  -- Barrels and Crates
+    RemoveImap(1113693078)   -- Snow on Two Crates
+    RemoveImap(660686456)    -- Crates for use with Snow Cover Crates (FOR USE WITH Snow on Crates)
+    RemoveImap(-8749224)     -- Torches Boxes and Crates (DO NOT USE SNOW ON CRATES WITH THIS)
     --## hole at -1627.81, 224.5, 106.45 ##--
     RequestImap(1861460906)
     --## Missing cabin -2376.0, -1590.96, 156.0 ##--
     RequestImap(-1387511711) -- shell
-    RequestImap(1901132483) -- interior
-    RemoveImap(-2082345587) -- onfire
-    RemoveImap(-715865581) -- fallen tree
+    RequestImap(1901132483)  -- interior
+    RemoveImap(-2082345587)  -- onfire
+    RemoveImap(-715865581)   -- fallen tree
     --## House interior 1119 481.74 96 ##--
     RequestImap(-787042507)
     RequestImap(-1543080891)
@@ -389,39 +262,39 @@ local function UpdateImaps()
 
 
     --#### Boats ####--
-    RequestImap(-614421509) -- Casino boat -- Shell
-    RequestImap(604920544) -- Casino boat -- Upstairs interior
-    RequestImap(1382135686) -- Casino boat -- Main room interior
+    RequestImap(-614421509)  -- Casino boat -- Shell
+    RequestImap(604920544)   -- Casino boat -- Upstairs interior
+    RequestImap(1382135686)  -- Casino boat -- Main room interior
     RequestImap(-1968130469) -- Casino boat -- Railings
-    RequestImap(-276259505) -- Casino boat -- Railings
-    RequestImap(-723094901) -- Ferry Boat
+    RequestImap(-276259505)  -- Casino boat -- Railings
+    RequestImap(-723094901)  -- Ferry Boat
     --#### End of Boats ####--
 
 
     --#### Utopia River Wagon Crash ####--
-    RemoveImap(1182205549) -- Utopia River -- Wagon Crash -- Chest
-    RemoveImap(1388161943) -- Utopia River -- Wagon Crash -- Fallen Tree
-    RemoveImap(927020127) -- Utopia River -- Wagon Crash -- Dirt Pile
-    RemoveImap(-928367655) -- Utopia River -- Wagon Crash -- Utopia Event
+    RemoveImap(1182205549)  -- Utopia River -- Wagon Crash -- Chest
+    RemoveImap(1388161943)  -- Utopia River -- Wagon Crash -- Fallen Tree
+    RemoveImap(927020127)   -- Utopia River -- Wagon Crash -- Dirt Pile
+    RemoveImap(-928367655)  -- Utopia River -- Wagon Crash -- Utopia Event
     RemoveImap(-1614141377) -- Utopia River -- Wagon Crash -- Coach
-    RemoveImap(45121961) -- Utopia River -- Wagon Crash -- StrongBox
+    RemoveImap(45121961)    -- Utopia River -- Wagon Crash -- StrongBox
     --#### End of Utopia River Wagon Crash ####--
 
 
     --#### Lemoyne ####--
     --## Saint Denis ##--
-    RemoveImap(-1221875648) -- Lemoyne -- Saint Denis -- Fire at Coffery Ranch
-    RemoveImap(-2093605706) -- Lemoyne -- Saint Denis
-    RemoveImap(-342806042) -- Lemoyne -- Saint Denis -- Tram Wreck
-    RemoveImap(1255880931) -- Lemoyne -- Saint Denis -- Wreckage from the Tram
-    RemoveImap(2070068088) -- Lemoyne -- Saint Denis
-    RemoveImap(220493865) -- Lemoyne -- Saint Denis
-    RemoveImap(281772765) -- Lemoyne -- Saint Denis -- Streets -- Crates #1
-    RemoveImap(490883533) -- Lemoyne -- Saint Denis -- Streets -- Crates #2
-    RequestImap(-226455701) -- Lemoyne -- Saint Denis -- Police Office -- Bounty Board
-    RequestImap(350100475) -- Lemoyne -- Saint Denis -- Police Office -- Prison Cellar doors
-    RequestImap(619024057) -- Lemoyne -- Saint Denis -- Doctor office -- full interior with doors
-    RemoveImap(-473077489) -- Lemoyne -- Saint Denis -- Doctor office -- Doors (fixes hole) no interior
+    RemoveImap(-1221875648)  -- Lemoyne -- Saint Denis -- Fire at Coffery Ranch
+    RemoveImap(-2093605706)  -- Lemoyne -- Saint Denis
+    RemoveImap(-342806042)   -- Lemoyne -- Saint Denis -- Tram Wreck
+    RemoveImap(1255880931)   -- Lemoyne -- Saint Denis -- Wreckage from the Tram
+    RemoveImap(2070068088)   -- Lemoyne -- Saint Denis
+    RemoveImap(220493865)    -- Lemoyne -- Saint Denis
+    RemoveImap(281772765)    -- Lemoyne -- Saint Denis -- Streets -- Crates #1
+    RemoveImap(490883533)    -- Lemoyne -- Saint Denis -- Streets -- Crates #2
+    RequestImap(-226455701)  -- Lemoyne -- Saint Denis -- Police Office -- Bounty Board
+    RequestImap(350100475)   -- Lemoyne -- Saint Denis -- Police Office -- Prison Cellar doors
+    RequestImap(619024057)   -- Lemoyne -- Saint Denis -- Doctor office -- full interior with doors
+    RemoveImap(-473077489)   -- Lemoyne -- Saint Denis -- Doctor office -- Doors (fixes hole) no interior
     RequestImap(-1667265438) -- Lemoyne -- Saint Denis -- Fantana Theatre -- signs on building 1
     --RequestImap(175578406)  -- Lemoyne -- Saint Denis -- Fantana Theatre -- signs on building 2
     --RequestImap(1137646647) -- Lemoyne -- Saint Denis -- Fantana Theatre -- fantana doors (fills hole)
@@ -435,125 +308,125 @@ local function UpdateImaps()
     --RemoveImap(1724413302)    -- Lemoyne -- Saint Denis -- Fantana Theatre -- sign option 7 (advertisement)
     RequestImap(-1267247536) -- Lemoyne -- Saint Denis -- Fantana Theatre -- sign option 8 (advertisement)
     --RemoveImap(481139295)     -- Lemoyne -- Saint Denis -- Hotel Chevalier -- scaffolding and grand opening soon sing
-    RequestImap(-274080837) -- Lemoyne -- Saint Denis -- Hotel Chevalier -- fixed hole in wall
+    RequestImap(-274080837)  -- Lemoyne -- Saint Denis -- Hotel Chevalier -- fixed hole in wall
     --## Rhodes ##--
-    RequestImap(1817836578) -- Lemoyne -- Rhodes -- Sheriffs Office -- Bounty Board
-    RemoveImap(-759698431) -- Lemoyne -- Rhodes -- Streets -- Fast Travel
-    RemoveImap(945502524) -- Lemoyne -- Rhodes -- Streets -- Stump Seat
-    RemoveImap(1033721560) -- Lemoyne -- Rhodes -- Streets -- Props (barrels, Cart, Crates, Fuit boxes)
-    RemoveImap(1989074279) -- Lemoyne -- Rhodes -- Streets -- Props (boxes & barrels)
+    RequestImap(1817836578)  -- Lemoyne -- Rhodes -- Sheriffs Office -- Bounty Board
+    RemoveImap(-759698431)   -- Lemoyne -- Rhodes -- Streets -- Fast Travel
+    RemoveImap(945502524)    -- Lemoyne -- Rhodes -- Streets -- Stump Seat
+    RemoveImap(1033721560)   -- Lemoyne -- Rhodes -- Streets -- Props (barrels, Cart, Crates, Fuit boxes)
+    RemoveImap(1989074279)   -- Lemoyne -- Rhodes -- Streets -- Props (boxes & barrels)
     RequestImap(-2144587490) -- Lemoyne -- Rhodes -- Cemetery -- Covers small plot hole with mound of dirt
     RequestImap(-1366431554) -- Lemoyne -- Rhodes -- Cemetery -- Covers Large hole with grass patch
-    RemoveImap(-158824350) -- Lemoyne -- Rhodes -- Cemetery -- Dirt in Small Plot (visually can't see it)
+    RemoveImap(-158824350)   -- Lemoyne -- Rhodes -- Cemetery -- Dirt in Small Plot (visually can't see it)
     -- Rhodes Camp --
-    RemoveImap(-159557995) -- Lemoyne -- Rhodes Camp -- Two Tents, Wagon, Chairs
-    RemoveImap(1313890873) -- Lemoyne -- Rhodes Camp -- Small Camp in the Woods Just North of Dutch's Rhodes Base
+    RemoveImap(-159557995)   -- Lemoyne -- Rhodes Camp -- Two Tents, Wagon, Chairs
+    RemoveImap(1313890873)   -- Lemoyne -- Rhodes Camp -- Small Camp in the Woods Just North of Dutch's Rhodes Base
     -- Boat and Supplies Near Rhodes Camp --
-    RemoveImap(1733394134) -- Lemoyne -- Boat and Supplies Near Rhodes Camp -- Boat and Supplies 807 -1235 41
+    RemoveImap(1733394134)   -- Lemoyne -- Boat and Supplies Near Rhodes Camp -- Boat and Supplies 807 -1235 41
     --## Braithwaite Manor ##--
-    RequestImap(1149195254) -- Lemoyne -- Braithwaite Manor -- Mansion Interior -- House Shell
+    RequestImap(1149195254)  -- Lemoyne -- Braithwaite Manor -- Mansion Interior -- House Shell
     --RequestImap(-1643869063)-- Lemoyne -- Braithwaite Manor -- Mansion Interior -- House Burnt Down
-    RequestImap(58066174) -- Lemoyne -- Braithwaite Manor -- Mansion Interior -- Interior
-    RemoveImap(1601599776) -- Lemoyne -- Braithwaite Manor -- Mansion Interior -- House on fire Smoke (Smoke and Burning Sounds Only)
-    RemoveImap(-437251660) -- Lemoyne -- Braithwaite Manor -- Mansion Interior -- House of Fire Flames
-    RequestImap(1944013855) -- Lemoyne -- Braithwaite Manor -- Mansion Exterior -- Add Open Shudders Upstairs Bed Room and Downstairs Library
-    RequestImap(-880373663) -- Lemoyne -- Braithwaite Manor -- Mansion Exterior -- Front Balcony Lantern Added
-    RequestImap(-70021332) -- Lemoyne -- Braithwaite Manor -- Mansion Exterior -- Adds Working tools and supplies to upper balcony
-    RemoveImap(-1220264217) -- Lemoyne -- Braithwaite Manor -- Mansion Exterior -- Shurbs and Bushes
-    RemoveImap(-1508467572) -- Lemoyne -- Braithwaite Manor -- Mansion Exterior -- Ferns Bushes Weeds Overgrown (Use with Burned Down Version of House)
-    RemoveImap(-990258606) -- Lemoyne -- Braithwaite Manor -- Mansion Exterior -- Small Trees
-    RemoveImap(-2137633069) -- Lemoyne -- Braithwaite Manor -- Mansion Exterior -- Shudders Close Upstairs Bedroom and Downstairs Library
+    RequestImap(58066174)    -- Lemoyne -- Braithwaite Manor -- Mansion Interior -- Interior
+    RemoveImap(1601599776)   -- Lemoyne -- Braithwaite Manor -- Mansion Interior -- House on fire Smoke (Smoke and Burning Sounds Only)
+    RemoveImap(-437251660)   -- Lemoyne -- Braithwaite Manor -- Mansion Interior -- House of Fire Flames
+    RequestImap(1944013855)  -- Lemoyne -- Braithwaite Manor -- Mansion Exterior -- Add Open Shudders Upstairs Bed Room and Downstairs Library
+    RequestImap(-880373663)  -- Lemoyne -- Braithwaite Manor -- Mansion Exterior -- Front Balcony Lantern Added
+    RequestImap(-70021332)   -- Lemoyne -- Braithwaite Manor -- Mansion Exterior -- Adds Working tools and supplies to upper balcony
+    RemoveImap(-1220264217)  -- Lemoyne -- Braithwaite Manor -- Mansion Exterior -- Shurbs and Bushes
+    RemoveImap(-1508467572)  -- Lemoyne -- Braithwaite Manor -- Mansion Exterior -- Ferns Bushes Weeds Overgrown (Use with Burned Down Version of House)
+    RemoveImap(-990258606)   -- Lemoyne -- Braithwaite Manor -- Mansion Exterior -- Small Trees
+    RemoveImap(-2137633069)  -- Lemoyne -- Braithwaite Manor -- Mansion Exterior -- Shudders Close Upstairs Bedroom and Downstairs Library
     --## Grey Estates ##--
-    RequestImap(-677977650) -- Lemoyne -- Caliga Hall -- Grey Estates -- Normal Barn Frame
-    RequestImap(702350293) -- Lemoyne -- Caliga Hall -- Grey Estates -- Barn Interior
-    RequestImap(1426715569) -- Lemoyne -- Caliga Hall -- Grey Estates -- Adds Field Props
-    RequestImap(26815048) -- Lemoyne -- Caliga Hall -- Grey Estates -- Normal Fields
+    RequestImap(-677977650)  -- Lemoyne -- Caliga Hall -- Grey Estates -- Normal Barn Frame
+    RequestImap(702350293)   -- Lemoyne -- Caliga Hall -- Grey Estates -- Barn Interior
+    RequestImap(1426715569)  -- Lemoyne -- Caliga Hall -- Grey Estates -- Adds Field Props
+    RequestImap(26815048)    -- Lemoyne -- Caliga Hall -- Grey Estates -- Normal Fields
     RequestImap(-1229109520) -- Lemoyne -- Caliga Hall -- Grey Estates -- Green Plants
-    RemoveImap(419559004) -- Lemoyne -- Caliga Hall -- Grey Estates -- Burnt Barn Frame 1
-    RemoveImap(1284656212) -- Lemoyne -- Caliga Hall -- Grey Estates -- Burning Structure
-    RemoveImap(-1162161651) -- Lemoyne -- Caliga Hall -- Grey Estates -- Fields on fire
-    RemoveImap(557212279) -- Lemoyne -- Caliga Hall -- Grey Estates -- Burnt Plants
-    RemoveImap(1786931635) -- Lemoyne -- Caliga Hall -- Grey Estates -- Burnt out fields
+    RemoveImap(419559004)    -- Lemoyne -- Caliga Hall -- Grey Estates -- Burnt Barn Frame 1
+    RemoveImap(1284656212)   -- Lemoyne -- Caliga Hall -- Grey Estates -- Burning Structure
+    RemoveImap(-1162161651)  -- Lemoyne -- Caliga Hall -- Grey Estates -- Fields on fire
+    RemoveImap(557212279)    -- Lemoyne -- Caliga Hall -- Grey Estates -- Burnt Plants
+    RemoveImap(1786931635)   -- Lemoyne -- Caliga Hall -- Grey Estates -- Burnt out fields
     --#### End of Lemoyne ####--
 
 
     --#### New Hanover ####--
     --## Valentine ##--
-    RequestImap(-661560211) -- New Hanover -- Valentine -- Barrels Everywhere?
-    RequestImap(1202020135) -- New Hanover -- Valentine -- Blank Banners across mainstreet
-    RequestImap(-892659042) -- New Hanover -- Valentine -- Leatherworker on west side of encampment
-    RequestImap(30201771) -- New Hanover -- Valentine -- Water Trough?
+    RequestImap(-661560211)  -- New Hanover -- Valentine -- Barrels Everywhere?
+    RequestImap(1202020135)  -- New Hanover -- Valentine -- Blank Banners across mainstreet
+    RequestImap(-892659042)  -- New Hanover -- Valentine -- Leatherworker on west side of encampment
+    RequestImap(30201771)    -- New Hanover -- Valentine -- Water Trough?
     RequestImap(-1475403379) -- New Hanover -- Valentine -- Fencing at farm
-    RequestImap(696143352) -- New Hanover -- Valentine -- Prison Break?
+    RequestImap(696143352)   -- New Hanover -- Valentine -- Prison Break?
     --RequestImap(731209239)  -- New Hanover -- Valentine -- Fast Travel Marker Valentine Train Station
-    RemoveImap(824748066) -- New Hanover -- Valentine -- Event Marker Western side of town along path ( -229.93, 946.05, 138.33 )
-    RemoveImap(-713587740) -- New Hanover -- Valentine -- Streets -- Construction Material
-    RemoveImap(-1217078386) -- New Hanover -- Valentine -- Wagons -- Blocking road through Valentine
-    RemoveImap(-1579403437) -- New Hanover -- Valentine -- Wagons -- Parked in front of bank
-    RemoveImap(517553365) -- New Hanover -- Valentine -- Wagons -- 2 Wagons in front of and behind of blue house across from Keane's Saloon.
-    RemoveImap(805009584) -- New Hanover -- Valentine -- Barricades -- Western
-    RemoveImap(-560409108) -- New Hanover -- Valentine -- Barricades -- Eastern
-    RemoveImap(-518785376) -- New Hanover -- Valentine -- Barricades -- Southern
-    RemoveImap(999248445) -- New Hanover -- Valentine -- Smithfields Saloon -- Yellow Wagon with Blue Barrels Outside
-    RemoveImap(2040843256) -- New Hanover -- Valentine -- Green House -- Smithfields Saloon -- Construction Supplies Outside
-    RemoveImap(2095116685) -- New Hanover -- Valentine -- Green House -- General Store -- Saloon Mainstreet -- Supplies/Boxes in Front
-    RequestImap(56708243) -- New Hanover -- Valentine -- Green House -- General Store -- Boarded up?
-    RemoveImap(1081087978) -- New Hanover -- Valentine -- Green House -- (Do Not Load Both(1/2)Building and Restaurant mainstreet - Pre-paint, almost completed stage(Help wanted sign)
-    RemoveImap(282485265) -- New Hanover -- Valentine -- Green House -- Building boarded up
-    RequestImap(903666582) -- New Hanover -- Valentine -- Green House -- (Do Not Load Both(2/2)Building and Restaurant Mainstreet-Painted, completed stage. Keane's Rooms for Rent
-    RemoveImap(637874199) -- New Hanover -- Valentine -- Green House -- Building Lamp
+    RemoveImap(824748066)    -- New Hanover -- Valentine -- Event Marker Western side of town along path ( -229.93, 946.05, 138.33 )
+    RemoveImap(-713587740)   -- New Hanover -- Valentine -- Streets -- Construction Material
+    RemoveImap(-1217078386)  -- New Hanover -- Valentine -- Wagons -- Blocking road through Valentine
+    RemoveImap(-1579403437)  -- New Hanover -- Valentine -- Wagons -- Parked in front of bank
+    RemoveImap(517553365)    -- New Hanover -- Valentine -- Wagons -- 2 Wagons in front of and behind of blue house across from Keane's Saloon.
+    RemoveImap(805009584)    -- New Hanover -- Valentine -- Barricades -- Western
+    RemoveImap(-560409108)   -- New Hanover -- Valentine -- Barricades -- Eastern
+    RemoveImap(-518785376)   -- New Hanover -- Valentine -- Barricades -- Southern
+    RemoveImap(999248445)    -- New Hanover -- Valentine -- Smithfields Saloon -- Yellow Wagon with Blue Barrels Outside
+    RemoveImap(2040843256)   -- New Hanover -- Valentine -- Green House -- Smithfields Saloon -- Construction Supplies Outside
+    RemoveImap(2095116685)   -- New Hanover -- Valentine -- Green House -- General Store -- Saloon Mainstreet -- Supplies/Boxes in Front
+    RequestImap(56708243)    -- New Hanover -- Valentine -- Green House -- General Store -- Boarded up?
+    RemoveImap(1081087978)   -- New Hanover -- Valentine -- Green House -- (Do Not Load Both(1/2)Building and Restaurant mainstreet - Pre-paint, almost completed stage(Help wanted sign)
+    RemoveImap(282485265)    -- New Hanover -- Valentine -- Green House -- Building boarded up
+    RequestImap(903666582)   -- New Hanover -- Valentine -- Green House -- (Do Not Load Both(2/2)Building and Restaurant Mainstreet-Painted, completed stage. Keane's Rooms for Rent
+    RemoveImap(637874199)    -- New Hanover -- Valentine -- Green House -- Building Lamp
     RequestImap(-1521525254) -- New Hanover -- Valentine -- Green House -- Exterior Trees and Flowers 1(Run 1 and 2 together)
-    RequestImap(-761186147) -- New Hanover -- Valentine -- Green House -- Exterior Trees and Flowers 2(Run 1 and 2 together)
-    RequestImap(952801839) -- New Hanover -- Valentine -- Sheriffs Office -- Bounty Board
-    RequestImap(1804593020) -- New Hanover -- Valentine -- Sheriffs Office -- Barrels on Step
-    RemoveImap(-1301569116) -- New Hanover -- Valentine -- Sheriffs Office -- Boarded up
-    RemoveImap(774477221) -- New Hanover -- Valentine -- Sheriffs Office -- Crumbled Wall parts...
-    RequestImap(1097534152) -- New Hanover -- Valentine -- Sheriffs Office -- Outer wall
-    RemoveImap(-52140817) -- New Hanover -- Valentine -- Law Office -- Boarded Up
-    RequestImap(1186533019) -- New Hanover -- Valentine -- Law Office -- Chair in front
-    RequestImap(-156313117) -- New Hanover -- Valentine -- Law Office -- Structure in front
-    RequestImap(924412185) -- New Hanover -- Valentine -- Law office -- (REMOVE FOR structural damage)
+    RequestImap(-761186147)  -- New Hanover -- Valentine -- Green House -- Exterior Trees and Flowers 2(Run 1 and 2 together)
+    RequestImap(952801839)   -- New Hanover -- Valentine -- Sheriffs Office -- Bounty Board
+    RequestImap(1804593020)  -- New Hanover -- Valentine -- Sheriffs Office -- Barrels on Step
+    RemoveImap(-1301569116)  -- New Hanover -- Valentine -- Sheriffs Office -- Boarded up
+    RemoveImap(774477221)    -- New Hanover -- Valentine -- Sheriffs Office -- Crumbled Wall parts...
+    RequestImap(1097534152)  -- New Hanover -- Valentine -- Sheriffs Office -- Outer wall
+    RemoveImap(-52140817)    -- New Hanover -- Valentine -- Law Office -- Boarded Up
+    RequestImap(1186533019)  -- New Hanover -- Valentine -- Law Office -- Chair in front
+    RequestImap(-156313117)  -- New Hanover -- Valentine -- Law Office -- Structure in front
+    RequestImap(924412185)   -- New Hanover -- Valentine -- Law office -- (REMOVE FOR structural damage)
     RequestImap(-1905652203) -- New Hanover -- Valentine -- Gunsmith -- Bench Infront
-    RequestImap(1936501508) -- New Hanover -- Valentine -- Gunsmith -- big old sign gunshop
-    RequestImap(2470511) -- New Hanover -- Valentine -- Gunsmith -- Box and Stool Near It
-    RequestImap(325677491) -- New Hanover -- Valentine -- Gunsmith -- White Sign
+    RequestImap(1936501508)  -- New Hanover -- Valentine -- Gunsmith -- big old sign gunshop
+    RequestImap(2470511)     -- New Hanover -- Valentine -- Gunsmith -- Box and Stool Near It
+    RequestImap(325677491)   -- New Hanover -- Valentine -- Gunsmith -- White Sign
     RequestImap(-1933617196) -- New Hanover -- Valentine -- Gunsmith -- Structures in front?
     RequestImap(-1588793465) -- New Hanover -- Valentine -- Motel -- Structure in Front
-    RemoveImap(-780819048) -- New Hanover -- Valentine -- Hotel Mainstreet -- Boarded Up
-    RemoveImap(-1989899190) -- New Hanover -- Valentine -- Bank Mainstreet -- Boarded Up
-    RemoveImap(-981203673) -- New Hanover -- Valentine -- Doctors Office -- Boarded up
-    RemoveImap(-2083943324) -- New Hanover -- Valentine -- Keane's Saloon -- Debris Infront of Liqour
-    RequestImap(610256856) -- New Hanover -- Valentine -- Keane's Saloon -- Debris and Remodle next to Liqour
+    RemoveImap(-780819048)   -- New Hanover -- Valentine -- Hotel Mainstreet -- Boarded Up
+    RemoveImap(-1989899190)  -- New Hanover -- Valentine -- Bank Mainstreet -- Boarded Up
+    RemoveImap(-981203673)   -- New Hanover -- Valentine -- Doctors Office -- Boarded up
+    RemoveImap(-2083943324)  -- New Hanover -- Valentine -- Keane's Saloon -- Debris Infront of Liqour
+    RequestImap(610256856)   -- New Hanover -- Valentine -- Keane's Saloon -- Debris and Remodle next to Liqour
     RequestImap(-1158072415) -- New Hanover -- Valentine -- Saloon Mainstreet -- Sign in Front
-    RemoveImap(199047531) -- New Hanover -- Valentine -- Saloon Mainstreet -- Boarded Windows
-    RemoveImap(1385025009) -- New Hanover -- Valentine -- Saloon Mainstreet -- Closed Sign
-    RemoveImap(-776975047) -- New Hanover -- Valentine -- Saloon Mainstreet -- Front Doors locked
-    RequestImap(1136898294) -- New Hanover -- Valentine -- Saloon Mainstreet -- Boarded Up??
-    RemoveImap(192173299) -- New Hanover -- Valentine -- Saloon Mainstreet -- Support Beams and Signs
-    RequestImap(897455211) -- New Hanover -- Valentine -- Saloon Mainstreet, General Store -- Something Regarding It
-    RequestImap(1285430299) -- New Hanover -- Valentine -- Saloon Mainstreet, General Store -- Crates Outside
-    RequestImap(1573766063) -- New Hanover -- Valentine -- General Store -- Fruit in front?
-    RequestImap(-554932707) -- New Hanover -- Valentine -- General Store -- Something Regarding It
-    RemoveImap(406334892) -- New Hanover -- Valentine -- General Store -- Closed Sign on Door
-    RemoveImap(1228600352) -- New Hanover -- Valentine -- General Store -- Boarded Up
-    RequestImap(135886022) -- New Hanover -- Valentine -- General Store -- Sign in Front
-    RemoveImap(-391187090) -- New Hanover -- Valentine -- Cemetery -- Grass on Grave
-    RemoveImap(-1902184438) -- New Hanover -- Valentine -- Cemetery -- Dirt Pile from Grave Dug #1
-    RemoveImap(740012805) -- New Hanover -- Valentine -- Cemetery -- Dirt Pile from Grave Dug #2
-    RemoveImap(1236921921) -- New Hanover -- Valentine -- Cemetery -- Dirt Pile from Grave Dug #3
-    RemoveImap(1886602884) -- New Hanover -- Valentine -- Cemetery -- Pre-Grave Dug #1
-    RemoveImap(1963724330) -- New Hanover -- Valentine -- Cemetery -- Pre-Grave Dug #2
-    RemoveImap(-1871745961) -- New Hanover -- Valentine -- Cemetery -- Coffin in Left Grave
-    RemoveImap(2125514970) -- New Hanover -- Valentine -- Cemetery -- Coffin in Center Grave
-    RemoveImap(267578156) -- New Hanover -- Valentine -- Cemetery -- Coffin in Right Grave
-    RequestImap(2077623691) -- New Hanover -- Valentine -- Railroad -- Track Bed - Full Legnth
+    RemoveImap(199047531)    -- New Hanover -- Valentine -- Saloon Mainstreet -- Boarded Windows
+    RemoveImap(1385025009)   -- New Hanover -- Valentine -- Saloon Mainstreet -- Closed Sign
+    RemoveImap(-776975047)   -- New Hanover -- Valentine -- Saloon Mainstreet -- Front Doors locked
+    RequestImap(1136898294)  -- New Hanover -- Valentine -- Saloon Mainstreet -- Boarded Up??
+    RemoveImap(192173299)    -- New Hanover -- Valentine -- Saloon Mainstreet -- Support Beams and Signs
+    RequestImap(897455211)   -- New Hanover -- Valentine -- Saloon Mainstreet, General Store -- Something Regarding It
+    RequestImap(1285430299)  -- New Hanover -- Valentine -- Saloon Mainstreet, General Store -- Crates Outside
+    RequestImap(1573766063)  -- New Hanover -- Valentine -- General Store -- Fruit in front?
+    RequestImap(-554932707)  -- New Hanover -- Valentine -- General Store -- Something Regarding It
+    RemoveImap(406334892)    -- New Hanover -- Valentine -- General Store -- Closed Sign on Door
+    RemoveImap(1228600352)   -- New Hanover -- Valentine -- General Store -- Boarded Up
+    RequestImap(135886022)   -- New Hanover -- Valentine -- General Store -- Sign in Front
+    RemoveImap(-391187090)   -- New Hanover -- Valentine -- Cemetery -- Grass on Grave
+    RemoveImap(-1902184438)  -- New Hanover -- Valentine -- Cemetery -- Dirt Pile from Grave Dug #1
+    RemoveImap(740012805)    -- New Hanover -- Valentine -- Cemetery -- Dirt Pile from Grave Dug #2
+    RemoveImap(1236921921)   -- New Hanover -- Valentine -- Cemetery -- Dirt Pile from Grave Dug #3
+    RemoveImap(1886602884)   -- New Hanover -- Valentine -- Cemetery -- Pre-Grave Dug #1
+    RemoveImap(1963724330)   -- New Hanover -- Valentine -- Cemetery -- Pre-Grave Dug #2
+    RemoveImap(-1871745961)  -- New Hanover -- Valentine -- Cemetery -- Coffin in Left Grave
+    RemoveImap(2125514970)   -- New Hanover -- Valentine -- Cemetery -- Coffin in Center Grave
+    RemoveImap(267578156)    -- New Hanover -- Valentine -- Cemetery -- Coffin in Right Grave
+    RequestImap(2077623691)  -- New Hanover -- Valentine -- Railroad -- Track Bed - Full Legnth
     --RequestImap(-794503195) -- New Hanover -- Valentine -- Railroad -- Broken Bridge and Pieces Pieces  -- 520 1754 187
-    RemoveImap(1879779330) -- New Hanover -- Valentine -- Traveling Magic Lantern Show -- sign outside tent version 1
-    RemoveImap(1104143966) -- New Hanover -- Valentine -- Traveling Magic Lantern Show -- sign outside tent version 2
-    RemoveImap(1027093524) -- New Hanover -- Valentine -- Traveling Magic Lantern Show -- sign outside tent version 3
+    RemoveImap(1879779330)   -- New Hanover -- Valentine -- Traveling Magic Lantern Show -- sign outside tent version 1
+    RemoveImap(1104143966)   -- New Hanover -- Valentine -- Traveling Magic Lantern Show -- sign outside tent version 2
+    RemoveImap(1027093524)   -- New Hanover -- Valentine -- Traveling Magic Lantern Show -- sign outside tent version 3
     RequestImap(-1617847332) -- New Hanover -- Valentine -- Traveling Magic Lantern Show -- sign outside tent version 4
-    RemoveImap(-763477089) -- New Hanover -- Valentine -- Traveling Magic Lantern Show -- partial door flap open
-    RemoveImap(317070801) -- New Hanover -- Valentine -- Traveling Magic Lantern Show -- full closed flap
+    RemoveImap(-763477089)   -- New Hanover -- Valentine -- Traveling Magic Lantern Show -- partial door flap open
+    RemoveImap(317070801)    -- New Hanover -- Valentine -- Traveling Magic Lantern Show -- full closed flap
     --## Annesburg ##--
     --RequestImap(582879672)  -- New Hanover -- Annesburg -- Fast Travel
     --RequestImap(1570947227) -- New Hanover -- Annesburg -- Sheriff office -- Bounty Board
@@ -573,24 +446,24 @@ local function UpdateImaps()
     --RequestImap(934782463)  -- New Hanover -- Annesburg -- Unknown Imap at Building Construction #03
     --RequestImap(-1315256079)-- New Hanover -- Annesburg -- Unknown Imap at Docks #01
     --## Farm House near Annesburg Mining Town -559 2686 319  ##--
-    RequestImap(-338553155) -- New Hanover -- Near Annesburg Mining Town -- Exterior House
+    RequestImap(-338553155)  -- New Hanover -- Near Annesburg Mining Town -- Exterior House
     RequestImap(-1636879249) -- New Hanover -- Near Annesburg Mining Town -- Normal Looking Interior
     --RequestImap(-323126593) -- New Hanover -- Near Annesburg Mining Town -- Burned Out Interior
     --RequestImap(-889869458) -- New Hanover -- Near Annesburg Mining Town -- Debris
     --RequestImap(1590561203) -- New Hanover -- Near Annesburg Mining Town -- Flames
     RequestImap(-1106668087) -- New Hanover -- Near Annesburg Mining Town -- Adds Wagon Wheel near Front Door
-    RequestImap(2028590076) -- New Hanover -- Near Annesburg Mining Town -- Cash Box Interior
-    RemoveImap(-323126593) -- New Hanover -- Near Annesburg Mining Town -- Burned Out Interior
-    RemoveImap(-889869458) -- New Hanover -- Near Annesburg Mining Town -- Debris
-    RemoveImap(1590561203) -- New Hanover -- Near Annesburg Mining Town -- Flames
+    RequestImap(2028590076)  -- New Hanover -- Near Annesburg Mining Town -- Cash Box Interior
+    RemoveImap(-323126593)   -- New Hanover -- Near Annesburg Mining Town -- Burned Out Interior
+    RemoveImap(-889869458)   -- New Hanover -- Near Annesburg Mining Town -- Debris
+    RemoveImap(1590561203)   -- New Hanover -- Near Annesburg Mining Town -- Flames
     --## Cumberland Forest ##--
-    RequestImap(604668055) -- New Hanover -- Cumberland Forest -- Tree Logs -- Debris Near Road
-    RemoveImap(1672215059) -- New Hanover -- Cumberland Forest -- Tree Logs -- Debris on the Road
+    RequestImap(604668055)   -- New Hanover -- Cumberland Forest -- Tree Logs -- Debris Near Road
+    RemoveImap(1672215059)   -- New Hanover -- Cumberland Forest -- Tree Logs -- Debris on the Road
     --RequestImap(23211744)   -- New Hanover -- Cumberland Forest -- Tree Logs -- Same as Above 1672215059
-    RemoveImap(-528294019) -- New Hanover -- Cumberland Forest -- Tree Logs -- TNT Line Leading Towards Road
+    RemoveImap(-528294019)   -- New Hanover -- Cumberland Forest -- Tree Logs -- TNT Line Leading Towards Road
     -- Bacchus Bridge --
-    RequestImap(1364392658) -- New Hanover -- Cumberland Forest -- Railroad -- Bacchus Bridge -- Undamaged
-    RequestImap(890452998) -- New Hanover -- Cumberland Forest -- Railroad -- Bacchus Bridge -- Undamaged LOD
+    RequestImap(1364392658)  -- New Hanover -- Cumberland Forest -- Railroad -- Bacchus Bridge -- Undamaged
+    RequestImap(890452998)   -- New Hanover -- Cumberland Forest -- Railroad -- Bacchus Bridge -- Undamaged LOD
     --RequestImap(-794503195) -- New Hanover -- Cumberland Forest -- Railroad -- Bacchus Bridge -- Damaged
     --RequestImap(-543171902) -- New Hanover -- Cumberland Forest -- Railroad -- Bacchus Bridge -- Damaged LOD
     --RequestImap(1492058366) -- New Hanover -- Cumberland Forest -- Railroad -- Bacchus Bridge -- Debris Near Bacchus Station
@@ -609,21 +482,21 @@ local function UpdateImaps()
     --RequestImap(-428652579) -- New Hanover -- The Heartland -- Vanhorn -- Sheriff office -- Bounty Board
     RequestImap(-1487154162) -- New Hanover -- The Heartland -- Vanhorn -- Sheriff office -- Bounty Board
     -- Oil Station --
-    RemoveImap(-84516711) -- New Hanover -- The Heartland -- Oil Station -- Run Down Closed Station
-    RequestImap(-657241692) -- New Hanover -- The Heartland -- Oil Station -- Oil Pipe
+    RemoveImap(-84516711)    -- New Hanover -- The Heartland -- Oil Station -- Run Down Closed Station
+    RequestImap(-657241692)  -- New Hanover -- The Heartland -- Oil Station -- Oil Pipe
     RequestImap(-1112373128) -- New Hanover -- The Heartland -- Oil Station -- Oil Tower
     -- Emerald Station --
     --RequestImap(-214604861) -- New Hanover -- The Heartland -- Emerald Station -- Sheriff office -- Bounty Board
     RequestImap(-1913584952) -- New Hanover -- The Heartland -- Emerald Station -- Sheriff office -- Bounty Board
     -- Hole/Cabin East of Emerald Station --
-    RequestImap(-574996782) -- New Hanover -- The Heartland -- Hole/Cabin East of Emerald Station -- House Shell/Front Enterence
-    RequestImap(1169511062) -- New Hanover -- The Heartland -- Hole/Cabin East of Emerald Station -- House Interior
+    RequestImap(-574996782)  -- New Hanover -- The Heartland -- Hole/Cabin East of Emerald Station -- House Shell/Front Enterence
+    RequestImap(1169511062)  -- New Hanover -- The Heartland -- Hole/Cabin East of Emerald Station -- House Interior
     RequestImap(-1266106154) -- New Hanover -- The Heartland -- Hole/Cabin East of Emerald Station -- Fence Border and Wood Pile Outside House
     RequestImap(-1377975054) -- New Hanover -- The Heartland -- Hole/Cabin East of Emerald Station -- Ground Trail to House
-    RemoveImap(-165202905) -- New Hanover -- The Heartland -- Hole/Cabin East of Emerald Station -- Grass Over Hole(No Trail)
-    RemoveImap(897624424) -- New Hanover -- The Heartland -- Hole/Cabin East of Emerald Station -- Grass Over Hole
-    RemoveImap(-1327148782) -- New Hanover -- The Heartland -- Hole/Cabin East of Emerald Station -- Grass Over Hole
-    RemoveImap(-1965378386) -- New Hanover -- The Heartland -- Hole/Cabin East of Emerald Station -- Grass Over Hole
+    RemoveImap(-165202905)   -- New Hanover -- The Heartland -- Hole/Cabin East of Emerald Station -- Grass Over Hole(No Trail)
+    RemoveImap(897624424)    -- New Hanover -- The Heartland -- Hole/Cabin East of Emerald Station -- Grass Over Hole
+    RemoveImap(-1327148782)  -- New Hanover -- The Heartland -- Hole/Cabin East of Emerald Station -- Grass Over Hole
+    RemoveImap(-1965378386)  -- New Hanover -- The Heartland -- Hole/Cabin East of Emerald Station -- Grass Over Hole
     --#### End of New Hanover ####--
 
 
@@ -643,266 +516,266 @@ local function UpdateImaps()
     --#### West Elizabeth ####--
     --## Blackwater ##--
     RequestImap(-2082201137) -- West Elizabeth -- Blackwater -- Town Hall -- Ground
-    RequestImap(1343343014) -- West Elizabeth -- Blackwater -- Town Hall -- Addons Construction
-    RequestImap(739412171) -- West Elizabeth -- Blackwater -- Town Hall -- Two Boards in front of city hall (Goes with Town Hall Construction)
-    RequestImap(-5339556) -- West Elizabeth -- Blackwater -- Town Hall -- Bank Under Construction
+    RequestImap(1343343014)  -- West Elizabeth -- Blackwater -- Town Hall -- Addons Construction
+    RequestImap(739412171)   -- West Elizabeth -- Blackwater -- Town Hall -- Two Boards in front of city hall (Goes with Town Hall Construction)
+    RequestImap(-5339556)    -- West Elizabeth -- Blackwater -- Town Hall -- Bank Under Construction
     --RequestImap(1173561253) -- West Elizabeth -- Blackwater -- Town Hall -- Tents Beside City Hall Near Trech
     --RequestImap(1470738186) -- West Elizabeth -- Blackwater -- Town Hall -- Adds Town Hall Pre-Construcion Ground (Ground does not mesh well with contrustion IPLs)
     --RequestImap(-1632348233)-- West Elizabeth -- Blackwater -- Town Hall -- Adds Trees and Grass (DO NOT USE WITH CONSTRUCTION IPL, WILL MERGE VISUALS)
-    RemoveImap(1173561253) -- West Elizabeth -- Blackwater -- Town Hall -- Tents Beside City Hall Near Trech
-    RemoveImap(1470738186) -- West Elizabeth -- Blackwater -- Town Hall -- Adds Pre-Construcion Ground (Ground does not mesh well with contrustion IPLs)
-    RemoveImap(-1632348233) -- West Elizabeth -- Blackwater -- Town Hall -- Adds Trees and Grass (DO NOT USE WITH CONSTRUCTION IPL, WILL MERGE VISUALS)
-    RemoveImap(1858796535) -- West Elizabeth -- Blackwater -- Fast Travel
-    RemoveImap(1490756544) -- West Elizabeth -- Blackwater -- Crates & Barrels on Streets
-    RemoveImap(-677362237) -- West Elizabeth -- Blackwater -- Wreckage near bards crossing
+    RemoveImap(1173561253)   -- West Elizabeth -- Blackwater -- Town Hall -- Tents Beside City Hall Near Trech
+    RemoveImap(1470738186)   -- West Elizabeth -- Blackwater -- Town Hall -- Adds Pre-Construcion Ground (Ground does not mesh well with contrustion IPLs)
+    RemoveImap(-1632348233)  -- West Elizabeth -- Blackwater -- Town Hall -- Adds Trees and Grass (DO NOT USE WITH CONSTRUCTION IPL, WILL MERGE VISUALS)
+    RemoveImap(1858796535)   -- West Elizabeth -- Blackwater -- Fast Travel
+    RemoveImap(1490756544)   -- West Elizabeth -- Blackwater -- Crates & Barrels on Streets
+    RemoveImap(-677362237)   -- West Elizabeth -- Blackwater -- Wreckage near bards crossing
     RequestImap(-1293161516) -- West Elizabeth -- Blackwater -- Sheriffs Office -- Bounty Board
     --## Strawberry ##--
-    RemoveImap(-134556459) -- West Elizabeth -- Strawberry -- Doctors House -- Locked Door (No Interior) -1799 -428 158
-    RemoveImap(270920361) -- West Elizabeth -- Strawberry -- Doctors House -- Crates on Porch
-    RequestImap(131323483) -- West Elizabeth -- Strawberry -- Doctors House -- Interior and Unlocked Front Door
-    RemoveImap(1892122519) -- West Elizabeth -- Strawberry -- Gunsmith -- Locked Door(No Interior) -1773 -431 154
-    RequestImap(-130638369) -- West Elizabeth -- Strawberry -- Gunsmith -- Interior with Unlocked Front Door (Upstairs does not work, other doors are locked)
-    RemoveImap(1291083725) -- West Elizabeth -- Strawberry -- Gunsmith -- Window Debris
-    RemoveImap(993595204) -- West Elizabeth -- Strawberry -- Gunsmith -- Window Debris
+    RemoveImap(-134556459)   -- West Elizabeth -- Strawberry -- Doctors House -- Locked Door (No Interior) -1799 -428 158
+    RemoveImap(270920361)    -- West Elizabeth -- Strawberry -- Doctors House -- Crates on Porch
+    RequestImap(131323483)   -- West Elizabeth -- Strawberry -- Doctors House -- Interior and Unlocked Front Door
+    RemoveImap(1892122519)   -- West Elizabeth -- Strawberry -- Gunsmith -- Locked Door(No Interior) -1773 -431 154
+    RequestImap(-130638369)  -- West Elizabeth -- Strawberry -- Gunsmith -- Interior with Unlocked Front Door (Upstairs does not work, other doors are locked)
+    RemoveImap(1291083725)   -- West Elizabeth -- Strawberry -- Gunsmith -- Window Debris
+    RemoveImap(993595204)    -- West Elizabeth -- Strawberry -- Gunsmith -- Window Debris
     RequestImap(-1019371157) -- West Elizabeth -- Strawberry -- Sheriffs Office -- Bounty Board
-    RequestImap(2137790641) -- West Elizabeth -- Strawberry -- Sheriffs Office -- Jail Cell Window Fixed
-    RequestImap(1934919499) -- West Elizabeth -- Strawberry -- Sheriffs Office -- Jail Cell Window Fixed
-    RequestImap(-515396642) -- West Elizabeth -- Strawberry -- Sheriffs Office -- Jail Cell Window Fixed
+    RequestImap(2137790641)  -- West Elizabeth -- Strawberry -- Sheriffs Office -- Jail Cell Window Fixed
+    RequestImap(1934919499)  -- West Elizabeth -- Strawberry -- Sheriffs Office -- Jail Cell Window Fixed
+    RequestImap(-515396642)  -- West Elizabeth -- Strawberry -- Sheriffs Office -- Jail Cell Window Fixed
     RequestImap(-1106517275) -- West Elizabeth -- Strawberry -- General Store -- Help Wanted Sign
-    RemoveImap(1924458218) -- West Elizabeth -- Strawberry -- Streets -- Crates & Barrels
+    RemoveImap(1924458218)   -- West Elizabeth -- Strawberry -- Streets -- Crates & Barrels
     --## Riggs Station ##--
-    RequestImap(1418611013) -- West Elizabeth -- Riggs Station -- Sheriffs Office -- Bounty Board
+    RequestImap(1418611013)  -- West Elizabeth -- Riggs Station -- Sheriffs Office -- Bounty Board
     --## Great Plains ##--
-    RequestImap(-605257184) -- West Elizabeth -- Great Plains -- Wallace Station -- Sheriffs Office -- Bounty Board
+    RequestImap(-605257184)  -- West Elizabeth -- Great Plains -- Wallace Station -- Sheriffs Office -- Bounty Board
     -- Beechers --
-    RequestImap(1353861354) -- West Elizabeth -- Great Plains -- Beechers -- Barn -- Interior, lanterns and doors
-    RemoveImap(611701601) -- West Elizabeth -- Great Plains -- Beechers -- Barn -- Work supplies
-    RemoveImap(901412334) -- West Elizabeth -- Great Plains -- Beechers -- Work supplies
-    RemoveImap(703356498) -- West Elizabeth -- Great Plains -- Beechers -- Barn -- Work supplies
-    RemoveImap(-650822431) -- West Elizabeth -- Great Plains -- Beechers -- Barn -- Work supplies
-    RequestImap(-956131204) -- West Elizabeth -- Great Plains -- Beechers -- Barn -- Exterior and Fencing
-    RemoveImap(2006257967) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(-2008632686) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(-1615103170) -- West Elizabeth -- Great Plains -- Beechers
-    RequestImap(578474998) -- West Elizabeth -- Great Plains -- Beechers -- Border Fencing
+    RequestImap(1353861354)  -- West Elizabeth -- Great Plains -- Beechers -- Barn -- Interior, lanterns and doors
+    RemoveImap(611701601)    -- West Elizabeth -- Great Plains -- Beechers -- Barn -- Work supplies
+    RemoveImap(901412334)    -- West Elizabeth -- Great Plains -- Beechers -- Work supplies
+    RemoveImap(703356498)    -- West Elizabeth -- Great Plains -- Beechers -- Barn -- Work supplies
+    RemoveImap(-650822431)   -- West Elizabeth -- Great Plains -- Beechers -- Barn -- Work supplies
+    RequestImap(-956131204)  -- West Elizabeth -- Great Plains -- Beechers -- Barn -- Exterior and Fencing
+    RemoveImap(2006257967)   -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-2008632686)  -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-1615103170)  -- West Elizabeth -- Great Plains -- Beechers
+    RequestImap(578474998)   -- West Elizabeth -- Great Plains -- Beechers -- Border Fencing
     RequestImap(-1860722801) -- West Elizabeth -- Great Plains -- Beechers -- Gazebo
-    RemoveImap(-692583342) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(-669282002) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(-1355464862) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(-1141450523) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(-252820785) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(258899919) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(-767883927) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(-535715562) -- West Elizabeth -- Great Plains -- Beechers -- Scaffolding // remove when completed
-    RequestImap(931647489) -- West Elizabeth -- Great Plains -- Beechers -- Interior
-    RequestImap(1467774743) -- West Elizabeth -- Great Plains -- Beechers -- Interior
-    RemoveImap(2030594491) -- West Elizabeth -- Great Plains -- Beechers -- Construction materials
-    RemoveImap(-790660125) -- West Elizabeth -- Great Plains -- Beechers --
-    RemoveImap(33260939) -- West Elizabeth -- Great Plains -- Beechers -- Construction supplies
-    RemoveImap(780653384) -- West Elizabeth -- Great Plains -- Beechers -- Construction supplies
-    RemoveImap(180676027) -- West Elizabeth -- Great Plains -- Beechers -- Construction supplies
-    RemoveImap(-270212770) -- West Elizabeth -- Great Plains -- Beechers -- Construction supplies
-    RemoveImap(-211623797) -- West Elizabeth -- Great Plains -- Beechers -- Construction supplies
-    RemoveImap(862349416) -- West Elizabeth -- Great Plains -- Beechers -- Construction supplies
-    RemoveImap(699225334) -- West Elizabeth -- Great Plains -- Beechers -- Construction supplies  -- Roof going on
-    RequestImap(411742897) -- West Elizabeth -- Great Plains -- Beechers -- Completed exterior
-    RequestImap(349494711) -- West Elizabeth -- Great Plains -- Beechers -- clothes line, wagon wheel,
-    RemoveImap(-706105482) -- West Elizabeth -- Great Plains -- Beechers -- crate on deck by window
-    RemoveImap(176369335) -- West Elizabeth -- Great Plains -- Beechers -- old windows from previous shack
-    RequestImap(2087181890) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(637627640) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(44077654) -- West Elizabeth -- Great Plains -- Beechers -- support beam - construction
-    RemoveImap(839872819) -- West Elizabeth -- Great Plains -- Beechers -- support beam - construction
-    RemoveImap(-1656895602) -- West Elizabeth -- Great Plains -- Beechers -- support beam - construction
-    RemoveImap(-583969090) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(-364121869) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(-1073832871) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(-1786558629) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(-1548753996) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(-1784133719) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(-1667461262) -- West Elizabeth -- Great Plains -- Beechers
-    RequestImap(1757739778) -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-692583342)   -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-669282002)   -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-1355464862)  -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-1141450523)  -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-252820785)   -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(258899919)    -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-767883927)   -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-535715562)   -- West Elizabeth -- Great Plains -- Beechers -- Scaffolding // remove when completed
+    RequestImap(931647489)   -- West Elizabeth -- Great Plains -- Beechers -- Interior
+    RequestImap(1467774743)  -- West Elizabeth -- Great Plains -- Beechers -- Interior
+    RemoveImap(2030594491)   -- West Elizabeth -- Great Plains -- Beechers -- Construction materials
+    RemoveImap(-790660125)   -- West Elizabeth -- Great Plains -- Beechers --
+    RemoveImap(33260939)     -- West Elizabeth -- Great Plains -- Beechers -- Construction supplies
+    RemoveImap(780653384)    -- West Elizabeth -- Great Plains -- Beechers -- Construction supplies
+    RemoveImap(180676027)    -- West Elizabeth -- Great Plains -- Beechers -- Construction supplies
+    RemoveImap(-270212770)   -- West Elizabeth -- Great Plains -- Beechers -- Construction supplies
+    RemoveImap(-211623797)   -- West Elizabeth -- Great Plains -- Beechers -- Construction supplies
+    RemoveImap(862349416)    -- West Elizabeth -- Great Plains -- Beechers -- Construction supplies
+    RemoveImap(699225334)    -- West Elizabeth -- Great Plains -- Beechers -- Construction supplies  -- Roof going on
+    RequestImap(411742897)   -- West Elizabeth -- Great Plains -- Beechers -- Completed exterior
+    RequestImap(349494711)   -- West Elizabeth -- Great Plains -- Beechers -- clothes line, wagon wheel,
+    RemoveImap(-706105482)   -- West Elizabeth -- Great Plains -- Beechers -- crate on deck by window
+    RemoveImap(176369335)    -- West Elizabeth -- Great Plains -- Beechers -- old windows from previous shack
+    RequestImap(2087181890)  -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(637627640)    -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(44077654)     -- West Elizabeth -- Great Plains -- Beechers -- support beam - construction
+    RemoveImap(839872819)    -- West Elizabeth -- Great Plains -- Beechers -- support beam - construction
+    RemoveImap(-1656895602)  -- West Elizabeth -- Great Plains -- Beechers -- support beam - construction
+    RemoveImap(-583969090)   -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-364121869)   -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-1073832871)  -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-1786558629)  -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-1548753996)  -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-1784133719)  -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(-1667461262)  -- West Elizabeth -- Great Plains -- Beechers
+    RequestImap(1757739778)  -- West Elizabeth -- Great Plains -- Beechers
     RequestImap(-2029237844) -- West Elizabeth -- Great Plains -- Beechers
     RequestImap(-2000794023) -- West Elizabeth -- Great Plains -- Beechers
-    RequestImap(-531137142) -- West Elizabeth -- Great Plains -- Beechers
-    RequestImap(5422464) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(203845253) -- West Elizabeth -- Great Plains -- Beechers -- Silo construction materials
-    RemoveImap(-1658679165) -- West Elizabeth -- Great Plains -- Beechers -- Silo construction base and materials
-    RemoveImap(258733332) -- West Elizabeth -- Great Plains -- Beechers -- Silo construction base and materials
-    RemoveImap(79028136) -- West Elizabeth -- Great Plains -- Beechers -- Silo construction base and materials
-    RequestImap(-218940381) -- West Elizabeth -- Great Plains -- Beechers -- Silo completed
-    RemoveImap(634752926) -- West Elizabeth -- Great Plains -- Beechers -- chairs and construction supplies
-    RemoveImap(984271748) -- West Elizabeth -- Great Plains -- Beechers -- chairs and construction supplies
-    RemoveImap(43335376) -- West Elizabeth -- Great Plains -- Beechers
-    RemoveImap(1444950942) -- West Elizabeth -- Great Plains -- Beechers -- green wagon side of house/clipping -- full of bricks
-    RemoveImap(910783469) -- West Elizabeth -- Great Plains -- Beechers -- green wagon side of house/clipping -- full of bricks
-    RemoveImap(727408145) -- West Elizabeth -- Great Plains -- Beechers -- green wagon front of house/clipping -- full of bricks
-    RemoveImap(429636242) -- West Elizabeth -- Great Plains -- Beechers -- pile of wood north side of house -- construction materials
-    RemoveImap(-19364596) -- West Elizabeth -- Great Plains -- Beechers -- pile of wood north side of house -- construction materials
-    RemoveImap(2131035495) -- West Elizabeth -- Great Plains -- Beechers -- green wagon side of house/clipping -- full of bricks
-    RequestImap(1236917971) -- West Elizabeth -- Great Plains -- Beechers -- Outhouse
-    RemoveImap(-316448350) -- West Elizabeth -- Great Plains -- Beechers -- construction materials
-    RemoveImap(-496874464) -- West Elizabeth -- Great Plains -- Beechers -- construction materials
-    RemoveImap(-794515291) -- West Elizabeth -- Great Plains -- Beechers -- construction materials
-    RemoveImap(275588949) -- West Elizabeth -- Great Plains -- Beechers -- construction materials
-    RemoveImap(-52330434) -- West Elizabeth -- Great Plains -- Beechers -- construction materials
-    RemoveImap(-2131457946) -- West Elizabeth -- Great Plains -- Beechers -- construction materials
-    RemoveImap(1819926822) -- West Elizabeth -- Great Plains -- Beechers -- interior framing -- construction
-    RemoveImap(1529593482) -- West Elizabeth -- Great Plains -- Beechers -- interior framing -- construction
-    RemoveImap(-668911501) -- West Elizabeth -- Great Plains -- Beechers -- framing, remove when exterior is up.
-    RemoveImap(-1012618146) -- West Elizabeth -- Great Plains -- Beechers -- old structure
-    RemoveImap(2111816145) -- West Elizabeth -- Great Plains -- Beechers -- old structure rubble
-    RemoveImap(-722030448) -- West Elizabeth -- Great Plains -- Beechers -- old structure
-    RemoveImap(-974480336) -- West Elizabeth -- Great Plains -- Beechers -- canvas gazebos
-    RemoveImap(197447134) -- West Elizabeth -- Great Plains -- Beechers -- canvas gazebo north, wagon, and supplies
-    RequestImap(-918785150) -- West Elizabeth -- Great Plains -- Beechers -- firepit seating
-    RemoveImap(1256771838) -- West Elizabeth -- Great Plains -- Beechers -- wagon wreckage in cropfield
-    RemoveImap(1205945639) -- West Elizabeth -- Great Plains -- Beechers -- lumber pile main driveway in
-    RemoveImap(1532774697) -- West Elizabeth -- Great Plains -- Beechers -- lumber pile main driveway in
-    RemoveImap(-114633341) -- West Elizabeth -- Great Plains -- Beechers -- saw horse main driveway in
-    RemoveImap(-90646166) -- West Elizabeth -- Great Plains -- Beechers -- floating saddle, hat, and rope in corral
-    RemoveImap(1681117196) -- West Elizabeth -- Great Plains -- Beechers -- pile of old lumber
-    RemoveImap(-803019223) -- West Elizabeth -- Great Plains -- Beechers -- fire behind house
-    RemoveImap(449426161) -- West Elizabeth -- Great Plains -- Beechers -- lantern
-    RemoveImap(-999913940) -- West Elizabeth -- Great Plains -- Beechers -- lantern
-    RemoveImap(-30541382) -- West Elizabeth -- Great Plains -- Beechers -- lantern
-    RemoveImap(-960328988) -- West Elizabeth -- Great Plains -- Beechers -- lantern
+    RequestImap(-531137142)  -- West Elizabeth -- Great Plains -- Beechers
+    RequestImap(5422464)     -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(203845253)    -- West Elizabeth -- Great Plains -- Beechers -- Silo construction materials
+    RemoveImap(-1658679165)  -- West Elizabeth -- Great Plains -- Beechers -- Silo construction base and materials
+    RemoveImap(258733332)    -- West Elizabeth -- Great Plains -- Beechers -- Silo construction base and materials
+    RemoveImap(79028136)     -- West Elizabeth -- Great Plains -- Beechers -- Silo construction base and materials
+    RequestImap(-218940381)  -- West Elizabeth -- Great Plains -- Beechers -- Silo completed
+    RemoveImap(634752926)    -- West Elizabeth -- Great Plains -- Beechers -- chairs and construction supplies
+    RemoveImap(984271748)    -- West Elizabeth -- Great Plains -- Beechers -- chairs and construction supplies
+    RemoveImap(43335376)     -- West Elizabeth -- Great Plains -- Beechers
+    RemoveImap(1444950942)   -- West Elizabeth -- Great Plains -- Beechers -- green wagon side of house/clipping -- full of bricks
+    RemoveImap(910783469)    -- West Elizabeth -- Great Plains -- Beechers -- green wagon side of house/clipping -- full of bricks
+    RemoveImap(727408145)    -- West Elizabeth -- Great Plains -- Beechers -- green wagon front of house/clipping -- full of bricks
+    RemoveImap(429636242)    -- West Elizabeth -- Great Plains -- Beechers -- pile of wood north side of house -- construction materials
+    RemoveImap(-19364596)    -- West Elizabeth -- Great Plains -- Beechers -- pile of wood north side of house -- construction materials
+    RemoveImap(2131035495)   -- West Elizabeth -- Great Plains -- Beechers -- green wagon side of house/clipping -- full of bricks
+    RequestImap(1236917971)  -- West Elizabeth -- Great Plains -- Beechers -- Outhouse
+    RemoveImap(-316448350)   -- West Elizabeth -- Great Plains -- Beechers -- construction materials
+    RemoveImap(-496874464)   -- West Elizabeth -- Great Plains -- Beechers -- construction materials
+    RemoveImap(-794515291)   -- West Elizabeth -- Great Plains -- Beechers -- construction materials
+    RemoveImap(275588949)    -- West Elizabeth -- Great Plains -- Beechers -- construction materials
+    RemoveImap(-52330434)    -- West Elizabeth -- Great Plains -- Beechers -- construction materials
+    RemoveImap(-2131457946)  -- West Elizabeth -- Great Plains -- Beechers -- construction materials
+    RemoveImap(1819926822)   -- West Elizabeth -- Great Plains -- Beechers -- interior framing -- construction
+    RemoveImap(1529593482)   -- West Elizabeth -- Great Plains -- Beechers -- interior framing -- construction
+    RemoveImap(-668911501)   -- West Elizabeth -- Great Plains -- Beechers -- framing, remove when exterior is up.
+    RemoveImap(-1012618146)  -- West Elizabeth -- Great Plains -- Beechers -- old structure
+    RemoveImap(2111816145)   -- West Elizabeth -- Great Plains -- Beechers -- old structure rubble
+    RemoveImap(-722030448)   -- West Elizabeth -- Great Plains -- Beechers -- old structure
+    RemoveImap(-974480336)   -- West Elizabeth -- Great Plains -- Beechers -- canvas gazebos
+    RemoveImap(197447134)    -- West Elizabeth -- Great Plains -- Beechers -- canvas gazebo north, wagon, and supplies
+    RequestImap(-918785150)  -- West Elizabeth -- Great Plains -- Beechers -- firepit seating
+    RemoveImap(1256771838)   -- West Elizabeth -- Great Plains -- Beechers -- wagon wreckage in cropfield
+    RemoveImap(1205945639)   -- West Elizabeth -- Great Plains -- Beechers -- lumber pile main driveway in
+    RemoveImap(1532774697)   -- West Elizabeth -- Great Plains -- Beechers -- lumber pile main driveway in
+    RemoveImap(-114633341)   -- West Elizabeth -- Great Plains -- Beechers -- saw horse main driveway in
+    RemoveImap(-90646166)    -- West Elizabeth -- Great Plains -- Beechers -- floating saddle, hat, and rope in corral
+    RemoveImap(1681117196)   -- West Elizabeth -- Great Plains -- Beechers -- pile of old lumber
+    RemoveImap(-803019223)   -- West Elizabeth -- Great Plains -- Beechers -- fire behind house
+    RemoveImap(449426161)    -- West Elizabeth -- Great Plains -- Beechers -- lantern
+    RemoveImap(-999913940)   -- West Elizabeth -- Great Plains -- Beechers -- lantern
+    RemoveImap(-30541382)    -- West Elizabeth -- Great Plains -- Beechers -- lantern
+    RemoveImap(-960328988)   -- West Elizabeth -- Great Plains -- Beechers -- lantern
     -- Beechers field --
     RequestImap(-1765152778) -- West Elizabeth -- Great Plains -- Beechers Field -- logs laying in
     RequestImap(-2072231077) -- West Elizabeth -- Great Plains -- Beechers Field -- plants over area
     RequestImap(-1253110600) -- West Elizabeth -- Great Plains -- Beechers Field -- hole in ground fix
-    RemoveImap(1929454697) -- West Elizabeth -- Great Plains -- Beechers Field -- side rows of some medium crop
-    RemoveImap(1649902358) -- West Elizabeth -- Great Plains -- Beechers Field -- side rows of some small crop
-    RemoveImap(1864768904) -- West Elizabeth -- Great Plains -- Beechers Field -- crops in middle
-    RemoveImap(938290967) -- West Elizabeth -- Great Plains -- Beechers Field -- crops in middle
-    RemoveImap(1169279648) -- West Elizabeth -- Great Plains -- Beechers Field -- crops in middle
+    RemoveImap(1929454697)   -- West Elizabeth -- Great Plains -- Beechers Field -- side rows of some medium crop
+    RemoveImap(1649902358)   -- West Elizabeth -- Great Plains -- Beechers Field -- side rows of some small crop
+    RemoveImap(1864768904)   -- West Elizabeth -- Great Plains -- Beechers Field -- crops in middle
+    RemoveImap(938290967)    -- West Elizabeth -- Great Plains -- Beechers Field -- crops in middle
+    RemoveImap(1169279648)   -- West Elizabeth -- Great Plains -- Beechers Field -- crops in middle
     --## Big Valley ##--
     -- Farm with hole in ground next to W in West Elizabeth --
-    RequestImap(890107948) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(1153046408) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(1634621556) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(-243627670) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(38567760) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(890107948)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(1153046408)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(1634621556)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(-243627670)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(38567760)    -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
     RequestImap(-1954278106) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(-947200121) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(629362551) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(-786579336) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(-947200121)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(629362551)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(-786579336)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
     RequestImap(-1305545118) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(-825836321) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Ground
-    RequestImap(446554495) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Ground
-    RequestImap(-262959893) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Ground
-    RequestImap(-735136865) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Ground
-    RequestImap(-868830916) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(764025611) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(-825836321)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Ground
+    RequestImap(446554495)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Ground
+    RequestImap(-262959893)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Ground
+    RequestImap(-735136865)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Ground
+    RequestImap(-868830916)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(764025611)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
     --RequestImap(1298607560) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
     --RequestImap(-297340751) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Small Pines
-    RequestImap(1271713904) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(1423681694) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(1293624693) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(1271713904)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(1423681694)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(1293624693)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
     RequestImap(-1305406402) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(1983816160) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(-602816690) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(636278554) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(-285245562) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(1031662866) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(1983816160)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(-602816690)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(636278554)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(-285245562)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(1031662866)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
     RequestImap(-1041976064) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(1221694281) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(1036815507) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(775893260) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(-329355129) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(991016631) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(57105576) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(238757788) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(-7594117) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(1221694281)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(1036815507)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(775893260)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(-329355129)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(991016631)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(57105576)    -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(238757788)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(-7594117)    -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
     RequestImap(-1680050035) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(41398635) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(462263849) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(1422134667) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(1263244828) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(41398635)    -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(462263849)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(1422134667)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(1263244828)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
     RequestImap(-1813544782) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(1008375999) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(117485200) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(-188216801) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(1008375999)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(117485200)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RequestImap(-188216801)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
     RequestImap(-2047539266) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RequestImap(1053919002) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RemoveImap(1802934313) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Trees
-    RemoveImap(607468222) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Shrubs
-    RemoveImap(2108112010) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Trees
-    RemoveImap(1208537422) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Trees
-    RemoveImap(361734047) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Trees
-    RemoveImap(-1552951782) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Trees
-    RemoveImap(1391886974) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Plants
-    RemoveImap(-1142569437) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Plants
-    RemoveImap(474113610) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Plants
-    RemoveImap(1298607560) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
-    RemoveImap(-297340751) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Small Pines
-    RemoveImap(2117211184) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Fence
-    RemoveImap(-1042390616) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Barn Interior
-    RemoveImap(-118700196) -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Props Outside
+    RequestImap(1053919002)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RemoveImap(1802934313)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Trees
+    RemoveImap(607468222)    -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Shrubs
+    RemoveImap(2108112010)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Trees
+    RemoveImap(1208537422)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Trees
+    RemoveImap(361734047)    -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Trees
+    RemoveImap(-1552951782)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Trees
+    RemoveImap(1391886974)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Plants
+    RemoveImap(-1142569437)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Plants
+    RemoveImap(474113610)    -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Plants
+    RemoveImap(1298607560)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth
+    RemoveImap(-297340751)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Small Pines
+    RemoveImap(2117211184)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Fence
+    RemoveImap(-1042390616)  -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Barn Interior
+    RemoveImap(-118700196)   -- West Elizabeth -- Big Valley -- Farm with hole in ground next to W in West Elizabeth -- Props Outside
 
     --#### New Austin ####--
     --## Tumbleweed ##--
-    RequestImap(1296658155) -- New Austin -- Tumbleweed -- Sheriffs Office -- Bounty Board
+    RequestImap(1296658155)  -- New Austin -- Tumbleweed -- Sheriffs Office -- Bounty Board
     --## Benedict Point ##--
     RequestImap(-1975145165) -- New Austin -- Benedict Point -- Sheriffs Office -- Bounty Board
     --## Armadillo ##--
-    RequestImap(59120723) -- New Austin -- Armadillo -- Sheriffs Office -- Bounty Board
+    RequestImap(59120723)    -- New Austin -- Armadillo -- Sheriffs Office -- Bounty Board
     --## Armadillo Fires ##--
     -- Southwest --
     RemoveImap(-1745210725) -- New Austin -- Armadillo -- Fires -- SW add debris
     RemoveImap(-1096712211) -- New Austin -- Armadillo -- Fires -- SW add debris
     RemoveImap(-1941005496) -- New Austin -- Armadillo -- Fires -- SW add debris
-    RemoveImap(1898267848) -- New Austin -- Armadillo -- Fires -- SW add ember
-    RemoveImap(974280355) -- New Austin -- Armadillo -- Fires -- SW add ember
-    RemoveImap(1756181464) -- New Austin -- Armadillo -- Fires -- SW add ember
-    RemoveImap(-816857367) -- New Austin -- Armadillo -- Fires -- SW add ember
-    RemoveImap(-72482077) -- New Austin -- Armadillo -- Fires -- SW add flame
+    RemoveImap(1898267848)  -- New Austin -- Armadillo -- Fires -- SW add ember
+    RemoveImap(974280355)   -- New Austin -- Armadillo -- Fires -- SW add ember
+    RemoveImap(1756181464)  -- New Austin -- Armadillo -- Fires -- SW add ember
+    RemoveImap(-816857367)  -- New Austin -- Armadillo -- Fires -- SW add ember
+    RemoveImap(-72482077)   -- New Austin -- Armadillo -- Fires -- SW add flame
     RemoveImap(-1122265410) -- New Austin -- Armadillo -- Fires -- SW add flame
-    RemoveImap(-935952905) -- New Austin -- Armadillo -- Fires -- SW add flame
-    RemoveImap(1309948033) -- New Austin -- Armadillo -- Fires -- SW add flame
-    RemoveImap(1941336822) -- New Austin -- Armadillo -- Fires -- SW add flame
-    RemoveImap(712371053) -- New Austin -- Armadillo -- Fires -- SW add flame
-    RemoveImap(1710282603) -- New Austin -- Armadillo -- Fires -- SW add flame
-    RemoveImap(574303518) -- New Austin -- Armadillo -- Fires -- SW add charred ground
-    RemoveImap(-752772715) -- New Austin -- Armadillo -- Fires -- SW add smoke
-    RemoveImap(503623514) -- New Austin -- Armadillo -- Fires -- SW add smoke
-    RemoveImap(-407026996) -- New Austin -- Armadillo -- Fires -- SW add smoke
+    RemoveImap(-935952905)  -- New Austin -- Armadillo -- Fires -- SW add flame
+    RemoveImap(1309948033)  -- New Austin -- Armadillo -- Fires -- SW add flame
+    RemoveImap(1941336822)  -- New Austin -- Armadillo -- Fires -- SW add flame
+    RemoveImap(712371053)   -- New Austin -- Armadillo -- Fires -- SW add flame
+    RemoveImap(1710282603)  -- New Austin -- Armadillo -- Fires -- SW add flame
+    RemoveImap(574303518)   -- New Austin -- Armadillo -- Fires -- SW add charred ground
+    RemoveImap(-752772715)  -- New Austin -- Armadillo -- Fires -- SW add smoke
+    RemoveImap(503623514)   -- New Austin -- Armadillo -- Fires -- SW add smoke
+    RemoveImap(-407026996)  -- New Austin -- Armadillo -- Fires -- SW add smoke
     -- Northeast --
     RemoveImap(-1029093195) -- New Austin -- Armadillo -- Fires -- NE add debris
     RemoveImap(-1325390493) -- New Austin -- Armadillo -- Fires -- NE add debris
     RemoveImap(-1622834706) -- New Austin -- Armadillo -- Fires -- NE add debris?
-    RemoveImap(257582350) -- New Austin -- Armadillo -- Fires -- NE add ember
-    RemoveImap(-39730787) -- New Austin -- Armadillo -- Fires -- NE add ember
+    RemoveImap(257582350)   -- New Austin -- Armadillo -- Fires -- NE add ember
+    RemoveImap(-39730787)   -- New Austin -- Armadillo -- Fires -- NE add ember
     RemoveImap(-1438901569) -- New Austin -- Armadillo -- Fires -- NE add ember
-    RemoveImap(-772691681) -- New Austin -- Armadillo -- Fires -- NE add flame
+    RemoveImap(-772691681)  -- New Austin -- Armadillo -- Fires -- NE add flame
     RemoveImap(-2110850686) -- New Austin -- Armadillo -- Fires -- NE add flame
     RemoveImap(-1142062162) -- New Austin -- Armadillo -- Fires -- NE add Flame
-    RemoveImap(32078073) -- New Austin -- Armadillo -- Fires -- NE add flame
-    RemoveImap(1011350990) -- New Austin -- Armadillo -- Fires -- NE add flame
-    RemoveImap(1007204499) -- New Austin -- Armadillo -- Fires -- NE add flame
-    RemoveImap(705321299) -- New Austin -- Armadillo -- Fires -- NE add flame
-    RemoveImap(34346755) -- New Austin -- Armadillo -- Fires -- NE smoke
-    RemoveImap(482102371) -- New Austin -- Armadillo -- Fires -- NE smoke
-    RemoveImap(-502343927) -- New Austin -- Armadillo -- Fires -- NE smoke
-    RemoveImap(112916013) -- New Austin -- Armadillo -- Fires -- NE add charred ground
+    RemoveImap(32078073)    -- New Austin -- Armadillo -- Fires -- NE add flame
+    RemoveImap(1011350990)  -- New Austin -- Armadillo -- Fires -- NE add flame
+    RemoveImap(1007204499)  -- New Austin -- Armadillo -- Fires -- NE add flame
+    RemoveImap(705321299)   -- New Austin -- Armadillo -- Fires -- NE add flame
+    RemoveImap(34346755)    -- New Austin -- Armadillo -- Fires -- NE smoke
+    RemoveImap(482102371)   -- New Austin -- Armadillo -- Fires -- NE smoke
+    RemoveImap(-502343927)  -- New Austin -- Armadillo -- Fires -- NE smoke
+    RemoveImap(112916013)   -- New Austin -- Armadillo -- Fires -- NE add charred ground
     -- Southeast --
     RemoveImap(-1725439174) -- New Austin -- Armadillo -- Fires -- SE add ember
     RemoveImap(-1443390498) -- New Austin -- Armadillo -- Fires -- SE add debris
-    RemoveImap(689576469) -- New Austin -- Armadillo -- Fires -- SE add debris
+    RemoveImap(689576469)   -- New Austin -- Armadillo -- Fires -- SE add debris
     RemoveImap(-1750010031) -- New Austin -- Armadillo -- Fires -- SE add debris
-    RemoveImap(1857654366) -- New Austin -- Armadillo -- Fires -- SE add ember
-    RemoveImap(2095655613) -- New Austin -- Armadillo -- Fires -- SE add ember
-    RemoveImap(1049317994) -- New Austin -- Armadillo -- Fires -- SE add flame
-    RemoveImap(-820561187) -- New Austin -- Armadillo -- Fires -- SE add flame
-    RemoveImap(-280121448) -- New Austin -- Armadillo -- Fires -- SE add flame
+    RemoveImap(1857654366)  -- New Austin -- Armadillo -- Fires -- SE add ember
+    RemoveImap(2095655613)  -- New Austin -- Armadillo -- Fires -- SE add ember
+    RemoveImap(1049317994)  -- New Austin -- Armadillo -- Fires -- SE add flame
+    RemoveImap(-820561187)  -- New Austin -- Armadillo -- Fires -- SE add flame
+    RemoveImap(-280121448)  -- New Austin -- Armadillo -- Fires -- SE add flame
     RemoveImap(-1268841107) -- New Austin -- Armadillo -- Fires -- SE add flame
-    RemoveImap(-279038963) -- New Austin -- Armadillo -- Fires -- SE add flame
-    RemoveImap(2087785010) -- New Austin -- Armadillo -- Fires -- SE add flame
-    RemoveImap(161441935) -- New Austin -- Armadillo -- Fires -- SE add flame
+    RemoveImap(-279038963)  -- New Austin -- Armadillo -- Fires -- SE add flame
+    RemoveImap(2087785010)  -- New Austin -- Armadillo -- Fires -- SE add flame
+    RemoveImap(161441935)   -- New Austin -- Armadillo -- Fires -- SE add flame
     RemoveImap(-1603458673) -- New Austin -- Armadillo -- Fires -- SE add charred ground
-    RemoveImap(1065585604) -- New Austin -- Armadillo -- Fires -- SE smoke
-    RemoveImap(-175048740) -- New Austin -- Armadillo -- Fires -- SE smoke
-    RemoveImap(-482127039) -- New Austin -- Armadillo -- Fires -- SE smoke
+    RemoveImap(1065585604)  -- New Austin -- Armadillo -- Fires -- SE smoke
+    RemoveImap(-175048740)  -- New Austin -- Armadillo -- Fires -- SE smoke
+    RemoveImap(-482127039)  -- New Austin -- Armadillo -- Fires -- SE smoke
     --#### End of New Austin ####--
 
 
@@ -2549,40 +2422,66 @@ end
 
 function StartInteriorsFix()
     Citizen.CreateThread(function()
-        while true do
-            Citizen.Wait(5000)
-            local interior = GetInteriorAtCoords(-308.88, 777.37, 118.77)
+        -- while true do -- Will neeed to test if this really needs to be done in a loop
+            Citizen.Wait(5000) --Will need to test if this wait is really needed
+
             if InteriorsActive == false then
-                if IsInteriorReady(interior) then
-                    if IsInteriorEntitySetActive(interior, "val_bank_front_windows") then
-                        InteriorsActive = true
-                        print(SourceKey, 'Interiors are already active.')
-                    else
-                        ActInterior(45314, "Emerald Ranch saloon", {
-                            "eme_saloon_intgroup_curtains",
-                            "eme_saloon_intgroup_furniture"
-                        })
-                        getValJail()
-                        getValBank()
-                        getValSaloon()
-                        getValGenstore()
-                        getKorrigan()
-                        getBeechers()
-                        getBraManor()
-                        getBronte()
-                        InteriorsActive = true
-                        print(SourceKey, 'Interiors are now active!')
-                    end
-                end
-            else
-                print(SourceKey, 'Interiors are already active.')
-                break
-            end
+                ActivateInterior(45314, "Emerald Ranch saloon", {
+                    "eme_saloon_intgroup_curtains",
+                    "eme_saloon_intgroup_furniture"
+                })
+
+                ActivateInteriorByCoords(-273.4513, 811.3408, 118.38, "Valentine Jail", {
+                    "val_jail_int_walla",
+                    "val_jail_int_wallb"
+                })
+
+                ActivateInteriorByCoords(-308.88, 777.37, 118.77, "Valentine Bank", {
+                    "val_bank_front_windows",
+                    "val_bank_int_curtainsopen"
+                })
+
+                ActivateInteriorByCoords(-310.0119, 802.9316, 117.9846, "Valentine Saloon", {
+                    "front_windows",
+                    "val_saloon_br03_bed",
+                    "6_chair_poker_set"
+                })
+
+                ActivateInteriorByCoords(323.0087, 801.0296, 116.8817, "Valentine General Store", {
+                    "val_genstore_night_light"
+                })
+
+                ActivateInteriorByCoords(3285.792, -1325.603, 43.08399, "Riverboat", {
+                    "korrigan_props_default",
+                    "korrigan_props_poker"
+                })
+
+                ActivateInteriorByCoords(-1643.893, -1358.232, 86.4541, "Beechers", {
+                    "bee_01_house_fireplace_on",
+                    "bee_01_masterBR_bed01",
+                    "Beechers_decorated_after_Abigail3",
+                    "IntGrp_livingrm_furniture_basic"
+                })
+
+                ActivateInteriorByCoords(1006.364, -1766.812, 46.5922, "Bra Mansion", {
+                    "bra_int_bedroom_clean",
+                    "bee_01_masterBR_bed01"
+                })
+
+                ActivateInteriorByCoords(2385.548, -1221.158, 46.1729, "Bra Mansion", {
+                    "bronte_shutters_open",
+                    "bronte_glass_unbreakable"
+                })
+
+                InteriorsActive = true
+                print(SourceKey, 'Interiors are now active!')
+            -- else
+            --     print(SourceKey, 'Interiors are confirmed active.')
+            --     break
+            -- end
         end
     end)
 
 
     UpdateImaps()
-
-
 end
