@@ -3,10 +3,6 @@ IMapsActive = false
 
 local SourceKey = "[Interiors]"
 
-local function ActivateInteriorByCoords(x, y, z, name, list)
-    ActivateInterior(GetInteriorAtCoords(x, y, z), name, list)
-end
-
 local function ActivateInterior(int, name, list)
     if IsValidInterior(int) then
         if not IsInteriorEntitySetActive(int, list[1]) then
@@ -16,6 +12,10 @@ local function ActivateInterior(int, name, list)
             print(SourceKey, name, " Interior Activated!")
         end
     end
+end
+
+local function ActivateInteriorByCoords(x, y, z, name, list)
+    ActivateInterior(GetInteriorAtCoords(x, y, z), name, list)
 end
 
 local function UpdateImaps()

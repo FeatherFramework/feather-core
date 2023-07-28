@@ -79,7 +79,7 @@ local function startPositionSync()
         while true do
             local result = RPCAPI.CallAsync("UpdatePlayerCoords", GetEntityCoords(PlayerPedId()))
             print(tostring(result))
-            Wait(20000)
+            Wait(Config.PositionSync)
         end
     end)
 end

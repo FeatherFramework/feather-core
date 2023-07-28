@@ -1,8 +1,15 @@
 -- Setup Global User API
-UserAPI = {
-    GetUserBySrc = GetUserBySrc,
-    GetUserByID = GetUserByID
-}
+UserAPI = {}
+
+
+-- User caching funtions
+function UserAPI.GetUserBySrc(src)
+    return CacheAPI.GetCacheBySrc("user", src)
+end
+
+function UserAPI.GetUserByID(ID)
+    return CacheAPI.GetCacheByID("user", ID)
+end
 
 function GetIdentifiers(src)
     local identifiers = GetPlayerIdentifiers(src)

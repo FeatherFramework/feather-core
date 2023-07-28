@@ -5,6 +5,8 @@ Config.DevMode = true
 Config.IdleAnimation = true
 Config.DisableRandomLootPrompts = true
 
+Config.PositionSync = 20000
+
 --Scale is 0.0-1.0
 Config.densityMultipliers = {
     ambientPeds     = 1.0,
@@ -20,7 +22,8 @@ Config.densityMultipliers = {
 
 -- All commands that the core has access to on startup (not including API registered commands)
 Config.Commands = {
-    ["hello"] = {
+    {
+        command = "hello",
         suggestion = "This is an awesome command",
         callback = function()
             print("WORLD!")

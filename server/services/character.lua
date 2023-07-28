@@ -3,10 +3,16 @@
 --------------------
 -- Character APIs --
 --------------------
-CharacterAPI = {
-    GetCharacterBySrc = GetCharacterBySrc,
-    GetCharacterByID = GetCharacterByID
-}
+CharacterAPI = {}
+
+-- Character- caching funtions
+function CharacterAPI.GetCharacterBySrc(src)
+    return CacheAPI.GetCacheBySrc("character", src)
+end
+
+function CharacterAPI.GetCharacterByID(ID)
+    return CacheAPI.GetCacheByID("character", ID)
+end
 
 function CharacterAPI.CreateCharacter(userid, firstname, lastname, dob, dollars, gold, xp, x, y, z)
     CharacterController.CreateCharacter(userid, firstname, lastname, dob, dollars, gold, xp, x, y, z)

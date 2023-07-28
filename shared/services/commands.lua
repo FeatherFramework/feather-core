@@ -1,19 +1,14 @@
 CommandAPI = {}
 
-function CommandAPI.Register(command, callback)
+function CommandAPI.Register(command, suggestion, callback)
     RegisterCommand(command, callback)
-    TriggerEvent("chat:addSuggestion", "/" .. value.command, value.suggestion)
-end
-
-function CommandAPI.Create(command, callback)
-    Commands[command] = callback
-    CommandAPI.Register(command, callback)
+    TriggerEvent("chat:addSuggestion", "/" .. command, suggestion)
 end
 
 function SetupCommands()
     CreateThread(function()
-        for key, value in pairs(Config.Commands) do
-            CommandAPI.Create(key, value)
+        for _, value in pairs(Config.Commands) do
+            CommandAPI.Register(value.command, value.suggestion, value.callback)
         end
     end)
 end

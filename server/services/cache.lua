@@ -120,21 +120,3 @@ function CacheAPI.UpdateCacheBySrc(type, src, key, update)
         CharacterCache[src][key] = update;
     end
 end
-
--- User caching funtions
-function CacheAPI.GetUserBySrc(src)
-    return CacheAPI.GetCacheBySrc("user", src)
-end
-
-function CacheAPI.GetUserByID(ID)
-    return CacheAPI.GetCacheByID("user", ID)
-end
-
--- Character- caching funtions
-function CacheAPI.GetCharacterBySrc(src)
-    return CacheAPI.GetCacheBySrc("character", src)
-end
-
-function CacheAPI.GetCharacterByID(ID)
-    return CacheAPI.GetCacheByID("character", ID)
-end
