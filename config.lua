@@ -30,3 +30,9 @@ Config.Commands = {
         end
     }
 }
+
+Config.LoadScreen = {
+    title = "Loading the world...",
+    subtitle = "In this dusty frontier, loading moments become tales whispered near campfires.",
+    signature = "-Someone probably"
+}

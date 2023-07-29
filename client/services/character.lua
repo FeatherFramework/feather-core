@@ -1,4 +1,3 @@
---TODO: For player spawn, dont spawn (show loadscreen), until ClientReady is true
 local PauseOpen = false
 local ActiveCharacterData = {}
 
@@ -8,26 +7,15 @@ local function ClearUIFeed()
 end
 
 local function preventWeaponSoftlock()
-    CreateThread(function()
-        while true do
-            Wait(1)
-
-            --Disable controller actions within the weapons wheel (This prevents a soft lock)
-            DisableControlAction(0, 0x7DA48D2A, true)
-            DisableControlAction(0, 0x9CC7A1A4, true)
-        end
-    end)
+    --Disable controller actions within the weapons wheel (This prevents a soft lock)
+    DisableControlAction(0, 0x7DA48D2A, true)
+    DisableControlAction(0, 0x9CC7A1A4, true)
+    Citizen.InvokeNative(0xFC094EF26DD153FA, 2)
 end
 
 local function disableRandomLootPrompt()
-    CreateThread(function()
-        while true do
-            Wait(0)
-
-            -- Disable random loot prompts
-            Citizen.InvokeNative(0xFC094EF26DD153FA, 2)
-        end
-    end)
+    -- Disable random loot prompts
+    Citizen.InvokeNative(0xFC094EF26DD153FA, 2)
 end
 
 local function setupCharacterMenuIdle()
@@ -58,17 +46,12 @@ local function setupCharacterMenuIdle()
     end)
 end
 
---TODO: Despawn character and then ACTUALLY spawn on /spawn command.
-
-
-
 --Global as the main.lua uses it during initial startup. (sooner the better for this to start.)
 function StartCharacterEssentials()
+    -- Disables award notifications
     EventsAPI:RegisterEventListener("EVENT_CHALLENGE_GOAL_COMPLETE", ClearUIFeed)
     EventsAPI:RegisterEventListener("EVENT_CHALLENGE_REWARD", ClearUIFeed)
     EventsAPI:RegisterEventListener("EVENT_DAILY_CHALLENGE_STREAK_COMPLETED", ClearUIFeed)
-
-    preventWeaponSoftlock()
 end
 
 ----------------------------------
@@ -84,15 +67,63 @@ local function startPositionSync()
     end)
 end
 
+local function SpawnLoop()
+    Citizen.CreateThread(function()
+        while true do
+            if Config.DisableRandomLootPrompts then disableRandomLootPrompt() end
+
+            preventWeaponSoftlock()
+            Wait(1)
+        end
+    end)
+end
+
 ----------------------------------
 -- Character Spawn handling --
 ----------------------------------
 local function SpawnHandler(character)
+    DoScreenFadeOut(1000)
+
+    -- TODO: Maybe for funsies add a dynamic text to this load (random quote or something)
+    Citizen.InvokeNative(0x1E5B70E53DB661E5, 0, 0, 0, Config.LoadScreen.title, Config.LoadScreen.subtitle, Config.LoadScreen.subtitle)
+
     ActiveCharacterData = character
+    local player = PlayerPedId()
+
+    local x = tonumber(character.X)
+    local y = tonumber(character.Y)
+    local z = tonumber(character.Z)
+
+    SetEntityCoords(player, x, y, z)
+    local valid, outPosition = GetSafeCoordForPed(x, y, z, false, 16)
+    if valid then
+        x = outPosition.x
+        y = outPosition.y
+        z = outPosition.z
+    end
+
+    local foundground, groundZ, normal = GetGroundZAndNormalFor_3dCoord(x, y, z)
+    if foundground then
+        z = groundZ
+    end
+
+    Wait(500)
     startPositionSync()
 
     if Config.IdleAnimation then setupCharacterMenuIdle() end
-    if Config.DisableRandomLootPrompts then disableRandomLootPrompt() end
+    SpawnLoop()
+    
+    -- Wait for the client natives and loaders to be ready.
+    while true do
+        Wait(2000)
+
+        if InteriorsActive == true and IMapsActive == true and ClientReady == true then
+            break
+        end
+    end
+
+    ShutdownLoadingScreen()
+    DoScreenFadeIn(2000)
 end
 
 RegisterNetEvent("bcc:character:spawn")

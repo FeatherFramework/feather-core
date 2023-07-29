@@ -1,6 +1,15 @@
 # Feather Core
 > Welcome to Feather Core, the beating heart of the Feather Framework; An extraordinary open-source RedM framework designed to bring the ultimate RedM server vision to life.
 
+# TODO
+- Spawn character at coords on initiateCharacter
+- xp/lv ui
+- money ui
+- gold ui
+- servermenu ui (Server name, rules, available commands, logout (back to char select))
+- locale/language system.
+- pvp toggle/ui
+
 ## First time setup
 Run our easy-to-use [txadmin recipe](https://github.com/FeatherFramework/feather-recipe)!
 

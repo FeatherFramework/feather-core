@@ -105,3 +105,11 @@ function StartVersioner()
         end
     end)
 end
+
+function StartReleaseFileCheck(resourcename, repo)
+    local f = LoadResourceFile(resourcename, './ui/index.html')
+    if not f then
+        print("^1 INCORRECT DOWNLOAD!  ^0")
+        print('^4 Please Download: ^2('..resourcename..'.zip) ^4from ^3<'..repo..'>^0')
+    end
+end
