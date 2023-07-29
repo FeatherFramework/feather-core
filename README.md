@@ -33,6 +33,11 @@ Run our easy-to-use [txadmin recipe](https://github.com/FeatherFramework/feather
 
 ## API Documentation and usage
 
+### Core API Setup
+```lua
+feather =  exports['feather-core'].initiate()
+```
+
 ### Character
 #### Create
 ```lua

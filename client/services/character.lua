@@ -1,7 +1,6 @@
 local PauseOpen = false
 local ActiveCharacterData = {}
 
-
 local function ClearUIFeed()
     Citizen.InvokeNative(0x6035E8FBCA32AC5E) --UiFeedClearAllChannels
 end
@@ -112,7 +111,7 @@ local function SpawnHandler(character)
 
     if Config.IdleAnimation then setupCharacterMenuIdle() end
     SpawnLoop()
-    
+
     -- Wait for the client natives and loaders to be ready.
     while true do
         Wait(2000)
