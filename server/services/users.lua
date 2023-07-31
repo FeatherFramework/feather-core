@@ -13,6 +13,7 @@ end
 
 function GetIdentifiers(src)
     local identifiers = GetPlayerIdentifiers(src)
+
     local license
 
     for _, v in pairs(identifiers) do
@@ -37,9 +38,8 @@ function SetupPlayerEvents()
         local identifiers = GetIdentifiers(src)
 
         local timestamp = os.date("%Y-%m-%d %H:%M:%S");
-        CacheAPI.AddToCache("user", src, identifiers.license, timestamp)
+        CacheAPI.AddToCache("user", src, GetPlayerName(src), identifiers.license, timestamp)
         print("Added source", src)
-
     end)
     
     AddEventHandler('playerDropped', function()

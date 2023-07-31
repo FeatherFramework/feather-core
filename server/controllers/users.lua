@@ -2,7 +2,7 @@
 UserController = {}
 
 --Returns user data. However, will also check if the userdata exists, if it does not, it will create an accounts.
-function UserController.LoadUser(license, timestamp)
+function UserController.LoadUser(username, license, timestamp)
     -- Check if player exists, if not lets create them a new record.
     local UserRecord = MySQL.query.await("SELECT users.*, roles.name, roles.level FROM users INNER JOIN roles ON users.role_id=roles.id WHERE license = @license", { ['license'] = license })  
     
