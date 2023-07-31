@@ -121,9 +121,12 @@ local function SpawnHandler(character)
         end
     end
 
+    MapAPI.setFOW(Config.UserFogOfWar)
+
     ShutdownLoadingScreen()
     DoScreenFadeIn(2000)
+
+    TriggerServerEvent("bcc:character:spawned", character)
 end
 
-RegisterNetEvent("bcc:character:spawn")
-AddEventHandler("bcc:character:spawn", SpawnHandler)
+RegisterNetEvent("bcc:character:spawn", SpawnHandler)

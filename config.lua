@@ -7,6 +7,8 @@ Config.DisableRandomLootPrompts = true
 
 Config.PositionSync = 20000
 
+Config.UserFogOfWar = false
+
 --Scale is 0.0-1.0
 Config.densityMultipliers = {
     ambientPeds     = 1.0,

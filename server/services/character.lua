@@ -42,6 +42,8 @@ end
 
 function CharacterAPI.RemoveCharacter(src)
     Citizen.CreateThread(function ()
+        --TODO: Add a check here if character is in cache, if so then remove
+
         CacheAPI.ReloadDBFromCacheRecord("character", src)
         CacheAPI.RemoveFromCache("character", src)
     end)

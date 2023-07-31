@@ -7,6 +7,7 @@ function StartAPI()
     CoreClientApi.Ped = PedAPI
     CoreClientApi.Prompt = PromptsAPI
     CoreClientApi.Render = RenderAPI
+    CoreClientApi.Map = MapAPI
 
     CoreClientApi = SetupSharedAPI(CoreClientApi)
 

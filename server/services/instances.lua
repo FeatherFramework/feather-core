@@ -7,8 +7,11 @@ local MathInstance = MathI:instanced()
 
 
 -- Create an instance for a given player/src
-function InstanceAPI.create(id)
+function InstanceAPI.create(id, tsrc)
     local src = source
+    if tsrc ~= nil then
+        src = tsrc
+    end
 
     -- Check to see if the player is already in a registered instance.
     for key, value in pairs(GameInstances) do
@@ -48,8 +51,11 @@ function InstanceAPI.create(id)
     return instanceID
 end
 
-function InstanceAPI.leave(id)
+function InstanceAPI.leave(id, tsrc)
     local src = source
+    if tsrc ~= nil then
+        src = tsrc
+    end
 
     -- If character is registered to the instance, remove them.
     if GameInstances[id] and GameInstances[id].characters[src] then
@@ -71,6 +77,7 @@ function InstanceAPI.leave(id)
 end
 
 -- Returns a list of all characters in a given instance
+-- TODO: Potentially limit this to seeing the instance you are in. idk
 function InstanceAPI.getInstanceCharacters(id)
     if not GameInstances[id] then
         print("Game instance does not exist")
@@ -80,3 +87,18 @@ function InstanceAPI.getInstanceCharacters(id)
 
     return GameInstances[id].characters
 end
+
+RPCAPI.Register("CreateInstance", function(params, res, player)
+    local id = InstanceAPI.create(params.id, player)
+    return res(id)
+end)
+
+RPCAPI.Register("LeaveInstance", function(params, res, player)
+    InstanceAPI.leave(params.id, player)
+    return res()
+end)
+
+RPCAPI.Register("GetInstancedCharacters", function(params, res, player)
+    local instances = InstanceAPI.getInstanceCharacters(id)
+    return res(instances)
+end)
