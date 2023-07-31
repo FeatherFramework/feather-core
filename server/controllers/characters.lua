@@ -4,7 +4,7 @@ function CharacterController.CreateCharacter(userID, firstname, lastname, dob, d
     local timestamp = os.date("%Y-%m-%d %H:%M:%S");
 
     return MySQL.query.await(
-        "INSERT INTO characters (userID, first_name, last_name, dob, dollars, gold, xp, x, y, z, created_at, updated_at) VALUES (@userid, @firstname, @lastname, @dob, @dollars, @gold, @xp, @x, @y, @z, @timestamp, @timestamp)",
+        "INSERT INTO characters (user_id, first_name, last_name, dob, dollars, gold, xp, x, y, z, created_at, updated_at) VALUES (@userid, @firstname, @lastname, @dob, @dollars, @gold, @xp, @x, @y, @z, @timestamp, @timestamp)",
         {
             ['userid'] = userID,
             ['firstname'] = firstname,
