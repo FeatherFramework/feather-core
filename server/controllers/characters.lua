@@ -4,7 +4,7 @@ function CharacterController.CreateCharacter(userID, firstname, lastname, dob, d
     local timestamp = os.date("%Y-%m-%d %H:%M:%S");
 
     return MySQL.query.await(
-        "INSERT INTO characters (UserID, FirstName, LastName, DOB, Dollars, Gold, XP, X, Y, Z, CreatedAt, UpdatedAt) VALUES (@userid, @firstname, @lastname, @dob, @dollars, @gold, @xp, @x, @y, @z, @timestamp, @timestamp)",
+        "INSERT INTO characters (userID, first_name, last_name, dob, dollars, gold, xp, x, y, z, created_at, updated_at) VALUES (@userid, @firstname, @lastname, @dob, @dollars, @gold, @xp, @x, @y, @z, @timestamp, @timestamp)",
         {
             ['userid'] = userID,
             ['firstname'] = firstname,
@@ -22,12 +22,12 @@ end
 
 --Returns user data. However, will also check if the userdata exists, if it does not, it will create an accounts.
 function CharacterController.GetCharacter(characterID)
-    local character = MySQL.query.await("SELECT * FROM characters WHERE ID = @ID", { ['ID'] = characterID })
+    local character = MySQL.query.await("SELECT * FROM characters WHERE id = @id", { ['id'] = characterID })
     return character[1]
 end
 
-function CharacterController.GetAvailableCharacters(UserID)
-    local characters = MySQL.query.await("SELECT * FROM characters WHERE UserID = @UserID", { ['UserID'] = UserID })
+function CharacterController.GetAvailableCharacters(userID)
+    local characters = MySQL.query.await("SELECT * FROM characters WHERE user_id = @UserID", { ['UserID'] = userID })
     return characters
 end
 
@@ -40,19 +40,19 @@ function CharacterController.UpdateCharacter(character)
     end
 
     local updatedCharacter MySQL.query.await(
-        "UPDATE characters SET FirstName = @firstname, LastName = @lastname, DOB = @dob, Dollars = @dollars, Gold = @gold, XP = @xp, X = @x, Y = @y, Z = @z, UpdatedAt = @timestamp WHERE ID = @id",
+        "UPDATE characters SET first_name = @firstname, last_name = @lastname, dob = @dob, dollars = @dollars, gold = @gold, xp = @xp, x = @x, y = @y, z = @z, updated_at = @timestamp WHERE id = @id",
         {
-            ['firstname'] = character.FirstName,
-            ['lastname'] = character.LastName,
-            ['dob'] = character.DOB,
-            ['dollars'] = character.Dollars,
-            ['gold'] = character.Gold,
-            ['xp'] = character.XP,
-            ['x'] = character.X,
-            ['y'] = character.Y,
-            ['z'] = character.Z,
+            ['firstname'] = character.first_name,
+            ['lastname'] = character.last_name,
+            ['dob'] = character.dob,
+            ['dollars'] = character.dollars,
+            ['gold'] = character.gold,
+            ['xp'] = character.xp,
+            ['x'] = character.x,
+            ['y'] = character.y,
+            ['z'] = character.z,
             ['timestamp'] = timestamp,
-            ['id'] = character.ID,
+            ['id'] = character.id,
         })
 
     return updatedCharacter

@@ -20,7 +20,7 @@ end
 
 function CharacterAPI.GetAvailableCharactersFromDB(src)
     local activeuser = CacheAPI.GetCacheBySrc('user', src)
-    return CharacterController.GetAvailableCharacters(activeuser.ID)
+    return CharacterController.GetAvailableCharacters(activeuser.id)
 end
 
 function CharacterAPI.InitiateCharacter(src, charid)
@@ -48,9 +48,9 @@ function CharacterAPI.RemoveCharacter(src)
 end
 
 function CharacterAPI.UpdateCharacterPOS(src, x, y, z)
-    CacheAPI.UpdateCacheBySrc('character', src, "X", x)
-    CacheAPI.UpdateCacheBySrc('character', src, "Y", y)
-    CacheAPI.UpdateCacheBySrc('character', src, "Z", z)
+    CacheAPI.UpdateCacheBySrc('character', src, "x", x)
+    CacheAPI.UpdateCacheBySrc('character', src, "y", y)
+    CacheAPI.UpdateCacheBySrc('character', src, "z", z)
 end
 
 function CharacterAPI.UpdateAttribute(src, key, val)
@@ -80,7 +80,7 @@ end)
 if Config.DevMode then
     RegisterCommand('CreateTestCharacter', function(source, args)
         local activeuser = CacheAPI.GetCacheBySrc('user', source)
-        CharacterAPI.CreateCharacter(activeuser.ID, 'Test', 'Mcgee', '10-10-1941', 0, 0, 0, 0, 0, 0)
+        CharacterAPI.CreateCharacter(activeuser.id, 'Test', 'Mcgee', '10-10-1941', 0, 0, 0, 0, 0, 0)
     end)
 
     RegisterCommand('GetAvailableCharacters', function(source)

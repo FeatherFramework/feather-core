@@ -92,7 +92,7 @@ function CacheAPI.GetCacheByID(type, ID)
     end
 
     for _, value in pairs(tempCache) do
-        if value.ID == ID then
+        if value.id == ID then
             targetCache = value
             break
         end

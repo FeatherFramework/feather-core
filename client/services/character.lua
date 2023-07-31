@@ -89,9 +89,9 @@ local function SpawnHandler(character)
     ActiveCharacterData = character
     local player = PlayerPedId()
 
-    local x = tonumber(character.X)
-    local y = tonumber(character.Y)
-    local z = tonumber(character.Z)
+    local x = tonumber(character.x)
+    local y = tonumber(character.y)
+    local z = tonumber(character.z)
 
     SetEntityCoords(player, x, y, z)
     local valid, outPosition = GetSafeCoordForPed(x, y, z, false, 16)
