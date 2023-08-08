@@ -16,3 +16,11 @@ end
 function IsOnServer()
     return IsDuplicityVersion()
 end
+
+function CheckVar(val, def)
+    if val == nil then
+        return def
+    end
+
+    return val
+end

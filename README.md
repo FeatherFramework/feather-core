@@ -190,7 +190,7 @@ This sets up the Prompt Group, which will allow you to attach future prompts to 
 
 -- client side only
 Citizen.CreateThread(function()
-	local  PromptGroup = featherPrompts:SetupPromptGroup() --Setup Prompt Group
+	local  PromptGroup = feather.Prompt:SetupPromptGroup() --Setup Prompt Group
 end)
 ```
 
@@ -226,7 +226,7 @@ Once you have the Prompt Group setup, you can now register a prompt to display w
 -- client side only
 
 Citizen.CreateThread(function()
-	local PromptGroup = featherPrompts:SetupPromptGroup() --Setup Prompt Group
+	local PromptGroup = feather.Prompt:SetupPromptGroup() --Setup Prompt Group
 	
 	local firstprompt = PromptGroup:RegisterPrompt("Press Me", 0x4CC0E2FE, 1, 1, true, 'hold', {timedeventhash = "MEDIUM_TIMED_EVENT"}) --Register your first prompt
 
@@ -253,7 +253,7 @@ Now that you have a Group setup and a registered Prompt, you can now display the
 -- client side only
 
 Citizen.CreateThread(function()
-	local PromptGroup = featherPrompts:SetupPromptGroup() --Setup Prompt Group
+	local PromptGroup = feather.Prompt:SetupPromptGroup() --Setup Prompt Group
 	
 	local firstprompt = PromptGroup:RegisterPrompt("Press Me", 0x4CC0E2FE, 1, 1, true, 'hold', {timedeventhash = "MEDIUM_TIMED_EVENT"}) --Register your first prompt
 
@@ -281,7 +281,7 @@ You can trigger code when a prompt has a completion event triggered (Example: cl
 -- client side only
 
 Citizen.CreateThread(function()
-	local  PromptGroup = featherPrompts:SetupPromptGroup() --Setup Prompt Group
+	local  PromptGroup = feather.Prompt:SetupPromptGroup() --Setup Prompt Group
 	
 	local firstprompt = PromptGroup:RegisterPrompt("Press Me", 0x4CC0E2FE, 1, 1, true, 'hold', {timedeventhash = "MEDIUM_TIMED_EVENT"}) --Register your first prompt
 
@@ -317,7 +317,7 @@ You can trigger code when a prompt has a failure event triggered (Example: timed
 -- client side only
 
 Citizen.CreateThread(function()
-	local  PromptGroup = featherPrompts:SetupPromptGroup() --Setup Prompt Group
+	local  PromptGroup = feather.Prompt:SetupPromptGroup() --Setup Prompt Group
 	
 	local firstprompt = PromptGroup:RegisterPrompt("Press Me", 0x4CC0E2FE, 1, 1, true, 'hold', {timedeventhash = "MEDIUM_TIMED_EVENT"}) --Register your first prompt
 
@@ -352,7 +352,7 @@ Remove a prompt completely
 -- client side only
 
 Citizen.CreateThread(function()
-	local  PromptGroup = featherPrompts:SetupPromptGroup() --Setup Prompt Group
+	local  PromptGroup = feather.Prompt:SetupPromptGroup() --Setup Prompt Group
 	
 	local firstprompt = PromptGroup:RegisterPrompt("Press Me", 0x4CC0E2FE, 1, 1, true, 'hold', {timedeventhash = "MEDIUM_TIMED_EVENT"}) --Register your first prompt
 
@@ -386,7 +386,7 @@ Make a prompt visible or hidden
 -- client side only
 
 Citizen.CreateThread(function()
-	local  PromptGroup = featherPrompts:SetupPromptGroup() --Setup Prompt Group
+	local  PromptGroup = feather.Prompt:SetupPromptGroup() --Setup Prompt Group
 	
 	local firstprompt = PromptGroup:RegisterPrompt("Press Me", 0x4CC0E2FE, 1, 1, true, 'hold', {timedeventhash = "MEDIUM_TIMED_EVENT"}) --Register your first prompt
 
