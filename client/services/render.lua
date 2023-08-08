@@ -35,3 +35,15 @@ function RenderAPI:DrawText(pos, text, color, scale, enableShadow)
     DisplayText(str, pos.x, pos.y)
     return str
 end
+
+function RenderAPI:Draw3DText(x, y, z, text, size)
+    local onScreen,_x,_y=GetScreenCoordFromWorldCoord(x, y, z)
+    local px,py,pz=table.unpack(GetGameplayCamCoord())
+    SetTextScale(size, size)
+    SetTextFontForCurrentCommand(1)
+    SetTextColor(255, 255, 255, 215)
+    local str = CreateVarString(10, "LITERAL_STRING", text, Citizen.ResultAsLong())
+    SetTextCentre(1)
+    DisplayText(str,_x,_y)
+    local factor = (string.len(text)) / 150
+end

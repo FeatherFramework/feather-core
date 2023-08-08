@@ -1,6 +1,6 @@
 function StartAPI()
     local CoreClientApi = {}
-    
+
     CoreClientApi.Notify = NotifyAPI
     CoreClientApi.Blip = BlipAPI
     CoreClientApi.Object = ObjectAPI
