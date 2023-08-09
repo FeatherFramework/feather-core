@@ -273,6 +273,20 @@ function PedAPI:Create(modelhash, x, y, z, heading, location, safeground, option
             self.Ped--[[ Ped ]]
         )
     end
+    
+    function PedClass:ChangeOutfitPreset(outfitPreset)
+        Citizen.InvokeNative(0x283978A15512B2FE, self.Ped, true)
+        Citizen.InvokeNative(
+            0x77FF8D35EEC6BBC4,
+            self.Ped,
+            outfitPreset--[[ Integer ]]
+        )
 
+        Citizen.InvokeNative(
+            0xCC8CA3E88256E58F,
+            self.Ped--[[ Ped ]]
+        )
+    end
+    
     return PedClass
 end
