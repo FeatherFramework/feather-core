@@ -115,7 +115,7 @@ Create a marker (blip) on the players map
 
 Citizen.CreateThread(function()
     
-    local  blip = featherBlips:SetBlip('Gift', 'blip_special_series_1', 0.2, x, y, z, vector3 or nil)
+    local  blip = feather.Blip:SetBlip('Gift', 'blip_special_series_1', 0.2, x, y, z, vector3 or nil)
 end)
 ```
 
@@ -127,7 +127,7 @@ If you want to use any natives that are not yet included, you can utilize the ra
 ```lua
 -- client side only
 Citizen.CreateThread(function()
-    local  blip = featherBlips:SetBlip('Gift', 'blip_special_series_1', 0.2, x, y, z,vector3 or nil)
+    local  blip = feather.Blip:SetBlip('Gift', 'blip_special_series_1', 0.2, x, y, z,vector3 or nil)
 
     local rawblip = blip.rawblip
     -- OR
@@ -145,11 +145,11 @@ Delete a marker (blip) on the players map
 ```lua
 -- client side only
 Citizen.CreateThread(function()
-    local  blip = featherBlips:SetBlip('Gift', 'blip_special_series_1', 0.2, x, y, z,vecotr3 or nil)
+    local  blip = feather.Blip:SetBlip('Gift', 'blip_special_series_1', 0.2, x, y, z,vecotr3 or nil)
 
     blip:Remove()
     -- OR
-    --- featherBlips:RemoveBlip(blip.rawblip)
+    --- feather.Blip:RemoveBlip(blip.rawblip)
 end)
 ```
 
@@ -168,11 +168,11 @@ Create a Radius blip
 -- client side only
 
 Citizen.CreateThread(function()
-    local  blip = featherBlips:SetBlip('Gift', 'blip_special_series_1', 0.2, x, y, z,vector3 or nil)
+    local  blip = feather.Blip:SetBlip('Gift', 'blip_special_series_1', 0.2, x, y, z,vector3 or nil)
 
     blip:AddRadius(64.0, -1282792512)
     -- OR
-    -- featherBlips:AddRadius(64.0, x, y, z, -1282792512)
+    -- feather.Blip:AddRadius(64.0, x, y, z, -1282792512)
 end)
 ```
 
@@ -444,7 +444,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false, isnetwork or false)
+    local ped = feather.Ped:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false, isnetwork or false)
 end)
 ```
 
@@ -469,7 +469,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:Freeze()
 end)
@@ -496,7 +496,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:Invincible()
 end)
@@ -523,7 +523,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:CanBeDamaged()
 end)
@@ -550,7 +550,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:SetHeading(0)
 end)
@@ -577,7 +577,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:SeeingRange(70.0)
 end)
@@ -604,7 +604,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:HearingRange(80.0)
 end)
@@ -631,7 +631,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('u_f_m_tumgeneralstoreowner_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:CanBeMounted(true)
 end)
@@ -658,7 +658,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:AddPedToGroup(GetPedGroupIndex(PlayerPedId()))
 
@@ -682,7 +682,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:ClearTasks()
 
@@ -706,7 +706,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     while (ped:GetTaskStatus(0x4924437d) ~= 8) do
         Wait(1000)
@@ -738,7 +738,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:FollowToOffsetOfEntity(PlayerPedId(), 0.0, -1.5, 0.0, 1.0, -1, 10, 1, 1)
 
@@ -766,7 +766,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('A_C_DogBluetickCoonhound_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('A_C_DogBluetickCoonhound_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:ChangeOutfit(0xDC567AF8)
 
@@ -795,7 +795,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:SetBlip(953018525, 'Person')
 end)
@@ -828,7 +828,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
     ped:AttackTarget(PlayerPedId())
 
     ped:GiveWeapon(0x64356159, 500, true, true, 3, false, true, true)
@@ -856,7 +856,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:FleeAtribute('DISABLE_ENTER_VEHICLES', true)
 end)
@@ -885,7 +885,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:SetPedCombatAttributes({
         {flag = 0, enabled = false}
@@ -914,7 +914,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:SetCombatStyle('SituationAllStop', 240.0)
 end)
@@ -936,7 +936,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:ClearCombatStyle()
 end)
@@ -963,7 +963,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:AttackTarget(PlayerPedId(), 'LAW')
 end)
@@ -985,7 +985,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     ped:Remove()
 end)
@@ -1007,7 +1007,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local ped = featherPeds:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
+    local ped = feather.Ped:Create('s_m_m_valdeputy_01', coords.x, coords.y, coords.z, 0, 'world', false)
 
     local rawped = ped:GetPed()
 
@@ -1046,7 +1046,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local obj = featherObjects:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
+    local obj = feather.Object:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
 end)
 ```
 
@@ -1071,7 +1071,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local obj = featherObjects:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
+    local obj = feather.Object:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
 
     obj:PickupLight(true)
 end)
@@ -1098,7 +1098,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local obj = featherObjects:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
+    local obj = feather.Object:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
 
     obj:Freeze(true)
 end)
@@ -1125,7 +1125,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local obj = featherObjects:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
+    local obj = feather.Object:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
 
     obj:SetHeading(0)
 end)
@@ -1152,7 +1152,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local obj = featherObjects:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
+    local obj = feather.Object:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
 
     obj:PlaceOnGround(true)
 end)
@@ -1179,7 +1179,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local obj = featherObjects:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
+    local obj = feather.Object:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
 
     obj:SetAsMission(true)
 end)
@@ -1203,7 +1203,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local obj = featherObjects:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
+    local obj = feather.Object:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
 
     obj:SetAsNoLongerNeeded()
 end)
@@ -1230,7 +1230,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local obj = featherObjects:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
+    local obj = feather.Object:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
 
     obj:Invincible(true)
 end)
@@ -1257,7 +1257,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local obj = featherObjects:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
+    local obj = feather.Object:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
 
     obj:SetNotHorseJumpable(true)
 end)
@@ -1280,7 +1280,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local obj = featherObjects:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
+    local obj = feather.Object:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
 
     Wait(5000)
 
@@ -1305,7 +1305,7 @@ Citizen.CreateThread(function()
         z = 118.38395690917968, y = 802.531982421875, x = -279.46728515625
     }
 
-    local obj = featherObjects:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
+    local obj = feather.Object:Create('p_package09', coords.x, coords.y, coords.z, 0, true, 'standard')
 
     Wait(5000)
 
@@ -1426,7 +1426,7 @@ Example Usage:
 ```lua
 -- Client
 RegisterCommand('trigger', function()
-    local coords, onscreen = featherRender:WorldToScreen(GetEntityCoords(PlayerPedId()))
+    local coords, onscreen = feather.Render:WorldToScreen(GetEntityCoords(PlayerPedId()))
 
     print(coords.x, coords.y, onscreen)
 end)
@@ -1451,7 +1451,7 @@ Example Usage:
 ```lua
 -- Client
 RegisterCommand('trigger', function()
-    local coords, onscreen = featherRender:WorldToHud(GetEntityCoords(PlayerPedId()))
+    local coords, onscreen = feather.Render:WorldToHud(GetEntityCoords(PlayerPedId()))
 
     print(coords.x, coords.y, onscreen)
 end)
@@ -1482,7 +1482,7 @@ Citizen.CreateThread(function()
         local onScreen, _x, _y = GetScreenCoordFromWorldCoord(GetEntityCoords(PlayerPedId()))
 
         if onScreen then
-            featherRender:DrawSprite(vector2(_x, _y), vector2(0.2, 0.2), 190.0, {r: 255, g: 0, b: 0, a: 255},  "feeds", "hud_menu_4a")
+            feather.Render:DrawSprite(vector2(_x, _y), vector2(0.2, 0.2), 190.0, {r: 255, g: 0, b: 0, a: 255},  "feeds", "hud_menu_4a")
         end
     end
 end)
@@ -1511,7 +1511,7 @@ Citizen.CreateThread(function()
         local onScreen, _x, _y = GetScreenCoordFromWorldCoord(GetEntityCoords(PlayerPedId()))
 
         if onScreen then
-            featherRender:DrawRectangle(vector2(_x, _y), vector2(0.2, 0.2), {r: 255, g: 0, b: 0, a: 255})
+            feather.Render:DrawRectangle(vector2(_x, _y), vector2(0.2, 0.2), {r: 255, g: 0, b: 0, a: 255})
         end
     end
 end)
@@ -1545,7 +1545,7 @@ Example Usage:
 Citizen.CreateThread(function()
     while  true  do
         Citizen.Wait(0)
-        featherRender:DrawMarker(0x50638AB9, GetEntityCoords(PlayerPedId()), vector3(0.0, 0.0, 0.0), vector3(0.0, 0.0, 0.0), vecotr3(0.15, 0.15, 0.15), {r: 255, g: 0, b: 0, a: 255}, false, false, false, false)
+        feather.Render:DrawMarker(0x50638AB9, GetEntityCoords(PlayerPedId()), vector3(0.0, 0.0, 0.0), vector3(0.0, 0.0, 0.0), vecotr3(0.15, 0.15, 0.15), {r: 255, g: 0, b: 0, a: 255}, false, false, false, false)
     end
 end)
 
@@ -1575,8 +1575,36 @@ Citizen.CreateThread(function()
         local onScreen, _x, _y = GetScreenCoordFromWorldCoord(GetEntityCoords(PlayerPedId()))
 
         if onScreen then
-            featherRender:DrawText(vector2(_x, _y), 'Feather Rules!', {r: 255, g: 0, b: 0, a: 255}, 1.0, false)
+            feather.Render:DrawText(vector2(_x, _y), 'Feather Rules!', {r: 255, g: 0, b: 0, a: 255}, 1.0, false)
         end
+    end
+end)
+
+```
+
+#### Draw Text 3D
+<Badge type="warning" text="Client Side Only" /> 
+
+Draw 3D Text on screen
+
+|Parameter| Description|
+|--|--|
+| x | x coord |
+| y | y coord |
+| z | z coord |
+| text | text to display |
+| scale | scale of the text |
+
+`feather.Render:Draw3DText(x, y, z, text, scale)`
+
+Example Usage:
+```lua
+-- Client
+Citizen.CreateThread(function()
+    while  true  do
+        Citizen.Wait(0)
+        local playerCoords = GetEntityCoords(PlayerPedId())
+        Feather.Render.Draw3DText(playerCoords.x, playerCoords.y, playerCoords.z, 'This will show at the coords', 0.2)
     end
 end)
 
