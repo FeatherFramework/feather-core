@@ -32,7 +32,6 @@ Run our easy-to-use [txadmin recipe](https://github.com/FeatherFramework/feather
   - Game Events
   - Prompts
   - Pedestrians
-  - Horse API
   - Objects
   - Notifications
   - Text Rendering
@@ -204,7 +203,7 @@ You can leverage Feathers built in function for easy in-game prompts.
 
 <Badge type="warning" text="Client Side Only" />
 
-This sets up the Prompt Group, which will allow you to attach future prompts to this group so that they can be displayed. This is required.
+This sets up the Prompt Group, which will allow you to attach future prompts to this group so that they can be displayed. Optionally you can set the groupId yourself. This is useful for when creating a prompt when targeting an entity. This is required.
 
 **Example Usage:**
 
@@ -213,6 +212,10 @@ This sets up the Prompt Group, which will allow you to attach future prompts to 
 -- client side only
 Citizen.CreateThread(function()
 	local  PromptGroup = feather.Prompt:SetupPromptGroup() --Setup Prompt Group
+
+    -- Optional: Setting the Prompt Group for entities. (Used for prompts when targeting)
+    local promptGroupId = Citizen.InvokeNative(0xB796970BD125FCE8, targetEntity) -- PromptGetGroupIdForTargetEntity
+    local  PromptGroup = feather.Prompt:SetupPromptGroup(promptGroupId)
 end)
 ```
 
