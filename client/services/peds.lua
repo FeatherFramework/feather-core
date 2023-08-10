@@ -5,26 +5,37 @@ function PedAPI:Create(modelhash, x, y, z, heading, location, safeground, option
     if not x and not y and not z and not heading then
         x, y, z, heading = table.unpack(vector4)
     end
+
     if CheckVar(safeground, true) then
-        local valid, outPosition = GetSafeCoordForPed(x, y, z, false, 16)
-        if valid then
-            x = outPosition.x
-            y = outPosition.y
-            z = outPosition.z
-        else
-            print('Trying to spawn Ped in invalid location!')
-            return nil
+        local groundCheck, ground = nil, nil
+        for height = 1, 1000 do
+            groundCheck, ground = GetGroundZAndNormalFor_3dCoord(x, y, height + 0.0)
+            if groundCheck then
+                break
+            end
         end
-
-        local foundground, groundZ, normal = GetGroundZAndNormalFor_3dCoord(x, y, z)
-
-        if foundground then
-            z = groundZ
-        else
-            print("Trying to spawn Ped with no ground!")
-            return nil
-        end
+        z = ground
     end
+    -- if CheckVar(safeground, true) then
+    --     local valid, outPosition = GetSafeCoordForPed(x, y, z, false, 16)
+    --     if valid then
+    --         x = outPosition.x
+    --         y = outPosition.y
+    --         z = outPosition.z
+    --     else
+    --         print('Trying to spawn Ped in invalid location!')
+    --         return nil
+    --     end
+
+    --     local foundground, groundZ, normal = GetGroundZAndNormalFor_3dCoord(x, y, z)
+
+    --     if foundground then
+    --         z = groundZ
+    --     else
+    --         print("Trying to spawn Ped with no ground!")
+    --         return nil
+    --     end
+    -- end
 
     --local hash = GetHashKey(CheckVar(modelhash, "s_m_m_valdeputy_01"))
     local countToBreak = 100

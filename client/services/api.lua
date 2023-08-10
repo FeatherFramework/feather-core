@@ -4,6 +4,7 @@ function StartAPI()
     CoreClientApi.Notify = NotifyAPI
     CoreClientApi.Blip = BlipAPI
     CoreClientApi.Object = ObjectAPI
+    CoreClientApi.Horse = HorseAPI
     CoreClientApi.Ped = PedAPI
     CoreClientApi.Prompt = PromptsAPI
     CoreClientApi.Render = RenderAPI
