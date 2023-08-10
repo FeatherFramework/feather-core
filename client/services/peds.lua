@@ -139,7 +139,10 @@ function PedAPI:Create(modelhash, x, y, z, heading, location, safeground, option
     end
 
     function PedClass:SetBlip(bliphash, title)
-        local blip = Citizen.InvokeNative(0x23f74c2fda6e7c61, CheckVar(bliphash, 953018525), self.Ped)
+        local blip = Citizen.InvokeNative(0x23f74c2fda6e7c61, 953018525, self.Ped)
+        if bliphash then
+            Citizen.InvokeNative(0x74F74D3207ED525C, blip, bliphash, true)
+        end
         Citizen.InvokeNative(0x9CB1A1623062F402, blip, CheckVar(title, 'Ped'))
     end
 
