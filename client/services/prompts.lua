@@ -52,7 +52,7 @@ function PromptsAPI:SetupPromptGroup()
     
         ----------------- Prompt Specific APIs below -----------------
          function PromptClass:TogglePrompt(toggle)
-            UiPromptSetVisible(self.Prompt, toggle)
+            PromptSetVisible(self.Prompt, toggle)
         end
 
         function PromptClass:EnabledPrompt(toggle)
