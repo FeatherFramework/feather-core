@@ -92,6 +92,10 @@ function HorseAPI:Create(modelHash, x, y, z, heading, gender, safeground, networ
     SetPedPromptName(self.Ped, CheckVar(title, 'MyHorse'))
   end
 
+  function HorseClass:UpdatePedVariation()
+    Citizen.InvokeNative(0xCC8CA3E88256E58F, self.Ped, false, true, true, true, false)
+  end
+
   function HorseClass:EquipMetaPedOutfit(outfitHash)
     if not joaat(tonumber(outfitHash)) then
       error('Invalid Hash!')
@@ -116,14 +120,14 @@ function HorseAPI:Create(modelHash, x, y, z, heading, gender, safeground, networ
     Citizen.InvokeNative(0x0D7FFA1B2F69ED82, self.Ped, tonumber(component), 0, 0)
   end
 
+  function HorseClass:IsMountSeatFree(seat)
+    return Citizen.InvokeNative(0xAAB0FE202E9FC9F0, self.Ped, CheckVar(seat, -1))
+  end
+
   function HorseClass:SetTag(title)
     self.Tag = Citizen.InvokeNative(0xE961BF23EAB76B12, self.Ped, CheckVar(title, 'MyHorse'))
     Citizen.InvokeNative(0x5F57522BC1EB9D9D, self.Tag, joaat('PLAYER_HORSE'))
     Citizen.InvokeNative(0xA0D7CE5F83259663, self.Tag)
-  end
-
-  function HorseClass:IsMountSeatFree(seat)
-    return Citizen.InvokeNative(0xAAB0FE202E9FC9F0, self.Ped, CheckVar(seat, -1))
   end
 
   function HorseClass:SetTagVisibility(value)
@@ -315,6 +319,10 @@ function HorseAPI:Create(modelHash, x, y, z, heading, gender, safeground, networ
       return
     end
     Citizen.InvokeNative(0x524B54361229154F, self.Ped, joaat(scenarioHash), -1, true, 0, -1, false)
+  end
+
+  function HorseClass:ClearTasks()
+    ClearPedTasks(self.Ped)
   end
 
   function HorseClass:SetPedConfigFlag(flag, active)
