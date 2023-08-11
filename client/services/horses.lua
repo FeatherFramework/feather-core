@@ -92,6 +92,14 @@ function HorseAPI:Create(modelHash, x, y, z, heading, gender, safeground, networ
     SetPedPromptName(self.Ped, CheckVar(title, 'MyHorse'))
   end
 
+  function HorseClass:EquipMetaPedOutfit(outfitHash)
+    if not joaat(tonumber(outfitHash)) then
+      error('Invalid Hash!')
+      return
+    end
+    Citizen.InvokeNative(0x1902C4CFCC5BE57C, self.Ped, joaat(tonumber(outfitHash)))
+  end
+
   function HorseClass:SetComponentEnabled(component, now)
     if not tonumber(component) then
       error('Component hash is required!')
