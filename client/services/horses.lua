@@ -1,13 +1,5 @@
 HorseAPI = {}
 
-local function CheckVar(val, def)
-  if val == nil then
-    return def
-  end
-
-  return val
-end
-
 function HorseAPI:Create(modelHash, x, y, z, heading, gender, safeground, networked, vector4)
   local HorseClass = {}
 
@@ -125,17 +117,17 @@ function HorseAPI:Create(modelHash, x, y, z, heading, gender, safeground, networ
   end
 
   function HorseClass:SetTag(title)
-    self.Tag = Citizen.InvokeNative(0xE961BF23EAB76B12, self.Ped, CheckVar(title, 'MyHorse'))
-    Citizen.InvokeNative(0x5F57522BC1EB9D9D, self.Tag, joaat('PLAYER_HORSE'))
-    Citizen.InvokeNative(0xA0D7CE5F83259663, self.Tag)
+    local tag = Citizen.InvokeNative(0xE961BF23EAB76B12, self.Ped, CheckVar(title, 'MyHorse'))
+    Citizen.InvokeNative(0x5F57522BC1EB9D9D, tag, joaat('PLAYER_HORSE'))
+    Citizen.InvokeNative(0xA0D7CE5F83259663, tag)
   end
 
-  function HorseClass:SetTagVisibility(value)
-    Citizen.InvokeNative(0x93171DDDAB274EB8, self.Tag, CheckVar(value, 2))
+  function HorseClass:SetTagVisibility(tag, state)
+    Citizen.InvokeNative(0x93171DDDAB274EB8, tag, CheckVar(state, 2))
   end
 
-  function HorseClass:IsTagActive()
-    Citizen.InvokeNative(0x502E1591A504F843, self.Tag, self.Ped)
+  function HorseClass:IsTagActive(tag)
+    Citizen.InvokeNative(0x502E1591A504F843, tag, self.Ped)
   end
 
   function HorseClass:SetPlayerOwnsMount(playerPed)
