@@ -25,7 +25,7 @@ function InstanceAPI.create(id, tsrc)
 
     if not GameInstances[id] then
         -- Instance not found, create a new one
-         --Generate an instance ID if one was not provided
+        --Generate an instance ID if one was not provided
         if id == nil then
             id = MathInstance:GetRandomInt()
         end
@@ -35,7 +35,6 @@ function InstanceAPI.create(id, tsrc)
                 src = src
             }
         }
-    
     elseif GameInstances[id] and not GameInstances[id].characters[src] then
         -- If the instance exists, and the player is not already within the instance, add them
         GameInstances[id].characters[src] = src
@@ -48,7 +47,9 @@ function InstanceAPI.create(id, tsrc)
         id
     )
 
-    return instanceID
+    -- Trigger Client Event for the isntanced player and send the ID
+    TriggerClientEvent('Feather:Instance:Created', src, id)
+    return id
 end
 
 function InstanceAPI.leave(id, tsrc)
@@ -61,7 +62,7 @@ function InstanceAPI.leave(id, tsrc)
     if GameInstances[id] and GameInstances[id].characters[src] then
         GameInstances[id].characters[src] = nil
     end
-    
+
     -- If the instance has no more characters registered, then remove the instance.
     if GameInstances[id] and #GameInstances[id].characters <= 0 then
         GameInstances[id] = nil
@@ -74,6 +75,9 @@ function InstanceAPI.leave(id, tsrc)
         src,
         0
     )
+
+    -- Trigger Client Event for the isntanced player and send the
+    TriggerClientEvent('Feather:Instance:Leave', src, 0)
 end
 
 -- Returns a list of all characters in a given instance
@@ -81,7 +85,7 @@ end
 function InstanceAPI.getInstanceCharacters(id)
     if not GameInstances[id] then
         print("Game instance does not exist")
-        
+
         return {}
     end
 
