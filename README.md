@@ -11,7 +11,6 @@
 - money ui
 - gold ui
 - servermenu ui (Server name, rules, available commands, logout (back to char select))
-- locale/language system.
 - pvp toggle/ui
 
 ## First time setup
@@ -36,6 +35,7 @@ Run our easy-to-use [txadmin recipe](https://github.com/FeatherFramework/feather
   - Notifications
   - Text Rendering
   - Blips
+- Global locale
 
 ## API Documentation and usage
 
@@ -2449,6 +2449,37 @@ example
 feather.Keys.A -- returns 0x7065027D
 ```
 
+### Locale API
+
+### Register Locale Translations
+Registers a table of translations
+
+> feather.locale.register(name, translation)
+
+- `name<string>` - name of the translation
+- `translation<table>` - a table of translations
+
+```lua
+feather.Locale.register("en_us", {
+    loadscreen_title = "Loading the world...",
+    loadscreen_subtitle = "In this dusty frontier, loading moments become tales whispered near campfires.",
+    loadscreen_signature = "-Someone probably"
+})
+```
+
+### Register Locale Translations
+Registers a table of translations
+
+> feather.locale.translate(src, name)
+
+- `src` - player source (if client then 0)
+-  `name<string>` - name of the translation
+
+```lua
+  -- (src, name). if on client src is 0
+  feather.Locale.translate(0, "loadscreen_title")
+```
+
 ### Github Version Control
 
 You can have feather check if your script is up-to-date by adding the following to your github repo
@@ -2489,4 +2520,4 @@ _Wrong: `v1.1.0`_
 
 ### Notifications
 
-TBD
+TBD NEEDS TESTING

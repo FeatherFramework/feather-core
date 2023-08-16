@@ -81,12 +81,10 @@ end
 -- Character Spawn handling --
 ----------------------------------
 local function SpawnHandler(character)
-    DoScreenFadeOut(1000)
+    DoScreenFadeOut(2000)
 
-    -- TODO: Maybe for funsies add a dynamic text to this load (random quote or something)
-    Citizen.InvokeNative(0x1E5B70E53DB661E5, 0, 0, 0, Config.LoadScreen.title, Config.LoadScreen.subtitle, Config.LoadScreen.subtitle)
+    Citizen.InvokeNative(0x1E5B70E53DB661E5, 0, 0, 0, LocalesAPI.translate(0, "loadscreen_title"), LocalesAPI.translate(0, "loadscreen_subtitle"), LocalesAPI.translate(0, "loadscreen_signature"))
 
-    ActiveCharacterData = character
     local player = PlayerPedId()
 
     local x = tonumber(character.x)
@@ -125,6 +123,8 @@ local function SpawnHandler(character)
 
     ShutdownLoadingScreen()
     DoScreenFadeIn(2000)
+
+    NotifyAPI.ToolTip(LocalesAPI.translate(0, "spawn_welcome"), 5000)
 
     TriggerServerEvent("bcc:character:spawned", character)
 end

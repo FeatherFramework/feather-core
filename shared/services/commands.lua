@@ -1,8 +1,8 @@
 CommandAPI = {}
 
-function CommandAPI.Register(command, suggestion, callback)
+function CommandAPI.Register(command, suggestion, callback, params)
     RegisterCommand(command, callback)
-    TriggerEvent("chat:addSuggestion", "/" .. command, suggestion)
+    TriggerEvent("chat:addSuggestion", "/" .. command, suggestion, params)
 end
 
 function SetupCommands()
