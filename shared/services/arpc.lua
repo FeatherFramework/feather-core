@@ -84,7 +84,7 @@ AddEventHandler("bcc:call", function(id, name, params)
         return
     end
     if not registeredProcedures[name] then
-        PrettyPrint("Procedure is not registered:", name)
+        PrettyPrint("Procedure is not registered:", name, registeredProcedures)
         return
     end
 
