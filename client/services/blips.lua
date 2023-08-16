@@ -30,7 +30,10 @@ function BlipAPI:SetBlip(name, sprite, scale, x, y, z)
     end
 
     function BlipClass:AddRadius(radius, hash)
-        self.RadiusBlip = Citizen.InvokeNative(0x45f13b7e0a15c880, hash or -1282792512, self.x, self.y, self.z, radius)
+        self.RadiusBlip = Citizen.InvokeNative(0x45f13b7e0a15c880, -1282792512, self.x, self.y, self.z, radius)
+        if hash then
+         Citizen.InvokeNative(0x74F74D3207ED525C, self.RadiusBlip, hash, true)
+        end
     end
 
     return BlipClass
