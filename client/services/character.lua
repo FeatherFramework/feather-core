@@ -80,7 +80,7 @@ end
 ----------------------------------
 -- Character Spawn handling --
 ----------------------------------
-local function SpawnHandler(character)
+RegisterNetEvent("bcc:character:spawn", function (character)
     DoScreenFadeOut(2000)
 
     Citizen.InvokeNative(0x1E5B70E53DB661E5, 0, 0, 0, LocalesAPI.translate(0, "loadscreen_title"), LocalesAPI.translate(0, "loadscreen_subtitle"), LocalesAPI.translate(0, "loadscreen_signature"))
@@ -91,18 +91,16 @@ local function SpawnHandler(character)
     local y = tonumber(character.y)
     local z = tonumber(character.z)
 
-    SetEntityCoords(player, x, y, z)
-    local valid, outPosition = GetSafeCoordForPed(x, y, z, false, 16)
-    if valid then
-        x = outPosition.x
-        y = outPosition.y
-        z = outPosition.z
+    local groundCheck, ground = nil, nil
+    for height = 1, 1000 do
+      groundCheck, ground = GetGroundZAndNormalFor_3dCoord(x, y, height + 0.0)
+      if groundCheck then
+        break
+      end
     end
+    z = ground
 
-    local foundground, groundZ, normal = GetGroundZAndNormalFor_3dCoord(x, y, z)
-    if foundground then
-        z = groundZ
-    end
+    SetEntityCoords(player, x, y, z)
 
     Wait(500)
     startPositionSync()
@@ -128,7 +126,4 @@ local function SpawnHandler(character)
     NotifyAPI.ToolTip(LocalesAPI.translate(0, "spawn_welcome"), 5000)
 
     TriggerServerEvent("bcc:character:spawned", character)
-end
-
-
-RegisterNetEvent("bcc:character:spawn", SpawnHandler)
+end)
