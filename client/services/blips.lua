@@ -30,10 +30,10 @@ end
 function BlipAPI:SetRadius(hash, radius, x, y, z)
     local RadiusClass = {}
 
-    RadiusClass.rawrad = Citizen.InvokeNative(0x45f13b7e0a15c880, hash or -1282792512, x, y, z, radius)
+    RadiusClass.rawrad = Citizen.InvokeNative(0x45f13b7e0a15c880, -1282792512, x, y, z, radius)
 
     if hash then
-        Citizen.InvokeNative(0x74F74D3207ED525C, RadiusClass.rawrad, hash, true)
+        Citizen.InvokeNative(0x74F74D3207ED525C, RadiusClass.rawrad, hash or -1282792512, true)
     end
 
     RadiusClass.x = x
