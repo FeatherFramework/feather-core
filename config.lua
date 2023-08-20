@@ -7,10 +7,11 @@ Config.DisableRandomLootPrompts = true
 
 Config.PositionSync = 20000
 
-Config.UserFogOfWar = false
+
+Config.UseFogOfWar = false
 
 --Scale is 0.0-1.0
-Config.densityMultipliers = {
+Config.DensityMultipliers = {
     ambientPeds     = 1.0,
     scenarioPeds    = 1.0,
     vehicles        = 1.0,

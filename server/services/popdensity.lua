@@ -4,5 +4,5 @@
 -----------------------------------
 
 RPCAPI.Register("popdensity:sync", function (coords, res, player)
-    return res(Config.densityMultipliers)
+    return res(Config.DensityMultipliers)
 end)

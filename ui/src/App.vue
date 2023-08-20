@@ -46,17 +46,17 @@ const closeApp = () => {
 <template>
   <div
     id="content"
-    class="relative bg-gray-900 left-0 right-0 mx-auto px-10"
+    class="relative bg-gray-900 mx-auto px-10 pt-12 "
     v-if="visible || devmode"
   >
     <div class="absolute right-2 top-0 text-2xl text-white" @click="closeApp">
       &times;
     </div>
-    <nav class="w-full text-center text-white">
+    <router-view />
+    <nav class="absolute w-full text-center text-white bottom-4">
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link>
     </nav>
-    <router-view />
   </div>
 </template>
 
