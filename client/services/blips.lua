@@ -7,7 +7,6 @@ function BlipAPI:SetBlip(name, sprite, scale, x, y, z)
     BlipClass.x = x
     BlipClass.y = y
     BlipClass.z = z
-    BlipClass.RadiusBlip = nil
     
     if type(sprite) == "string" then
         sprite = joaat(sprite)
@@ -23,23 +22,36 @@ function BlipAPI:SetBlip(name, sprite, scale, x, y, z)
     function BlipClass:Remove()
         RemoveBlip(self.rawblip)
         self.rawblip = nil
-        if self.RadiusBlip then
-            RemoveBlip(self.RadiusBlip)
-            self.RadiusBlip = nil
-        end
-    end
-
-    function BlipClass:AddRadius(radius, hash)
-        self.RadiusBlip = Citizen.InvokeNative(0x45f13b7e0a15c880, hash or -1282792512, self.x, self.y, self.z, radius)
     end
 
     return BlipClass
 end
 
-function BlipAPI:RemoveBlip(blip)
-    RemoveBlip(blip)
+function BlipAPI:SetRadius(hash, radius, x, y, z)
+    local RadiusClass = {}
+
+    RadiusClass.rawrad = Citizen.InvokeNative(0x45f13b7e0a15c880, hash or -1282792512, x, y, z, radius)
+
+    if hash then
+        Citizen.InvokeNative(0x74F74D3207ED525C, RadiusClass.rawrad, hash, true)
+    end
+
+    RadiusClass.x = x
+    RadiusClass.y = y
+    RadiusClass.z = z
+    
+    function RadiusClass:Get()
+        return self.rawrad
+    end
+
+    function RadiusClass:Remove()
+        RemoveBlip(self.rawrad)
+        self.rawrad = nil
+    end
+
+    return RadiusClass
 end
 
-function BlipAPI:AddRadius(radius, x, y, z, hash)
-    return Citizen.InvokeNative(0x45f13b7e0a15c880, hash or -1282792512, x, y, z, radius)
+function BlipAPI:RemoveBlip(blip)
+    RemoveBlip(blip)
 end

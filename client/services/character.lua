@@ -119,7 +119,8 @@ local function SpawnHandler(character)
         end
     end
 
-    MapAPI.setFOW(Config.UserFogOfWar)
+    --Set global fog of war, to to the wording of the config, we inverse the value
+    MapAPI.setFOW(not Config.UseFogOfWar)
 
     ShutdownLoadingScreen()
     DoScreenFadeIn(2000)
@@ -128,5 +129,6 @@ local function SpawnHandler(character)
 
     TriggerServerEvent("bcc:character:spawned", character)
 end
+
 
 RegisterNetEvent("bcc:character:spawn", SpawnHandler)

@@ -6,6 +6,10 @@ function MapAPI.setFOW(toggle)
     )
 end
 
+function MapAPI.DisplayRadar(toggle)
+    DisplayRadar(toggle)
+end
+
 function MapAPI.StartGps(start, finish)
     StartGpsMultiRoute(6, true, true)
     AddPointToGpsMultiRoute(start.x, start.y, start.z)
