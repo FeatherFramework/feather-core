@@ -23,6 +23,12 @@ Config.DensityMultipliers = {
     scenarioHumans  = 1.0
 }
 
+Config.UI = {
+    hotkey = "PGUP",
+    command = "menu",
+    suggestion = "Toggles the core ui"
+}
+
 Config.XP = {
     perLevel = 1900
 }

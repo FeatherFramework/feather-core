@@ -110,6 +110,11 @@ if Config.DevMode then
     end)
 
     RegisterCommand('InitiateCharacter', function(source, args)
+        if args[1] == nil then
+            print("must have character id")
+            return
+        end
+
         CharacterAPI.InitiateCharacter(source, args[1])
     end)
     TriggerEvent("chat:addSuggestion", "/InitiateCharacter", "Initiate a character", {

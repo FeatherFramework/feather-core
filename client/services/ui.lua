@@ -1,16 +1,14 @@
-local state = false
-
+UIState = false
 function ToggleUI()
     if ActiveCharacter == nil or ActiveCharacter == {} then
         print("No active character fount")
         return 
     end
 
-    state = not state
-
+    UIState = not UIState
     SendNUIMessage({
         type = 'toggle',
-        visible = state,
+        visible = UIState,
         player = ActiveCharacter,
         config = {
             xp = Config.XP
@@ -20,8 +18,8 @@ function ToggleUI()
 end
 
 RegisterNUICallback('updatestate', function(args, nuicb)
-    state = args.state
-    SetNuiFocus(state, state)
+    UIState = args.state
+    SetNuiFocus(UIState, UIState)
     nuicb('ok')
 end)
 
@@ -30,6 +28,10 @@ RegisterNUICallback('updatelocale', function(args, nuicb)
     nuicb('ok')
 end)
 
-RegisterCommand("toggleUI", function(source, args, rawCommand)
+CommandAPI.Register(Config.UI.command, Config.UI.suggestion, function()
     ToggleUI()
-end, false)
+end)
+
+KeyPressAPI:RegisterListener(Config.UI.hotkey, function()
+    ToggleUI()
+end)

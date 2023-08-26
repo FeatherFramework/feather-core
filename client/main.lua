@@ -2,6 +2,7 @@ ClientReady = false
 
 function RunCore()
     StartAPI()
+    StartKeyListeners()
     StartPopulationDensity()
     StartInteriorsFix()
     StartCharacterEssentials()

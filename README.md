@@ -10,6 +10,7 @@
 - Make the UI configurable
 - UI Plugins
 - Hide default redm popups
+- Bring loadscreenbcc helper into the core. (add as optional)
 
 ## First time setup
 
