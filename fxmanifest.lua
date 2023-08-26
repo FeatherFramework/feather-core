@@ -34,6 +34,19 @@ client_scripts {
     "/client/main.lua"
 }
 
+ui_page {
+    "ui/shim.html"
+}
+
+files {
+    "ui/shim.html",
+    "ui/js/*.*",
+    "ui/css/*.*",
+    "ui/fonts/*.*",
+    "ui/img/*.*"
+}
+
+
 dependencies {
     'oxmysql',
     'weathersync'

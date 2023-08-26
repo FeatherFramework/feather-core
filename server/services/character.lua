@@ -75,7 +75,16 @@ end
 RPCAPI.Register("UpdatePlayerCoords", function (coords, res, player)
     local x, y, z = table.unpack(coords)
     CharacterAPI.UpdateCharacterPOS(player, x, y, z)
-    return res("Player Coords Updated!")
+    return res(CharacterAPI.GetCharacterBySrc(player))
+end)
+
+RPCAPI.Register("UpdatePlayerLang", function (lang, res, player)
+    CharacterAPI.UpdateLang(player, lang)
+    return res(CharacterAPI.GetCharacterBySrc(player))
+end)
+
+RPCAPI.Register("SyncCharacter", function (_, res, player)
+    return res(CharacterAPI.GetCharacterBySrc(player))
 end)
 
 AddEventHandler('playerDropped', function()
@@ -84,7 +93,6 @@ AddEventHandler('playerDropped', function()
 
     print("Dropped Character Source", src)
 end)
-
 
 ---------------------------------------------------------------------------------------------------
 -- Developer Test Commands (THIS IS TEMPORARY AND WILL NEED TO BE DONE BY THE CHARACTER CREATOR) --
