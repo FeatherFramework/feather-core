@@ -1,5 +1,5 @@
 local PauseOpen = false
-local ActiveCharacterData = {}
+ActiveCharacter = {}
 
 local function ClearUIFeed()
     Citizen.InvokeNative(0x6035E8FBCA32AC5E) --UiFeedClearAllChannels
@@ -59,8 +59,7 @@ end
 local function startPositionSync()
     Citizen.CreateThread(function()
         while true do
-            local result = RPCAPI.CallAsync("UpdatePlayerCoords", GetEntityCoords(PlayerPedId()))
-            print(tostring(result))
+            ActiveCharacter = RPCAPI.CallAsync("UpdatePlayerCoords", GetEntityCoords(PlayerPedId()))
             Wait(Config.PositionSync)
         end
     end)
@@ -124,6 +123,8 @@ RegisterNetEvent("bcc:character:spawn", function (character)
     DoScreenFadeIn(2000)
 
     NotifyAPI.ToolTip(LocalesAPI.translate(0, "spawn_welcome"), 5000)
+
+    ActiveCharacter = character
 
     TriggerServerEvent("bcc:character:spawned", character)
 end)

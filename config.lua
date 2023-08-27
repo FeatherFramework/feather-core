@@ -23,6 +23,16 @@ Config.DensityMultipliers = {
     scenarioHumans  = 1.0
 }
 
+Config.UI = {
+    hotkey = "PGUP",
+    command = "menu",
+    suggestion = "Toggles the core ui"
+}
+
+Config.XP = {
+    perLevel = 1900
+}
+
 -- All commands that the core has access to on startup (not including API registered commands)
 Config.Commands = {
     {
@@ -32,10 +42,4 @@ Config.Commands = {
             print("WORLD!")
         end
     }
-}
-
-Config.LoadScreen = {
-    title = "Loading the world...",
-    subtitle = "In this dusty frontier, loading moments become tales whispered near campfires.",
-    signature = "-Someone probably"
 }

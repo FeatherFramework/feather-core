@@ -1,21 +1,37 @@
-local state = false
-
+UIState = false
 function ToggleUI()
-    state = not state
+    if ActiveCharacter == nil or ActiveCharacter == {} then
+        print("No active character fount")
+        return 
+    end
+
+    UIState = not UIState
     SendNUIMessage({
         type = 'toggle',
-        visible = state,
+        visible = UIState,
+        player = ActiveCharacter,
+        config = {
+            xp = Config.XP
+        },
+        locale = LocalesAPI.translations
     })
 end
 
 RegisterNUICallback('updatestate', function(args, nuicb)
-    state = args.state
-    SetNuiFocus(state, state)
-    print('State change received!', state)
-
+    UIState = args.state
+    SetNuiFocus(UIState, UIState)
     nuicb('ok')
 end)
 
-RegisterCommand("toggleUI", function(source, args, rawCommand)
+RegisterNUICallback('updatelocale', function(args, nuicb)
+    ActiveCharacter = RPCAPI.CallAsync("UpdatePlayerLang", args.locale, function()end)
+    nuicb('ok')
+end)
+
+CommandAPI.Register(Config.UI.command, Config.UI.suggestion, function()
     ToggleUI()
-end, false)
+end)
+
+KeyPressAPI:RegisterListener(Config.UI.hotkey, function()
+    ToggleUI()
+end)
