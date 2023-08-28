@@ -39,17 +39,16 @@ function SetupPlayerEvents()
 
         local timestamp = os.date("%Y-%m-%d %H:%M:%S");
         CacheAPI.AddToCache("user", src, GetPlayerName(src), identifiers.license, timestamp)
-        print("Added source", src)
+        DebugLog("Added source", src)
     end)
     
     AddEventHandler('playerDropped', function()
         local src = source
         CacheAPI.ReloadDBFromCacheRecord("user", src)
         CacheAPI.RemoveFromCache("user", src)
-        print("Dropped User Source", src)
+        DebugLog("Dropped User Source", src)
     end)
     
-    -- TODO: Whitelist check (either our own, or we check txadmin whitelist somehow)
     AddEventHandler('playerConnecting', function(name, kickreason, deferrals)
         local src = source
         local username = string.gsub(name, "%s+", "")

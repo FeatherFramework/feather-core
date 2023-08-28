@@ -20,12 +20,12 @@ RPCAPI.isWaitingForResourceStart = true
 
 if IsOnServer() then
     -- Server event registry
-    RegisterServerEvent("bcc:call")
-    RegisterServerEvent("bcc:response")
+    RegisterServerEvent("feather:call")
+    RegisterServerEvent("feather:response")
 else
     -- Client event registry
-    RegisterNetEvent("bcc:call")
-    RegisterNetEvent("bcc:response")
+    RegisterNetEvent("feather:call")
+    RegisterNetEvent("feather:response")
 end
 
 ----------------------
@@ -53,7 +53,7 @@ local function GetResponseFunction(id)
         return function() end
     end
     return function(...)
-        TriggerRemoteEvent("bcc:response", source, id, ...)
+        TriggerRemoteEvent("feather:response", source, id, ...)
     end
 end
 
@@ -69,7 +69,7 @@ local function CallRemoteProcedures(name, params, callback, source)
         pendingCallbacks[id] = callback
     end
 
-    return TriggerRemoteEvent("bcc:call", source, id, name, params)
+    return TriggerRemoteEvent("feather:call", source, id, name, params)
 end
 
 
@@ -78,27 +78,26 @@ end
 --------------------
 
 -- Handle the outgoing rpc
-AddEventHandler("bcc:call", function(id, name, params)
+AddEventHandler("feather:call", function(id, name, params)
     if type(name) ~= "string" then
-        PrettyPrint("Name must be a string")
+        print("Name must be a string")
         return
     end
     if not registeredProcedures[name] then
-        PrettyPrint("Procedure is not registered:", name, registeredProcedures)
+        print("Procedure is not registered:", name, registeredProcedures)
         return
     end
-
 
     local activeProcedure = registeredProcedures[name]
 
     local returnValues = { activeProcedure(params, GetResponseFunction(id), source) }
     if #returnValues > 0 and id then
-        TriggerRemoteEvent("bcc:response", source, id, table.unpack(returnValues))
+        TriggerRemoteEvent("feather:response", source, id, table.unpack(returnValues))
     end
 end)
 
 -- Handle the incomming response from the rpc
-AddEventHandler("bcc:response", function(id, ...)
+AddEventHandler("feather:response", function(id, ...)
     if not id then
         print("RPC callback ID not found: ", id)
         return
@@ -119,7 +118,10 @@ end)
 
 -- Register the procedure/method
 function RPCAPI.Register(name, callback)
-    print("Registered RPC: ", name)
+    if Config.DevMode then
+        print("Registered RPC: ", name)
+    end
+
     registeredProcedures[name] = callback
 
     return true

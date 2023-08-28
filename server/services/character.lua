@@ -1,5 +1,3 @@
---TODO: once initiate player is called, we need to check that interiors and everything is already loaded in properly. (This means poping up a load screen until it is)
-
 --------------------
 -- Character APIs --
 --------------------
@@ -42,17 +40,21 @@ function CharacterAPI.InitiateCharacter(src, charid)
         return
     else
         local char = CacheAPI.AddToCache("character", src, charid)
-        TriggerClientEvent("bcc:character:spawn", src, char)
+        TriggerClientEvent("feather:character:spawn", src, char)
     end
 end
 
 function CharacterAPI.RemoveCharacter(src)
-    Citizen.CreateThread(function ()
-        --TODO: Add a check here if character is in cache, if so then remove
-
+    Citizen.CreateThread(function()
         CacheAPI.ReloadDBFromCacheRecord("character", src)
         CacheAPI.RemoveFromCache("character", src)
+        TriggerEvent("feather:character:logout")
+        DebugLog("Dropped Character Source", src)
     end)
+end
+
+function CharacterAPI.Logout(src)
+    CharacterAPI.RemoveCharacter(src)
 end
 
 function CharacterAPI.UpdateCharacterPOS(src, x, y, z)
@@ -72,27 +74,32 @@ end
 ----------------------------------
 -- Character RPC Registrations --
 ----------------------------------
-RPCAPI.Register("UpdatePlayerCoords", function (coords, res, player)
+RPCAPI.Register("UpdatePlayerCoords", function(coords, res, player)
     local x, y, z = table.unpack(coords)
     CharacterAPI.UpdateCharacterPOS(player, x, y, z)
     return res(CharacterAPI.GetCharacterBySrc(player))
 end)
 
-RPCAPI.Register("UpdatePlayerLang", function (lang, res, player)
+RPCAPI.Register("UpdatePlayerLang", function(lang, res, player)
     CharacterAPI.UpdateLang(player, lang)
     return res(CharacterAPI.GetCharacterBySrc(player))
 end)
 
-RPCAPI.Register("SyncCharacter", function (_, res, player)
+RPCAPI.Register("SyncCharacter", function(_, res, player)
     return res(CharacterAPI.GetCharacterBySrc(player))
+end)
+
+RPCAPI.Register("LogoutCharacter", function(_, res, player)
+    CharacterAPI.Logout(source)
+
+    return res(true)
 end)
 
 AddEventHandler('playerDropped', function()
     local src = source
     CharacterAPI.RemoveCharacter(src)
-
-    print("Dropped Character Source", src)
 end)
+
 
 ---------------------------------------------------------------------------------------------------
 -- Developer Test Commands (THIS IS TEMPORARY AND WILL NEED TO BE DONE BY THE CHARACTER CREATOR) --
@@ -118,11 +125,14 @@ if Config.DevMode then
         CharacterAPI.InitiateCharacter(source, args[1])
     end)
     TriggerEvent("chat:addSuggestion", "/InitiateCharacter", "Initiate a character", {
-        { name="CharID", help="character ID to spawn" }
+        { name = "CharID", help = "character ID to spawn" }
     })
 
-    RegisterCommand('notifytest', function(source)
-        NotifyAPI.Notify('TESTING', 2000)
-    end)
+    TriggerEvent("chat:addSuggestion", "/InitiateCharacter", "Initiate a character", {
+        { name = "CharID", help = "character ID to spawn" }
+    })
 
+    -- RegisterCommand('notifytest', function(source)
+    --     NotifyAPI.Notify('TESTING This sucker out!', 5000)
+    -- end)
 end

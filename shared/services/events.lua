@@ -64,7 +64,7 @@ local function startGlobalEventListeners(eventgroup)
 							end
 
                             if EventsDevMode[eventmode] == true then
-								PrettyPrint("EVENT TRIGGERED:", EVENTS[eventAtIndex].name, datafields)
+								DebugLog("EVENT TRIGGERED:", EVENTS[eventAtIndex].name, datafields)
 							end
           
 							if EventListeners[eventAtIndex] then

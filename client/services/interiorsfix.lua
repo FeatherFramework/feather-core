@@ -9,7 +9,8 @@ local function ActivateInterior(int, name, list)
             for k, v in ipairs(list) do
                 ActivateInteriorEntitySet(int, v)
             end
-            print(SourceKey, name, " Interior Activated!")
+            
+            DebugLog(SourceKey, name, " Interior Activated!")
         end
     end
 end
@@ -2474,9 +2475,9 @@ function StartInteriorsFix()
                 })
 
                 InteriorsActive = true
-                print(SourceKey, 'Interiors are now active!')
+                DebugLog(SourceKey, 'Interiors are now active!')
             -- else
-            --     print(SourceKey, 'Interiors are confirmed active.')
+            --     DebugLog(SourceKey, 'Interiors are confirmed active.')
             --     break
             -- end
         end

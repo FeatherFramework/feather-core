@@ -4,7 +4,7 @@
 -----------------------------------
 
 function SetupDensities(multipliers)
-	print("Starting pop density")
+	DebugLog("Starting pop density")
     while true do
 		if SetPedDensityMultiplierThisFrame then
 			-- FiveM

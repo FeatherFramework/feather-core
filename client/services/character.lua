@@ -1,5 +1,10 @@
 local PauseOpen = false
 ActiveCharacter = {}
+local ActiveSystems = {
+    spawn = false,
+    menuidle = false,
+    possync = false
+}
 
 local function ClearUIFeed()
     Citizen.InvokeNative(0x6035E8FBCA32AC5E) --UiFeedClearAllChannels
@@ -17,7 +22,19 @@ local function disableRandomLootPrompt()
     Citizen.InvokeNative(0xFC094EF26DD153FA, 2)
 end
 
+local function disableHUD()
+    DisableControlAction(0, 0x580C4473, true)
+    DisableControlAction(0, 0xCF8A4ECA, true)
+end
+
+local function disableUICards()
+    DisableControlAction(0, 0x9CC7A1A4, true) -- Disable special ability when open hud
+    DisableControlAction(0, 0x1F6D95E5, true) -- Disable f4 key that contains HUD
+end
+
 local function setupCharacterMenuIdle()
+    ActiveSystems.menuidle = true
+    
     -- This thread handles menu idle animation
     Citizen.CreateThread(function()
         while true do
@@ -41,6 +58,10 @@ local function setupCharacterMenuIdle()
                 SetCurrentPedWeapon(ped, GetHashKey("weapon_unarmed"))
                 PauseOpen = false
             end
+
+            if ActiveSystems.menuidle == false then
+                break
+            end
         end
     end)
 end
@@ -57,20 +78,32 @@ end
 -- Character Position handling --
 ----------------------------------
 local function startPositionSync()
+    ActiveSystems.possync = true
     Citizen.CreateThread(function()
         while true do
             ActiveCharacter = RPCAPI.CallAsync("UpdatePlayerCoords", GetEntityCoords(PlayerPedId()))
             Wait(Config.PositionSync)
+
+            if ActiveSystems.possync == false then
+                break
+            end
         end
     end)
 end
 
 local function SpawnLoop()
+    ActiveSystems.spawn = true
     Citizen.CreateThread(function()
         while true do
             if Config.DisableRandomLootPrompts then disableRandomLootPrompt() end
 
+            disableHUD()
+            disableUICards()
             preventWeaponSoftlock()
+
+            if ActiveSystems.spawn == false then
+                break
+            end
             Wait(1)
         end
     end)
@@ -79,7 +112,7 @@ end
 ----------------------------------
 -- Character Spawn handling --
 ----------------------------------
-RegisterNetEvent("bcc:character:spawn", function (character)
+RegisterNetEvent("feather:character:spawn", function (character)
     DoScreenFadeOut(2000)
 
     Citizen.InvokeNative(0x1E5B70E53DB661E5, 0, 0, 0, LocalesAPI.translate(0, "loadscreen_title"), LocalesAPI.translate(0, "loadscreen_subtitle"), LocalesAPI.translate(0, "loadscreen_signature"))
@@ -102,6 +135,7 @@ RegisterNetEvent("bcc:character:spawn", function (character)
     SetEntityCoords(player, x, y, z)
 
     Wait(500)
+
     startPositionSync()
 
     if Config.IdleAnimation then setupCharacterMenuIdle() end
@@ -126,5 +160,18 @@ RegisterNetEvent("bcc:character:spawn", function (character)
 
     ActiveCharacter = character
 
-    TriggerServerEvent("bcc:character:spawned", character)
+    TriggerServerEvent("feather:character:spawned", character)
+end)
+
+RegisterCommand('logout', function()
+    RPCAPI.CallAsync("UpdatePlayerCoords", GetEntityCoords(PlayerPedId()))
+    RPCAPI.CallAsync("LogoutCharacter", { })
+    ActiveCharacter = {}
+    ActiveSystems = {
+        spawn = false,
+        menuidle = false,
+        possync = false
+    }
+
+    MapAPI.setFOW(true)
 end)

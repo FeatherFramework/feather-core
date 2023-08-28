@@ -30,14 +30,14 @@ end
 function LocalesAPI.register(key, translation)
     if LocalesAPI.translations[key] == nil then
         LocalesAPI.translations[key] = translation
-        print("Locale (" .. key .. ") registered")
+        DebugLog("Locale (" .. key .. ") registered")
     else
         for tkey, tvalue in pairs(translation) do
             if LocalesAPI.translations[key][tkey] == nil then
                 LocalesAPI.translations[key][tkey] = tvalue
-                print("Locale (" .. key .. ") translation (" .. tkey .. ") registered")
+                DebugLog("Locale (" .. key .. ") translation (" .. tkey .. ") registered")
             else
-                print("Locale (" .. key .. ") translation (" .. tkey .. ") already registered")
+                DebugLog("Locale (" .. key .. ") translation (" .. tkey .. ") already registered")
             end
         end
     end

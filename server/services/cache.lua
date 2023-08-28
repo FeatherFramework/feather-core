@@ -108,7 +108,6 @@ function CacheAPI.UpdateCacheBySrc(type, src, key, update)
             return
         end
 
-
         UserCache[src][key] = update;
     elseif type == 'character' then
         if not CharacterCache[src] then

@@ -42,7 +42,6 @@ function PromptsAPI:SetupPromptGroup(groupId)
         end
 
         if mode == 'timed' then
-            print('timed mode set!')
             Citizen.InvokeNative(0x1473D3AF51D54276, PromptClass.Prompt,
                 CheckVar(options and options.depletiontime, 10000))
         end

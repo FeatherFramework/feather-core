@@ -16,7 +16,7 @@ function InstanceAPI.create(id, tsrc)
     -- Check to see if the player is already in a registered instance.
     for key, value in pairs(GameInstances) do
         if value.characters[src] then
-            print('Migrating user from instance ', key, ' to instance', id)
+            DebugLog('Migrating user from instance ', key, ' to instance', id)
 
             --Remove character from old instance
             GameInstances[key].characters[src] = nil
@@ -81,7 +81,6 @@ function InstanceAPI.leave(id, tsrc)
 end
 
 -- Returns a list of all characters in a given instance
--- TODO: Potentially limit this to seeing the instance you are in. idk
 function InstanceAPI.getInstanceCharacters(id)
     if not GameInstances[id] then
         print("Game instance does not exist")

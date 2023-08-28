@@ -83,3 +83,9 @@ function PrettyPrint(...)
 
     print(table.unpack(args));
 end
+
+function DebugLog(...)
+    if Config.DevMode then
+        PrettyPrint(...)
+    end
+end

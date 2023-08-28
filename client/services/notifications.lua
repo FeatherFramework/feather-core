@@ -1,7 +1,7 @@
 NotifyAPI = {}
 
-RegisterNetEvent("bcc:notify")
-AddEventHandler("bcc:notify", function(type, ...)
+RegisterNetEvent("feather:notify")
+AddEventHandler("feather:notify", function(type, ...)
     NotifyAPI[type](...)
 end)
 

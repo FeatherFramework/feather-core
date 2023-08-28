@@ -1,7 +1,7 @@
 UIState = false
 function ToggleUI()
     if ActiveCharacter == nil or ActiveCharacter == {} then
-        print("No active character fount")
+        print("No active character found")
         return 
     end
 
@@ -13,6 +13,7 @@ function ToggleUI()
         config = {
             xp = Config.XP
         },
+        pvp = PVPAPI.active,
         locale = LocalesAPI.translations
     })
 end
@@ -25,6 +26,11 @@ end)
 
 RegisterNUICallback('updatelocale', function(args, nuicb)
     ActiveCharacter = RPCAPI.CallAsync("UpdatePlayerLang", args.locale, function()end)
+    nuicb('ok')
+end)
+
+RegisterNUICallback('togglepvp', function(args, nuicb)
+    PVPAPI:togglePVP()
     nuicb('ok')
 end)
 

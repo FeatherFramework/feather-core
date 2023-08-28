@@ -44,7 +44,10 @@ function KeyPressAPI:RegisterListener(keycode, cb)
     }
     KeyListenerCount = KeyListenerCount + 1
 
-    print("KeyPressListener Registered", keycode);
+    if Config.DevMode then
+        print("KeyPressListener Registered", keycode);
+    end
+
     return { keycode, postition }
 end
 
