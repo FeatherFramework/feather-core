@@ -8,6 +8,8 @@ Config.DisableRandomLootPrompts = true
 Config.PositionSync = 20000
 
 Config.PVP = true
+Config.UseDeadEye = true
+Config.UseEagleEye = true
 
 Config.UseFogOfWar = false
 

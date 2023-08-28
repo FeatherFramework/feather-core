@@ -1,10 +1,10 @@
 CharacterController = {}
 
-function CharacterController.CreateCharacter(userID, roleID, firstname, lastname, dob, dollars, gold, xp, x, y, z, lang)
+function CharacterController.CreateCharacter(userID, roleID, firstname, lastname, dob, dollars, gold, tokens, xp, x, y, z, lang)
     local timestamp = os.date("%Y-%m-%d %H:%M:%S");
 
     return MySQL.query.await(
-        "INSERT INTO characters (user_id, role_id, first_name, last_name, dob, dollars, gold, xp, x, y, z, lang, created_at, updated_at) VALUES (@userid, @roleid, @firstname, @lastname, @dob, @dollars, @gold, @xp, @x, @y, @z, @lang, @timestamp, @timestamp)",
+        "INSERT INTO characters (user_id, role_id, first_name, last_name, dob, dollars, gold, xp, tokens, x, y, z, lang, created_at, updated_at) VALUES (@userid, @roleid, @firstname, @lastname, @dob, @dollars, @gold, @tokens, @xp, @x, @y, @z, @lang, @timestamp, @timestamp)",
         {
             ['userid'] = userID,
             ['roleid'] = roleID,
@@ -13,6 +13,7 @@ function CharacterController.CreateCharacter(userID, roleID, firstname, lastname
             ['dob'] = dob,
             ['dollars'] = dollars,
             ['gold'] = gold,
+            ['tokens'] = tokens,
             ['xp'] = xp,
             ['x'] = x,
             ['y'] = y,
@@ -46,13 +47,14 @@ function CharacterController.UpdateCharacter(character)
     end
 
     MySQL.query.await(
-        "UPDATE characters SET first_name = @firstname, last_name = @lastname, dob = @dob, dollars = @dollars, gold = @gold, xp = @xp, x = @x, y = @y, z = @z, lang = @lang, updated_at = @timestamp WHERE id = @id",
+        "UPDATE characters SET first_name = @firstname, last_name = @lastname, dob = @dob, dollars = @dollars, gold = @gold, tokens = @tokens, xp = @xp, x = @x, y = @y, z = @z, lang = @lang, updated_at = @timestamp WHERE id = @id",
         {
             ['firstname'] = character.first_name,
             ['lastname'] = character.last_name,
             ['dob'] = character.dob,
             ['dollars'] = character.dollars,
             ['gold'] = character.gold,
+            ['tokens'] = character.tokens,
             ['xp'] = character.xp,
             ['x'] = character.x,
             ['y'] = character.y,

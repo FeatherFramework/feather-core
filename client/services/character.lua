@@ -6,6 +6,22 @@ local ActiveSystems = {
     possync = false
 }
 
+local function GuarmaCheck(player)
+    if Citizen.InvokeNative(0x43AD8FC02B429D33, GetEntityCoords(player), 10) == -512529193 then
+        Citizen.InvokeNative(0xA657EC9DBC6CC900, 1935063277) -- SetMinimapZone
+        Citizen.InvokeNative(0xE8770EE02AEE45C2, 1) -- SetWorldWaterType
+        Citizen.InvokeNative(0x74E2261D2A66849A, true) -- SetGuarmaWorldhorizonActive
+    end
+end
+
+local function SetEagleEye(player, state)
+    Citizen.InvokeNative(0xA63FCAD3A6FEC6D2, player, state)
+end
+
+local function SetDeadEye(player, state)
+    Citizen.InvokeNative(0x95EE1DEE1DCD9070, player, state)
+end
+
 local function ClearUIFeed()
     Citizen.InvokeNative(0x6035E8FBCA32AC5E) --UiFeedClearAllChannels
 end
@@ -34,7 +50,7 @@ end
 
 local function setupCharacterMenuIdle()
     ActiveSystems.menuidle = true
-    
+
     -- This thread handles menu idle animation
     Citizen.CreateThread(function()
         while true do
@@ -112,10 +128,11 @@ end
 ----------------------------------
 -- Character Spawn handling --
 ----------------------------------
-RegisterNetEvent("feather:character:spawn", function (character)
+RegisterNetEvent("feather:character:spawn", function(character)
     DoScreenFadeOut(2000)
 
-    Citizen.InvokeNative(0x1E5B70E53DB661E5, 0, 0, 0, LocalesAPI.translate(0, "loadscreen_title"), LocalesAPI.translate(0, "loadscreen_subtitle"), LocalesAPI.translate(0, "loadscreen_signature"))
+    Citizen.InvokeNative(0x1E5B70E53DB661E5, 0, 0, 0, LocalesAPI.translate(0, "loadscreen_title"),
+        LocalesAPI.translate(0, "loadscreen_subtitle"), LocalesAPI.translate(0, "loadscreen_signature"))
 
     local player = PlayerPedId()
 
@@ -125,16 +142,20 @@ RegisterNetEvent("feather:character:spawn", function (character)
 
     local groundCheck, ground = nil, nil
     for height = 1, 1000 do
-      groundCheck, ground = GetGroundZAndNormalFor_3dCoord(x, y, height + 0.0)
-      if groundCheck then
-        break
-      end
+        groundCheck, ground = GetGroundZAndNormalFor_3dCoord(x, y, height + 0.0)
+        if groundCheck then
+            break
+        end
     end
     z = ground
 
     SetEntityCoords(player, x, y, z)
-
+    SetEntityHeading(player, GetEntityHeading(player))
     Wait(500)
+
+    GuarmaCheck(player)
+    SetEagleEye(player, Config.UseEagleEye)
+    SetDeadEye(player, Config.UseDeadEye)
 
     startPositionSync()
 
@@ -165,7 +186,7 @@ end)
 
 RegisterCommand('logout', function()
     RPCAPI.CallAsync("UpdatePlayerCoords", GetEntityCoords(PlayerPedId()))
-    RPCAPI.CallAsync("LogoutCharacter", { })
+    RPCAPI.CallAsync("LogoutCharacter", {})
     ActiveCharacter = {}
     ActiveSystems = {
         spawn = false,

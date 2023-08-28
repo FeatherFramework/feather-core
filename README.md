@@ -6,8 +6,8 @@
 
 # TODO
 - pvp toggle/ui
+- death/respawn system
 - Make the UI configurable
-- UI Plugins
 - Hide default redm popups
 - Bring loadscreenbcc helper into the core. (add as optional)
 - Job API/Docs

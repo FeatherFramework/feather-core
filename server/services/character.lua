@@ -12,8 +12,8 @@ function CharacterAPI.GetCharacterByID(ID)
     return CacheAPI.GetCacheByID("character", ID)
 end
 
-function CharacterAPI.CreateCharacter(userid, roldid, firstname, lastname, dob, dollars, gold, xp, x, y, z, lang)
-    CharacterController.CreateCharacter(userid, roldid, firstname, lastname, dob, dollars, gold, xp, x, y, z, lang)
+function CharacterAPI.CreateCharacter(userid, roldid, firstname, lastname, dob, dollars, gold, tokens, xp, x, y, z, lang)
+    CharacterController.CreateCharacter(userid, roldid, firstname, lastname, dob, dollars, gold, tokens, xp, x, y, z, lang)
 end
 
 function CharacterAPI.GetAvailableCharactersFromDB(src)
@@ -127,12 +127,4 @@ if Config.DevMode then
     TriggerEvent("chat:addSuggestion", "/InitiateCharacter", "Initiate a character", {
         { name = "CharID", help = "character ID to spawn" }
     })
-
-    TriggerEvent("chat:addSuggestion", "/InitiateCharacter", "Initiate a character", {
-        { name = "CharID", help = "character ID to spawn" }
-    })
-
-    -- RegisterCommand('notifytest', function(source)
-    --     NotifyAPI.Notify('TESTING This sucker out!', 5000)
-    -- end)
 end
