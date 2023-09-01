@@ -13,7 +13,8 @@ function CharacterAPI.GetCharacterByID(ID)
 end
 
 function CharacterAPI.CreateCharacter(userid, roldid, firstname, lastname, dob, dollars, gold, tokens, xp, x, y, z, lang)
-    CharacterController.CreateCharacter(userid, roldid, firstname, lastname, dob, dollars, gold, tokens, xp, x, y, z, lang)
+    CharacterController.CreateCharacter(userid, roldid, firstname, lastname, dob, dollars, gold, tokens, xp, x, y, z,
+        lang)
 end
 
 function CharacterAPI.GetAvailableCharactersFromDB(src)
@@ -48,7 +49,7 @@ function CharacterAPI.RemoveCharacter(src)
     Citizen.CreateThread(function()
         CacheAPI.ReloadDBFromCacheRecord("character", src)
         CacheAPI.RemoveFromCache("character", src)
-        TriggerEvent("feather:character:logout")
+        TriggerEvent("feather:character:logout", src)
         DebugLog("Dropped Character Source", src)
     end)
 end
