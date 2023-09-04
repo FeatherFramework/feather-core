@@ -2479,15 +2479,25 @@ Registers a table of translations
   feather.Locale.translate(0, "loadscreen_title")
 ```
 
+### Github UI Check
+You can have the core check that you have ui/index.html installed properly.
+
+```
+name 'feather-core'
+github_ui_check 'true'
+github_link 'https://github.com/FeatherFramework/feather-core'
+```
+
 ### Github Version Control
 
 You can have feather check if your script is up-to-date by adding the following to your github repo
 
 ```
-name 'bcc-anticheat'
-version '0.0.1'
-github 'https://github.com/BryceCanyonCounty/bcc-anticheat'
-github_type 'release' --OR file
+name 'feather-core'
+version '1.0.0'
+github_version_check 'true'
+github_version_type 'release' --OR file
+github_link 'https://github.com/FeatherFramework/feather-core'
 ```
 
 The script will check what current version of the script is downloaded via the Version defined in the fxmanifest.
@@ -2518,5 +2528,4 @@ _Wrong: `v1.1.0`_
 ```
 
 ### Notifications
-
-TBD NEEDS TESTING
+Docs Coming Soon..

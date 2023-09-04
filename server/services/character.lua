@@ -86,7 +86,7 @@ RPCAPI.Register("UpdatePlayerLang", function(lang, res, player)
     return res(CharacterAPI.GetCharacterBySrc(player))
 end)
 
-RPCAPI.Register("SyncCharacter", function(_, res, player)
+RPCAPI.Register("GetCharacter", function(_, res, player)
     return res(CharacterAPI.GetCharacterBySrc(player))
 end)
 

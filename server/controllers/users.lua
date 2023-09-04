@@ -2,15 +2,14 @@
 UserController = {}
 
 --Returns user data. However, will also check if the userdata exists, if it does not, it will create an accounts.
-function UserController.LoadUser(username, license, timestamp)
+function UserController.LoadUser(username, license)
     -- Check if player exists, if not lets create them a new record.
     local UserRecord = MySQL.query.await("SELECT * FROM users WHERE license = @license", { ['license'] = license })
     
     if not UserRecord or not UserRecord[1] then
         MySQL.query.await(
-        "INSERT INTO users (username, license, created_at, updated_at) VALUES (@username, @license, @timestamp, @timestamp)",
-            { ['username'] = username, ['license'] = license,
-                ['timestamp'] = timestamp })
+        "INSERT INTO users (username, license) VALUES (@username, @license)",
+            { ['username'] = username, ['license'] = license })
 
         UserRecord = MySQL.query.await("SELECT * FROM users WHERE license = @license", { ['license'] = license })
         UserRecord = UserRecord[1]
@@ -27,14 +26,13 @@ function UserController.GetUser(id)
     return user
 end
 
+-- For now there isnt anything to update, but there will be at sompoint.
 function UserController.UpdateUser(currentUser)
-    local timestamp = os.date("%Y-%m-%d %H:%M:%S");
-
-    local updateduser = MySQL.query.await(
-        "UPDATE users SET updated_at = @timestamp WHERE id = @UserID",
-        {
-            ['UserID'] = currentUser.id,
-            ['timestamp'] = timestamp
-        })
-    return updateduser
+    -- local updateduser = MySQL.query.await(
+    --     "UPDATE users SET updated_at = @timestamp WHERE id = @UserID",
+    --     {
+    --         ['UserID'] = currentUser.id,
+    --         ['timestamp'] = timestamp
+    --     })
+    return {}
 end

@@ -1,5 +1,6 @@
 UIState = false
 function ToggleUI()
+    ActiveCharacter = RPCAPI.CallAsync("GetCharacter", {})
     if ActiveCharacter == nil or ActiveCharacter == {} then
         print("No active character found")
         return 
