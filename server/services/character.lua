@@ -41,7 +41,7 @@ function CharacterAPI.InitiateCharacter(src, charid)
         return
     else
         local char = CacheAPI.AddToCache("character", src, charid)
-        TriggerClientEvent("feather:character:spawn", src, char)
+        TriggerClientEvent("Feather:Character:Spawn", src, char)
     end
 end
 
@@ -49,7 +49,7 @@ function CharacterAPI.RemoveCharacter(src)
     Citizen.CreateThread(function()
         CacheAPI.ReloadDBFromCacheRecord("character", src)
         CacheAPI.RemoveFromCache("character", src)
-        TriggerEvent("feather:character:logout", src)
+        TriggerEvent("Feather:Character:Logout", src)
         DebugLog("Dropped Character Source", src)
     end)
 end

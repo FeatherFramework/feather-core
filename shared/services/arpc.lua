@@ -20,12 +20,12 @@ RPCAPI.isWaitingForResourceStart = true
 
 if IsOnServer() then
     -- Server event registry
-    RegisterServerEvent("feather:call")
-    RegisterServerEvent("feather:response")
+    RegisterServerEvent("Feather:Call")
+    RegisterServerEvent("Feather:Response")
 else
     -- Client event registry
-    RegisterNetEvent("feather:call")
-    RegisterNetEvent("feather:response")
+    RegisterNetEvent("Feather:Call")
+    RegisterNetEvent("Feather:Response")
 end
 
 ----------------------
@@ -53,7 +53,7 @@ local function GetResponseFunction(id)
         return function() end
     end
     return function(...)
-        TriggerRemoteEvent("feather:response", source, id, ...)
+        TriggerRemoteEvent("Feather:Response", source, id, ...)
     end
 end
 
@@ -69,7 +69,7 @@ local function CallRemoteProcedures(name, params, callback, source)
         pendingCallbacks[id] = callback
     end
 
-    return TriggerRemoteEvent("feather:call", source, id, name, params)
+    return TriggerRemoteEvent("Feather:Call", source, id, name, params)
 end
 
 
@@ -78,7 +78,7 @@ end
 --------------------
 
 -- Handle the outgoing rpc
-AddEventHandler("feather:call", function(id, name, params)
+AddEventHandler("Feather:Call", function(id, name, params)
     if type(name) ~= "string" then
         print("Name must be a string")
         return
@@ -92,12 +92,12 @@ AddEventHandler("feather:call", function(id, name, params)
 
     local returnValues = { activeProcedure(params, GetResponseFunction(id), source) }
     if #returnValues > 0 and id then
-        TriggerRemoteEvent("feather:response", source, id, table.unpack(returnValues))
+        TriggerRemoteEvent("Feather:Response", source, id, table.unpack(returnValues))
     end
 end)
 
 -- Handle the incomming response from the rpc
-AddEventHandler("feather:response", function(id, ...)
+AddEventHandler("Feather:Response", function(id, ...)
     if not id then
         print("RPC callback ID not found: ", id)
         return

@@ -128,7 +128,7 @@ end
 ----------------------------------
 -- Character Spawn handling --
 ----------------------------------
-RegisterNetEvent("feather:character:spawn", function(character)
+RegisterNetEvent("Feather:Character:Spawn", function(character)
     DoScreenFadeOut(2000)
 
     Citizen.InvokeNative(0x1E5B70E53DB661E5, 0, 0, 0, LocalesAPI.translate(0, "loadscreen_title"),
@@ -181,7 +181,7 @@ RegisterNetEvent("feather:character:spawn", function(character)
 
     ActiveCharacter = character
 
-    TriggerServerEvent("feather:character:spawned", character)
+    TriggerServerEvent("Feather:Character:Spawned", character)
 end)
 
 RegisterCommand('logout', function()

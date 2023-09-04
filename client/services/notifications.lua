@@ -1,7 +1,7 @@
 NotifyAPI = {}
 
-RegisterNetEvent("feather:notify")
-AddEventHandler("feather:notify", function(type, ...)
+RegisterNetEvent("Feather:Notify")
+AddEventHandler("Feather:Notify", function(type, ...)
     NotifyAPI[type](...)
 end)
 
