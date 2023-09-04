@@ -52,7 +52,7 @@ function PromptsAPI:SetupPromptGroup(groupId)
 
         ----------------- Prompt Specific APIs below -----------------
         function PromptClass:TogglePrompt(toggle)
-            PromptSetVisible(self.Prompt, toggle)
+            Citizen.InvokeNative(0x71215ACCFDE075EE, self.Prompt, toggle)
         end
 
         function PromptClass:EnabledPrompt(toggle)
