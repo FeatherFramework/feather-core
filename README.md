@@ -5,12 +5,11 @@
 > Welcome to Feather Core, the beating heart of the Feather Framework; An extraordinary open-source RedM framework designed to bring the ultimate RedM server vision to life.
 
 # TODO
-- pvp toggle/ui
+- Job API/Docs
+- Copy to clipboard API
 - death/respawn system
 - Make the UI configurable
 - Hide default redm popups
-- Bring loadscreenbcc helper into the core. (add as optional)
-- Job API/Docs
 
 ## First time setup
 
