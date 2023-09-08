@@ -1,6 +1,22 @@
 PedAPI = {}
 
 function PedAPI:Create(modelhash, x, y, z, heading, location, safeground, options, outfit, networked, vector4)
+    local hash
+    if type(modelhash) == "string" then
+        hash = joaat(modelhash)
+    else
+        hash = modelhash
+    end
+
+    if not IsModelValid(hash) then
+        return print("Invalid model")
+    end
+
+    RequestModel(hash)
+    while not HasModelLoaded(hash) do
+        Wait(10)
+    end
+
     local PedClass = {}
     if not x and not y and not z and not heading then
         x, y, z, heading = table.unpack(vector4)
@@ -16,28 +32,6 @@ function PedAPI:Create(modelhash, x, y, z, heading, location, safeground, option
         end
         z = ground
     end
-
-    --local hash = GetHashKey(CheckVar(modelhash, "s_m_m_valdeputy_01"))
-    local countToBreak = 100
-
-    if not IsModelInCdimage(modelhash) then
-        return print("Invalid model")
-    end
-
-    while not HasModelLoaded(modelhash) do
-        RequestModel(modelhash)
-        countToBreak = countToBreak - 1
-        if countToBreak == 0 then
-            break
-        end
-        Wait(50)
-    end
-
-    local hash
-    if type(modelhash) == "string" then
-        hash = joaat(modelhash)
-    end
-
 
     if location == nil or location == 'world' then
         if networked == false then
