@@ -39,10 +39,12 @@ Config.XP = {
 -- All commands that the core has access to on startup (not including API registered commands)
 Config.Commands = {
     {
-        command = "hello",
-        suggestion = "This is an awesome command",
+        command = "suicide",
+        suggestion = "Kill yourself",
         callback = function()
-            print("WORLD!")
+            if not IsOnServer() then
+                SetEntityHealth(PlayerPedId(), 0, 0)
+            end
         end
     }
 }

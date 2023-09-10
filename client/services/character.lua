@@ -6,35 +6,10 @@ local ActiveSystems = {
     possync = false
 }
 
-local function GuarmaCheck(player)
-    if Citizen.InvokeNative(0x43AD8FC02B429D33, GetEntityCoords(player), 10) == -512529193 then
-        Citizen.InvokeNative(0xA657EC9DBC6CC900, 1935063277) -- SetMinimapZone
-        Citizen.InvokeNative(0xE8770EE02AEE45C2, 1) -- SetWorldWaterType
-        Citizen.InvokeNative(0x74E2261D2A66849A, true) -- SetGuarmaWorldhorizonActive
-    end
-end
-
-local function SetEagleEye(player, state)
-    Citizen.InvokeNative(0xA63FCAD3A6FEC6D2, player, state)
-end
-
-local function SetDeadEye(player, state)
-    Citizen.InvokeNative(0x95EE1DEE1DCD9070, player, state)
-end
-
-local function ClearUIFeed()
-    Citizen.InvokeNative(0x6035E8FBCA32AC5E) --UiFeedClearAllChannels
-end
-
 local function preventWeaponSoftlock()
     --Disable controller actions within the weapons wheel (This prevents a soft lock)
     DisableControlAction(0, 0x7DA48D2A, true)
     DisableControlAction(0, 0x9CC7A1A4, true)
-    Citizen.InvokeNative(0xFC094EF26DD153FA, 2)
-end
-
-local function disableRandomLootPrompt()
-    -- Disable random loot prompts
     Citizen.InvokeNative(0xFC094EF26DD153FA, 2)
 end
 
@@ -46,6 +21,50 @@ end
 local function disableUICards()
     DisableControlAction(0, 0x9CC7A1A4, true) -- Disable special ability when open hud
     DisableControlAction(0, 0x1F6D95E5, true) -- Disable f4 key that contains HUD
+end
+
+local function RagDollPlayer()
+    local player = PlayerPedId()
+    SetPedToRagdoll(player, 4000, 4000, 0, false, false, false)
+    ResetPedRagdollTimer(player)
+    DisablePedPainAudio(player, true)
+end
+
+local function killPlayer()
+    SetEntityHealth(PlayerPedId(), 0, 0)
+end
+
+local function revivePlayer()
+    exports.spawnmanager.setAutoSpawn(true)
+    DisplayHud(true)
+    DisplayRadar(true)
+
+    AnimpostfxPlay("PlayerWakeUpInterrogation")
+
+    local player = PlayerPedId()
+    ResurrectPed(player)
+
+    SetAttributeCoreValue(player, 0, 100)
+    SetEntityHealth(player, 600, 1)
+    SetAttributeCoreValue(player, 1, 100)
+    RestorePedStamina(player, 1065330373)
+
+    RPCAPI.Call("CharacterDeath", 0)
+end
+
+local function hoursLaterDisplay()
+    DoScreenFadeOut(2000)
+    Wait(2000)
+    AnimpostfxPlay("Title_Gen_FewHoursLater")
+    Wait(3000)
+    DoScreenFadeIn(2000)
+end
+
+-- This respawns a player at the closes hospital.'
+-- TODO: Add location to respawn at.
+local function respawnPlayer()
+    hoursLaterDisplay()
+    revivePlayer()
 end
 
 local function setupCharacterMenuIdle()
@@ -82,12 +101,35 @@ local function setupCharacterMenuIdle()
     end)
 end
 
+
+local function EssentialsLoop()
+    ActiveSystems.spawn = true
+    Citizen.CreateThread(function()
+        while true do
+            if Config.DisableRandomLootPrompts then DisableRandomLootPrompt() end
+
+            disableHUD()
+            disableUICards()
+            preventWeaponSoftlock()
+
+
+
+            if ActiveSystems.spawn == false then
+                break
+            end
+            Wait(1)
+        end
+    end)
+end
+
 --Global as the main.lua uses it during initial startup. (sooner the better for this to start.)
 function StartCharacterEssentials()
     -- Disables award notifications
     EventsAPI:RegisterEventListener("EVENT_CHALLENGE_GOAL_COMPLETE", ClearUIFeed)
     EventsAPI:RegisterEventListener("EVENT_CHALLENGE_REWARD", ClearUIFeed)
     EventsAPI:RegisterEventListener("EVENT_DAILY_CHALLENGE_STREAK_COMPLETED", ClearUIFeed)
+
+    EssentialsLoop()
 end
 
 ----------------------------------
@@ -107,20 +149,43 @@ local function startPositionSync()
     end)
 end
 
-local function SpawnLoop()
-    ActiveSystems.spawn = true
-    Citizen.CreateThread(function()
+local deadInitiated = false
+local function DeadCheck()
+    local DeadPromptGroup = PromptsAPI:SetupPromptGroup()                                                                      --Setup Prompt Group
+    local DeadPrompt = DeadPromptGroup:RegisterPrompt("Hold", Keys.R, 1, 1, true, 'hold',
+        { timedeventhash = "MEDIUM_TIMED_EVENT" })                                                                                 --Register your first prompt
+
+    CreateThread(function()
         while true do
-            if Config.DisableRandomLootPrompts then disableRandomLootPrompt() end
+            Wait(0)
+            local player = PlayerPedId()
 
-            disableHUD()
-            disableUICards()
-            preventWeaponSoftlock()
+            if IsEntityDead(player) then
+                -- Check to run dead initiate (this ensure it only runs one time when dead)
+                if deadInitiated == false then
+                    NetworkSetInSpectatorMode(false, player)
+                    exports.spawnmanager.setAutoSpawn(false)
+                    DisplayHud(false)
+                    DisplayRadar(false)
+                    deadInitiated = true
 
-            if ActiveSystems.spawn == false then
-                break
+                    RPCAPI.Call("CharacterDeath", 1)
+                    -- TODO: Send to server to update DB (then ensure dead is set from db on character initiate)
+                end
+                DeadPromptGroup:ShowGroup("Respawn")
+
+                --TODO: Account for a countdown for when you can respawn
+                if IsEntityAttachedToAnyPed(player) then
+                    -- Player cant respawn as they are being carried
+                    -- TODO: make sure the camera follows.
+                    DeadPrompt:EnabledPrompt(false)
+                else
+                    DeadPrompt:EnabledPrompt(true)
+                    if DeadPrompt:HasCompleted() then
+                        respawnPlayer()
+                    end
+                end
             end
-            Wait(1)
         end
     end)
 end
@@ -158,10 +223,8 @@ RegisterNetEvent("Feather:Character:Spawn", function(character)
     SetDeadEye(player, Config.UseDeadEye)
 
     startPositionSync()
-
-    if Config.IdleAnimation then setupCharacterMenuIdle() end
-    SpawnLoop()
-
+    DeadCheck()
+    
     -- Wait for the client natives and loaders to be ready.
     while true do
         Wait(2000)
@@ -171,8 +234,15 @@ RegisterNetEvent("Feather:Character:Spawn", function(character)
         end
     end
 
+    if Config.IdleAnimation then setupCharacterMenuIdle() end
+
     --Set global fog of war, to to the wording of the config, we inverse the value
     MapAPI.setFOW(not Config.UseFogOfWar)
+
+    Wait(2000)
+    if character.dead == 1 then
+        killPlayer()
+    end
 
     ShutdownLoadingScreen()
     DoScreenFadeIn(2000)

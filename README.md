@@ -6,10 +6,10 @@
 
 # TODO
 - Job API/Docs
-- Copy to clipboard API
-- death/respawn system
+- death/respawn timer
+- death/respawn locations
 - Make the UI configurable
-- Hide default redm popups
+- Copy to clipboard API
 
 ## First time setup
 
@@ -33,7 +33,10 @@ Run our easy-to-use [txadmin recipe](https://github.com/FeatherFramework/feather
   - Notifications
   - Text Rendering
   - Blips
+  - Files
 - Global per player locale
+- Death handling
+- Position Syncing
 
 ## API Documentation and usage
 
@@ -2526,5 +2529,13 @@ _Wrong: `v1.1.0`_
 - My first Update
 ```
 
+
+### Files
+Docs Coming Soon..
+
+
 ### Notifications
+Docs Coming Soon..
+
+### Instancing
 Docs Coming Soon..

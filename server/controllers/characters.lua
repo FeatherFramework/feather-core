@@ -45,7 +45,7 @@ function CharacterController.UpdateCharacter(character)
     --TODO: Make this update dynamic so its not a hard defined list of elelments to update.
 
     MySQL.query.await(
-        "UPDATE characters SET first_name = @firstname, last_name = @lastname, dob = @dob, dollars = @dollars, gold = @gold, tokens = @tokens, xp = @xp, x = @x, y = @y, z = @z, lang = @lang WHERE id = @id",
+        "UPDATE characters SET first_name = @firstname, last_name = @lastname, dob = @dob, dollars = @dollars, gold = @gold, tokens = @tokens, xp = @xp, x = @x, y = @y, z = @z, dead = @dead, lang = @lang WHERE id = @id",
         {
             ['firstname'] = character.first_name,
             ['lastname'] = character.last_name,
@@ -58,7 +58,8 @@ function CharacterController.UpdateCharacter(character)
             ['y'] = character.y,
             ['z'] = character.z,
             ['lang'] = character.lang,
-            ['id'] = character.id
+            ['id'] = character.id,
+            ['dead'] = character.dead
         })
 
     local character = MySQL.query.await(

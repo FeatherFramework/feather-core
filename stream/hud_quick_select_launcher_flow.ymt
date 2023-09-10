@@ -1,0 +1,704 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<rage__fwuiFlowBlock>
+  <ID>hud_quick_select_main</ID>
+  <EntryPoints>
+    <Item>
+      <Target>scene_host.idle</Target>
+      <Interruptible value="true"/>
+      <ID>idle</ID>
+      <Guid>5d6c68b3-f758-4338-938c-2428ad82438c</Guid>
+    </Item>
+  </EntryPoints>
+  <ExitPoints>
+    <Item>
+      <ID>exit</ID>
+      <Guid>3d66638c-0588-491b-9f17-02c94dc0cd36</Guid>
+    </Item>
+  </ExitPoints>
+  <FlowRoot>
+    <ID>resource_load</ID>
+    <State type="rage__StateResourceLoader">
+      <Resources>
+        <Item type="uiFeedbackContextStreamingDependencyResource">
+          <Name>wheel_menu_feedback</Name>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheels/weapon_wheels/single_wield_weapon_wheel</Name>
+          <Template>
+            <Id>single_wield_weapon_wheel</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheels/weapon_wheels/dual_wield_weapon_wheel</Name>
+          <Template>
+            <Id>dual_wield_weapon_wheel</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheels/item_wheel</Name>
+          <Template>
+            <Id>satchel_player_item_wheel</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheels/horse_item_wheel</Name>
+          <Template>
+            <Id>satchel_horse_item_wheel</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheels/fishing_wheel</Name>
+          <Template>
+            <Id>fishing_wheel</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_tab</Name>
+          <Template>
+            <Id>wheel_tab</Id>
+            <PropertyKeys>
+              <Item key="styleBinding">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path/>
+                </Target>
+                <Property/>
+              </Item>
+              <Item key="label">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path/>
+                </Target>
+                <Property>Text</Property>
+              </Item>
+            </PropertyKeys>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/weapon_swap</Name>
+          <Template>
+            <Id>WeaponSwap</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/equipped_brush</Name>
+          <Template>
+            <Id>EquippedBrush</Id>
+            <PropertyKeys>
+              <Item key="rotation">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                </Target>
+                <Property>Rotation</Property>
+              </Item>
+            </PropertyKeys>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/slot_highlight_brush</Name>
+          <Template>
+            <Id>SlotHighlightBrush</Id>
+            <PropertyKeys>
+              <Item key="rotation">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                </Target>
+                <Property>Rotation</Property>
+              </Item>
+            </PropertyKeys>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_slots/slot_cycle_prompt</Name>
+          <Template>
+            <Id>SlotCyclePrompt</Id>
+            <PropertyKeys>
+              <Item key="iconToken">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                </Target>
+                <Property>IconToken</Property>
+              </Item>
+            </PropertyKeys>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_items/wheel_satchel_item</Name>
+          <Template>
+            <Id>WheelSatchelItem</Id>
+            <InsertionPoints>
+              <Item key="PermanentIndicator">
+                <PathType>PATH_LOCAL</PathType>
+              </Item>
+            </InsertionPoints>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_items/wheel_weapon_item</Name>
+          <Template>
+            <Id>WheelWeaponItem</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/item_counters/ammo_counter</Name>
+          <Template>
+            <Id>AmmoCounter</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/item_counters/item_counter</Name>
+          <Template>
+            <Id>ItemCounter</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/permanent_item_indicator</Name>
+          <Template>
+            <Id>PermanentIndicator</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/wheel_central_bg</Name>
+          <Template>
+            <Id>WheelCentralBG</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/wheel_single_item_description</Name>
+          <Template>
+            <Id>WheelSingleItemDescription</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/wheel_dual_item_description</Name>
+          <Template>
+            <Id>WheelDualItemDescription</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/wheel_fishing_item_description</Name>
+          <Template>
+            <Id>WheelFishingItemDescription</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/item_wheel_single_item_description</Name>
+          <Template>
+            <Id>ItemWheelSingleItemDescription</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>radial_menus/slot_item_entry_counter</Name>
+          <Template>
+            <Id>WheelSlotItemEntryCounter</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_slots/slot_bg_8_2</Name>
+          <Template>
+            <Id>radial_slot_bg_8_2</Id>
+            <PropertyKeys>
+              <Item key="style">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                </Target>
+                <Property>Style</Property>
+              </Item>
+            </PropertyKeys>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_slots/slot_bg_8_6</Name>
+          <Template>
+            <Id>radial_slot_bg_8_6</Id>
+            <PropertyKeys>
+              <Item key="style">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                </Target>
+                <Property>Style</Property>
+              </Item>
+            </PropertyKeys>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_slots/slot_mask_6_2</Name>
+          <Template>
+            <Id>radial_slot_mask_6_2</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_slots/slot_mask_6_3</Name>
+          <Template>
+            <Id>radial_slot_mask_6_3</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_slots/slot_mask_6_4</Name>
+          <Template>
+            <Id>radial_slot_mask_6_4</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_slots/slot_mask_6_5</Name>
+          <Template>
+            <Id>radial_slot_mask_6_5</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_slots/slot_mask_6_6</Name>
+          <Template>
+            <Id>radial_slot_mask_6_6</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/weapon_damage_mode_list</Name>
+          <Template>
+            <Id>weapon_damage_mode_list</Id>
+            <PropertyKeys>
+              <Item key="Visible">
+                <Property>Visible</Property>
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path>SP_DamageModeHost</Path>
+                </Target>
+              </Item>
+            </PropertyKeys>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/weapon_damage_mode_indicator</Name>
+          <Template>
+            <Id>weapon_damage_mode_indicator</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/sub_slot_list</Name>
+          <Template>
+            <Id>sub_slot_list</Id>
+            <PropertyKeys>
+              <Item key="Visible">
+                <Property>Visible</Property>
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path>SP_AmmoCapacity</Path>
+                </Target>
+              </Item>
+            </PropertyKeys>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/sub_slot_list_item</Name>
+          <Template>
+            <Id>sub_slot_list_item</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/slot_count_display</Name>
+          <Template>
+            <Id>slot_count_indicator</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/ammo_capacity</Name>
+          <Template>
+            <Id>ammo_capacity</Id>
+            <PropertyKeys>
+              <Item key="Visible">
+                <Property>Visible</Property>
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path>SP_AmmoCapacity</Path>
+                </Target>
+              </Item>
+            </PropertyKeys>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/ammo_percentage</Name>
+          <Template>
+            <Id>ammo_percentage</Id>
+            <PropertyKeys>
+              <Item key="Visible">
+                <Property>Visible</Property>
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path>SP_AmmoPercentage</Path>
+                </Target>
+              </Item>
+            </PropertyKeys>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/weapon_stat_list</Name>
+          <Template>
+            <Id>weapon_stat_list</Id>
+            <PropertyKeys>
+              <Item key="VisibleBinding"/>
+            </PropertyKeys>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/weapon_stat_item</Name>
+          <Template>
+            <Id>wheel_weapon_stat_item</Id>
+            <PropertyKeys>
+              <Item key="label">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path>TXT_Label</Path>
+                </Target>
+                <Property>Text</Property>
+              </Item>
+              <Item key="minimumStatActive">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path>PAN_ProgressBar.MET_StatValueFill</Path>
+                </Target>
+                <Property>Minimum</Property>
+              </Item>
+              <Item key="maximumStatActive">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path>PAN_ProgressBar.MET_StatValueFill</Path>
+                </Target>
+                <Property>Maximum</Property>
+              </Item>
+              <Item key="valueBindingStatActive">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path>PAN_ProgressBar.MET_StatValueFill</Path>
+                </Target>
+              </Item>
+              <Item key="minimumStatCapacity">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path>PAN_ProgressBar.MET_StatCapacityFill</Path>
+                </Target>
+                <Property>Minimum</Property>
+              </Item>
+              <Item key="maximumStatCapacity">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path>PAN_ProgressBar.MET_StatCapacityFill</Path>
+                </Target>
+                <Property>Maximum</Property>
+              </Item>
+              <Item key="valueBindingStatCapacity">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path>PAN_ProgressBar.MET_StatCapacityFill</Path>
+                </Target>
+              </Item>
+            </PropertyKeys>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/weapon_stat_progress_bar</Name>
+          <Template>
+            <Id>weapon_stat_progress_bar</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/horse_info/horse_info</Name>
+          <Template>
+            <Id>horse_info1</Id>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>core/horizontal_divider</Name>
+          <Template>
+            <Id>horse_info_horizontal_divider1</Id>
+          </Template>
+        </Item>
+        <Item type="rage__fwuiValueConversionStreamingDependencyResource">
+          <Name>hud/quick_select/ammo_color_conversion</Name>
+        </Item>
+        <Item type="rage__fwuiValueConversionStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_header_tab_focus</Name>
+        </Item>
+        <Item type="rage__fwuiValueConversionStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_focus</Name>
+        </Item>
+        <Item type="rage__fwuiValueConversionStreamingDependencyResource">
+          <Name>hud/quick_select/sub_slot_icon_conversion</Name>
+        </Item>
+        <Item type="rage__fwuiValueConversionStreamingDependencyResource">
+          <Name>hud/quick_select/release_to_action_conversion</Name>
+        </Item>
+        <Item type="rage__fwuiAnimationStreamingDependencyResource">
+          <Name>hud/quick_select/slot_pulse_loop</Name>
+        </Item>
+        <Item type="rage__fwuiTextureDictionaryDependencyResource">
+          <Name>generic_textures</Name>
+        </Item>
+        <Item type="rage__fwuiTextureDictionaryDependencyResource">
+          <Name>menu_textures</Name>
+        </Item>
+        <Item type="rage__fwuiTextureDictionaryDependencyResource">
+          <Name>hud_quick_select</Name>
+        </Item>
+        <Item type="rage__fwuiTextureDictionaryDependencyResource">
+          <Name>inventory_items</Name>
+        </Item>
+        <Item type="rage__fwuiTextureDictionaryDependencyResource">
+          <Name>multiwheel_weapons</Name>
+        </Item>
+        <Item type="rage__fwuiTextureDictionaryDependencyResource">
+          <Name>hud_radial_menu</Name>
+        </Item>
+        <Item type="rage__fwuiTextureDictionaryDependencyResource">
+          <Name>ammo_types</Name>
+        </Item>
+        <Item type="rage__fwuiTextureDictionaryDependencyResource">
+          <Name>toasts_mp_generic</Name>
+        </Item>
+        <Item type="UIObjectSceneStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_menu_host</Name>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>core/mp_rank_bar1</Name>
+          <Template>
+            <Id>mp_rank_bar1</Id>
+            <PropertyKeys>
+              <Item key="RankText">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path>SP_RankBar.PAN_RankShield.TXT_Rank</Path>
+                </Target>
+              </Item>
+              <Item key="HeaderText">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path>SP_RankBar.SP_TextStack.TXT_Header</Path>
+                </Target>
+              </Item>
+              <Item key="Meter">
+                <Target>
+                  <PathType>PATH_LOCAL</PathType>
+                  <Path>SP_RankBar.SP_TextStack.PAN_ProgressBarContainer.MET_Meter</Path>
+                </Target>
+              </Item>
+            </PropertyKeys>
+          </Template>
+        </Item>
+        <Item type="UITemplateStreamingDependencyResource">
+          <Name>hud/quick_select/wheel_descriptions/scope_mod_indicator</Name>
+          <Template>
+            <Id>scope_mod_indicator</Id>
+          </Template>
+        </Item>
+      </Resources>
+    </State>
+    <LinkMap>
+      <Item key="failed">
+        <Target>exit</Target>
+        <LinkInfo>LINK_TO_EXTERNAL</LinkInfo>
+      </Item>
+    </LinkMap>
+    <Children>
+      <Item>
+        <ID>scene_host</ID>
+        <State type="StateUIObjectStreamedSceneHost">
+          <ParentPath>HUDManager</ParentPath>
+          <HideSceneOnAttachment value="true"/>
+          <GCOnRemove value="true"/>
+          <ResetSceneFocusOnFocusLost value="true"/>
+          <HideSceneOnFocusLost value="true"/>
+          <SceneName>hud/quick_select/wheel_menu_host</SceneName>
+        </State>
+        <LinkMap>
+          <Item key="idle">
+            <Target>idle_unenhance_radar</Target>
+            <LinkType type="rage__fwuiLinkTypeForward"/>
+          </Item>
+          <Item key="enter_flow">
+            <Target>enter_flow</Target>
+            <LinkType type="rage__fwuiLinkTypeForward"/>
+          </Item>
+          <Item key="open_abilities">
+            <Target>abilities_launcher</Target>
+            <LinkType type="rage__fwuiLinkTypeForward"/>
+          </Item>
+          <Item key="put_away_fishing_rod">
+            <Target>put_away_fishing_rod</Target>
+            <LinkType type="rage__fwuiLinkTypeForward"/>
+          </Item>
+        </LinkMap>
+        <Children>
+          <Item>
+            <ID>put_away_fishing_rod</ID>
+            <State type="StateDispatchScriptEvent">
+              <Channel>HUD_QUICK_SELECT</Channel>
+              <Event>
+                <Type>UISCRIPTEVENTTYPE_ITEM_SELECTED</Type>
+                <HashParameter>PUT_AWAY_FISHING_ROD</HashParameter>
+              </Event>
+            </State>
+            <LinkMap>
+              <Item key="idle">
+                <Target>^.idle_unenhance_radar</Target>
+              </Item>
+            </LinkMap>
+            <Guid>3ae274af-100f-464b-8137-3f43836f03c3</Guid>
+          </Item>
+          <Item>
+            <ID>abilities_launcher</ID>
+            <State type="rage__StateAppLauncher">
+              <AppID>abilities</AppID>
+              <EntryPoint>FromWheel</EntryPoint>
+            </State>
+            <LinkMap>
+              <Item key="exit">
+                <Target>^.idle_unenhance_radar</Target>
+              </Item>
+              <Item key="failed">
+                <Target>^.idle_unenhance_radar</Target>
+              </Item>
+              <Item key="idle">
+                <Target>abilities_idle</Target>
+              </Item>
+            </LinkMap>
+            <Children>
+              <Item>
+                <ID>abilities_idle</ID>
+                <State type="StateSetAnimPostFX">
+                  <Enable value="false"/>
+                  <ReverseOnExit value="false"/>
+                  <ReverseOnSuspend value="false"/>
+                  <EffectUser>kSelectionWheel</EffectUser>
+                  <EffectName>WheelHUDIn</EffectName>
+                </State>
+                <LinkMap>
+                  <Item key="exit">
+                    <Target>^.^.^.idle_unenhance_radar</Target>
+                  </Item>
+                </LinkMap>
+                <Guid>f3861861-9f8e-4b09-b781-6eaaaa074d4c</Guid>
+              </Item>
+            </Children>
+            <Guid>76490a21-4aa1-4e3d-afc8-d95e50bffb97</Guid>
+          </Item>
+          <Item>
+            <ID>idle</ID>
+            <State type="StateSetAnimPostFX">
+              <Enable value="false"/>
+              <ReverseOnExit value="false"/>
+              <ReverseOnSuspend value="false"/>
+              <EffectUser>kSelectionWheel</EffectUser>
+              <EffectName>WheelHUDIn</EffectName>
+            </State>
+            <LinkMap>
+              <Item key="next">
+                <Target>set_time_warp</Target>
+              </Item>
+            </LinkMap>
+            <Children>
+              <Item>
+                <ID>set_time_warp</ID>
+                <State type="StateTimeWarp">
+                  <WarpSpeed>TIME_WARP_SPEED_NORMAL</WarpSpeed>
+                </State>
+                <LinkMap>
+                  <Item key="enter_flow">
+                    <Target>^.^.enter_flow</Target>
+                  </Item>
+                </LinkMap>
+                <Guid>96170c85-92cf-4022-9316-ae1ad3b4d22f</Guid>
+              </Item>
+            </Children>
+            <Guid>358f75ac-b2b0-4d6a-a90f-3b33483dee9f</Guid>
+          </Item>
+          <Item>
+            <ID>idle_unenhance_radar</ID>
+            <State type="StateMapEnhanceRadarRequest">
+              <ReverseOnExit value="false"/>
+              <RequestType>POP_REQUEST</RequestType>
+            </State>
+            <LinkMap>
+              <Item key="next">
+                <Target>^.idle</Target>
+              </Item>
+            </LinkMap>
+            <Guid>cf10b8c0-77de-47d5-820a-4cc5f9804b28</Guid>
+          </Item>
+          <Item>
+            <ID>enter_flow</ID>
+            <State type="StateDispatchScriptEvent">
+              <Channel>HUD_QUICK_SELECT</Channel>
+              <Event>
+                <Type>UISCRIPTEVENTTYPE_ITEM_SELECTED</Type>
+                <HashParameter>FLOW_LAUNCHED</HashParameter>
+              </Event>
+            </State>
+            <LinkMap>
+              <Item key="next">
+                <Target>anim_post_fx</Target>
+              </Item>
+            </LinkMap>
+            <Children>
+              <Item>
+                <ID>anim_post_fx</ID>
+                <State type="StateSetAnimPostFX">
+                  <ReverseOnExit value="false"/>
+                  <WaitWhilePendingOnEnter value="true"/>
+                  <EffectUser>kSelectionWheel</EffectUser>
+                  <EffectName>WheelHUDIn</EffectName>
+                </State>
+                <LinkMap>
+                  <Item key="next">
+                    <Target>enhance_radar</Target>
+                  </Item>
+                </LinkMap>
+                <Children>
+                  <Item>
+                    <ID>enhance_radar</ID>
+                    <State type="StateMapEnhanceRadarRequest">
+                      <ReverseOnExit value="false"/>
+                      <RequestType>PUSH_REQUEST</RequestType>
+                    </State>
+                    <LinkMap>
+                      <Item key="next">
+                        <Target>^.network_check</Target>
+                      </Item>
+                    </LinkMap>
+                    <Guid>8a6f156b-a212-4d76-ad92-62be2eaa6bf5</Guid>
+                  </Item>
+                  <Item>
+                    <ID>network_check</ID>
+                    <State type="StateIsNetworkGameInProgress"/>
+                    <LinkMap>
+                      <Item key="yes">
+                        <Target>^.^.^</Target>
+                      </Item>
+                      <Item key="no">
+                        <Target>^.time_warp_slow</Target>
+                      </Item>
+                    </LinkMap>
+                    <Guid>e10db29b-f0f9-45c5-aa07-9bdaa9f5c556</Guid>
+                  </Item>
+                  <Item>
+                    <ID>time_warp_slow</ID>
+                    <State type="StateTimeWarp">
+                      <WarpSpeed>TIME_WARP_SPEED_SLOW</WarpSpeed>
+                    </State>
+                    <LinkMap>
+                      <Item key="next">
+                        <Target>^.^.^</Target>
+                      </Item>
+                    </LinkMap>
+                    <Guid>811456df-99d9-47f3-9ebd-922dad5b13f4</Guid>
+                  </Item>
+                </Children>
+                <Guid>ae3df525-7219-41ee-97d5-6fb5be157d39</Guid>
+              </Item>
+            </Children>
+            <Guid>6877110b-23ab-46fd-822d-0d028fc1b533</Guid>
+          </Item>
+        </Children>
+        <Guid>68e52f47-c076-4fe1-b046-ba079d3a5a4d</Guid>
+      </Item>
+    </Children>
+    <Guid>c26c6728-7013-4df7-af25-379f0cca5582</Guid>
+  </FlowRoot>
+</rage__fwuiFlowBlock>

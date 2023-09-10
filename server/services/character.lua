@@ -92,7 +92,12 @@ end)
 
 RPCAPI.Register("LogoutCharacter", function(_, res, player)
     CharacterAPI.Logout(source)
+    return res(true)
+end)
 
+RPCAPI.Register("CharacterDeath", function(state, res, player)
+    print('Character dead!', state)
+    CharacterAPI.UpdateAttribute(player, 'dead', state)
     return res(true)
 end)
 
@@ -108,7 +113,7 @@ end)
 if Config.DevMode then
     RegisterCommand('CreateTestCharacter', function(source, args)
         local activeuser = CacheAPI.GetCacheBySrc('user', source)
-        CharacterAPI.CreateCharacter(activeuser.id, 1, 'Test', 'Mcgee', '10-10-1941', 0, 0, 0, 0, 0, 0, "en_us")
+        CharacterAPI.CreateCharacter(activeuser.id, 1, 'Test', 'Mcgee', '10-10-1941', 0, 0, 0, 0, 0, 0, 0, "en_us")
     end)
 
     RegisterCommand('GetAvailableCharacters', function(source)
@@ -125,7 +130,7 @@ if Config.DevMode then
 
         CharacterAPI.InitiateCharacter(source, args[1])
     end)
-    TriggerEvent("chat:addSuggestion", "/InitiateCharacter", "Initiate a character", {
+    TriggerClientEvent("chat:addSuggestion", "/InitiateCharacter", "Initiate a character", {
         { name = "CharID", help = "character ID to spawn" }
     })
 end
