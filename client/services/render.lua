@@ -39,14 +39,13 @@ end
 
 function RenderAPI:Draw3DText(pos, text, scale, color, font, background)
     scale = CheckVar(scale, 1)
-    color = CheckVar(color, 1)
     font = CheckVar(font, 1)
     background = CheckVar(font, 0)
 
     local onScreen, _x, _y = GetScreenCoordFromWorldCoord(pos.x, pos.y, pos.z)
     local str = CreateVarString(10, "LITERAL_STRING", text)
     if onScreen then
-        SetTextColor(Text.Colors[color][1], Text.Colors[color][2], Text.Colors[color][3], 215)
+        SetTextColor(math.floor(color.r), math.floor(color.g), math.floor(color.b), math.floor(color.a))
         SetTextScale(scale, scale)
         SetTextFontForCurrentCommand(font)
         SetTextCentre(1)

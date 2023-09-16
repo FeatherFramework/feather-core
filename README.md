@@ -2221,7 +2221,7 @@ Draw 3D Text on screen
 | z         | z coord           |
 | text      | text to display   |
 | scale     | scale of the text |
-| color     | Color of the text (1-64) Default: 1 |
+| color     | table of rgba values |
 | font      | font of the text (1-16) Default: 1 |
 | background| background of the text (0-64) Default: 0 |
 
