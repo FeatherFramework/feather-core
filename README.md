@@ -2532,13 +2532,237 @@ _Wrong: `v1.1.0`_
 - My first Update
 ```
 
-
 ### Files
-Docs Coming Soon..
+#### Open
+<Badge type="tip" text="Server Side Only" />
+
+Open a file from a given file path
+|Parameter| Description|
+|--|--|
+| resourcename | the string name of your resource |
+| filepath | the path to the file you with to open or create |
+
+`feather.Files:Open(resourcename, filepath))` 
+  
+Example Usage:
+```lua
 
 
-### Notifications
-Docs Coming Soon..
+
+Citizen.CreateThread(function()
+    local file = feather.Files:Open(GetCurrentResourceName(), 'data.txt')
+end)
+```
+
+#### Read
+<Badge type="tip" text="Server Side Only" />
+
+Read the file that you have openned.
+
+|Parameter| Description|
+|--|--|
+| mode | if nothing, it will default to standard read, mode are 'standard' or 'table'. Table will store a table to the file properly |
+
+`file:Read(mode)` 
+  
+Example Usage:
+```lua
+
+
+
+
+Citizen.CreateThread(function()
+    local file = feather.Files:Open(GetCurrentResourceName(), 'data.txt')
+    local filedata = file:Read()
+end)
+```
+
+#### Save
+<Badge type="tip" text="Server Side Only" />
+
+Save data to the file that you have opened.
+
+|Parameter| Description|
+|--|--|
+| content | The data you with to save to the file |
+| mode | if nothing, it will default to standard save, modes are 'standard' or 'table'. Table will store a table to the file properly |
+
+`file:Save(content, mode)` 
+  
+Example Usage:
+```lua
+
+
+
+
+Citizen.CreateThread(function()
+    local file = feather.Files:Open(GetCurrentResourceName(), 'data.txt')
+    local filedata = file:Read()
+
+    local data = "Some Awesome stuff!"
+
+    file:Save(data)
+end)
+```
+
+#### Update
+<Badge type="tip" text="Server Side Only" />
+
+Instead of needing to open and save a file, you can update data directly to the file.
+
+|Parameter| Description|
+|--|--|
+| content | The data you with to save to the file |
+| mode | if nothing, it will default to standard save, modes are 'standard' or 'table'. Table will store a table to the file properly |
+
+`file:Update(content, mode)` 
+  
+Example Usage:
+```lua
+
+
+
+
+Citizen.CreateThread(function()
+    local file = feather.Files:Open(GetCurrentResourceName(), 'data.txt')
+    file:Update("Some Awesome stuff!")
+end)
+```
+
+#### Lazy Functions
+<Badge type="tip" text="Server Side Only" />
+
+There is a way to use these functions without needing to call the Open() function, this can be used for quick usage or prototyping, but is non-optimal and slower than the above. 
+
+##### Load File
+<Badge type="tip" text="Server Side Only" />
+
+Read the file that you have openned.
+
+|Parameter| Description|
+|--|--|
+| resourcename | Name of the resource |
+| filepath | path to the file you with to load |
+| mode | if nothing, it will default to standard read, mode are 'standard' or 'table'. Table will store a table to the file properly |
+
+`feather.Files:Load(resourcename, filepath, mode)` 
+  
+Example Usage:
+```lua
+
+
+
+-- Lazy functions, not as optimized
+Citizen.CreateThread(function()
+    local file = feather.Files:Load(GetCurrentResourceName(), 'data.txt')
+end)
+```
+
+##### Save File
+<Badge type="tip" text="Server Side Only" />
+
+Save the file that you have openned.
+
+|Parameter| Description|
+|--|--|
+| resourcename | Name of the resource |
+| filepath | path to the file you with to load |
+| content | data to save to the file |
+| mode | if nothing, it will default to standard read, mode are 'standard' or 'table'. Table will store a table to the file properly |
+
+`feather.Files:Load(resourcename, filepath, mode)` 
+  
+Example Usage:
+```lua
+
+
+
+-- Lazy functions, not as optimized
+Citizen.CreateThread(function()
+    feather.Files:Save(GetCurrentResourceName(), 'data.txt', "Some cool stuff!")
+end)
+```
+
+##### Update File
+<Badge type="tip" text="Server Side Only" />
+
+Update the file that you have openned.
+
+|Parameter| Description|
+|--|--|
+| resourcename | Name of the resource |
+| filepath | path to the file you with to load |
+| content | data to update to the file |
+| mode | if nothing, it will default to standard read, mode are 'standard' or 'table'. Table will store a table to the file properly |
+
+`feather.Files:Update(resourcename, filepath, content, mode)` 
+  
+Example Usage:
+```lua
+
+
+
+-- Lazy functions, not as optimized
+Citizen.CreateThread(function()
+    feather.Files:Update(GetCurrentResourceName(), 'data.txt', "Some cool stuff!")
+end)
+```
 
 ### Instancing
+#### Create Instance
+Create a player instance
+
+|Parameter| Description|
+|--|--|
+| id | The id of the instance (usually an integer) |
+| tsrc | The player source, if nil, it will use the source enacting the instance |
+
+`feather.Instance.create(id, playersource)`
+
+Example Usage:
+
+```lua
+feather.Instance.create(id)
+
+-- OR
+
+feather.Instance.create(id, source)
+```
+
+#### Leave Instance
+Leave a player instance
+
+|Parameter| Description|
+|--|--|
+| id | The id of the instance (usually an integer) |
+| tsrc | The player source, if nil, it will use the source enacting the instance |
+
+`feather.Instance.Leave(id, playersource)`
+
+Example Usage:
+
+```lua
+feather.Instance.Leave(id)
+
+-- OR
+
+feather.Instance.Leave(id, source)
+```
+
+#### Get players in instance
+get all players in an instance
+
+|Parameter| Description|
+|--|--|
+| id | The id of the instance (usually an integer) |
+
+`feather.Instance.getInstanceCharacters(id)`
+
+Example Usage:
+
+```lua
+feather.Instance.getInstanceCharacters(id)
+```
+
+### Notifications
 Docs Coming Soon..
