@@ -2184,7 +2184,7 @@ Draw a Text on screen
 | Parameter | Description                                                 |
 | --------- | ----------------------------------------------------------- |
 | pos       | table containing x and y coords of text position (0-1, 0-1) |
-| text      | table containing x y and z coords                           |
+| text      | the text to display                          |
 | color     | table of rgba values                                        |
 | scale     | scale of the text                                           |
 | shadow    | if shadow is enabled (true/false)                           |
@@ -2221,8 +2221,11 @@ Draw 3D Text on screen
 | z         | z coord           |
 | text      | text to display   |
 | scale     | scale of the text |
+| color     | Color of the text (1-64) Default: 1 |
+| font      | font of the text (1-16) Default: 1 |
+| background| background of the text (0-64) Default: 0 |
 
-`feather.Render:Draw3DText(x, y, z, text, scale)`
+`feather.Render:Draw3DText(pos, text, scale, color, font, background)`
 
 Example Usage:
 
@@ -2232,7 +2235,7 @@ Citizen.CreateThread(function()
     while  true  do
         Citizen.Wait(0)
         local playerCoords = GetEntityCoords(PlayerPedId())
-        Feather.Render.Draw3DText(playerCoords.x, playerCoords.y, playerCoords.z, 'This will show at the coords', 0.2)
+        Feather.Render.Draw3DText(vector3(x, y, z), 'This will show at the coords', 0.2)
     end
 end)
 
