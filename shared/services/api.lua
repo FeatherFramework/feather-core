@@ -5,7 +5,8 @@ function SetupSharedAPI(SharedApi)
     SharedApi.Keys = Keys
     SharedApi.RPC = RPCAPI
     SharedApi.Command = CommandAPI
-    -- SharedApi.Locale = LocalesAPI
+    SharedApi.Misc = MiscAPI
+    SharedApi.Locale = LocalesAPI
 
     return SharedApi
 end
