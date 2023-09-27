@@ -1,6 +1,6 @@
 # **THIS IS A WORK IN PROGRESS AND NOT READY FOR PRODUCTION USE YET!**
 
-# Feather Core
+# Feather Core (Alpha)
 
 > Welcome to Feather Core, the beating heart of the Feather Framework; An extraordinary open-source RedM framework designed to bring the ultimate RedM server vision to life.
 
@@ -29,12 +29,14 @@ Follow our easy [Guide](https://featherframework.net/guide)
   - Files
 - Global per player locale
 - Death handling
+  - Death Camera
+  - Death Timer
 - Position Syncing
 
 # TODO
-- Job API/Docs
-- death/respawn timer
 - death/respawn locations
+- Job API/Docs
+- Add/Remove Money/Tokens/XP
 - Make the UI configurable
 
 ## API Documentation and usage

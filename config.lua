@@ -5,13 +5,19 @@ Config.DevMode = true
 Config.IdleAnimation = true
 Config.DisableRandomLootPrompts = true
 
-Config.PositionSync = 20000
+Config.PositionSync = 20000 --ms
 
 Config.PVP = true
 Config.UseDeadEye = true
 Config.UseEagleEye = true
-
 Config.UseFogOfWar = false
+
+Config.Character = {
+    death = {
+        timer = 60, --seconds
+        cameraRotation = true
+    }
+}
 
 --Scale is 0.0-1.0
 Config.DensityMultipliers = {

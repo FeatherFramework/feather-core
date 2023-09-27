@@ -1,6 +1,6 @@
 ------- File Information --------
 -- Redm RPC
--- OG Script: https://github.com/egerdnc/redm-rpc
+-- Inspired by: https://github.com/egerdnc/redm-rpc
 -----------------------------------
 
 --  Track all queued callbacks
