@@ -31,13 +31,14 @@ Follow our easy [Guide](https://featherframework.net/guide)
 - Death handling
   - Death Camera
   - Death Timer
+  - Hospital Spawner
 - Position Syncing
 
 # TODO
-- death/respawn locations
 - Job API/Docs
 - Add/Remove Money/Tokens/XP
 - Make the UI configurable
+- Optimization pass
 
 ## API Documentation and usage
 [https://featherframework.net/api](https://featherframework.net/)

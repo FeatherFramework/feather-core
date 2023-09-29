@@ -54,3 +54,21 @@ Config.Commands = {
         end
     }
 }
+
+Config.RespawnLocations = {
+    {
+        name = "Valentine Medical",
+        coords = vector3(-288.882172, 811.387634, 119.385941),
+        heading = 236.87
+    },
+    {
+        name = "St. Denis Medical",
+        coords = vector3(2732.895752, -1231.804321, 50.370411),
+        heading = 69.18
+    },
+    {
+        name = "Strawberry Medical",
+        coords = vector3(-1803.796997, -430.861938, 158.830292),
+        heading = 72.78
+    }
+}

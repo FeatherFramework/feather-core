@@ -58,9 +58,40 @@ local function revivePlayer()
     TriggerServerEvent('Feather:Character:Revived')
 end
 
+local function teleportToClosestMedical()
+    local closestIndex = 1
+    local closestDistance = 99999999999999
+    local player = PlayerPedId()
+    local pcoords = GetEntityCoords(player)
+    for index, location in ipairs(Config.RespawnLocations) do
+        local distance = #(location.coords - pcoords)
+        if distance < closestDistance then
+            closestIndex = index
+            closestDistance = distance
+        end
+    end
+
+    local hospital = Config.RespawnLocations[closestIndex]
+    local x, y, z = table.unpack(hospital.coords)
+    local groundCheck, ground = nil, nil
+    for height = 1, 1000 do
+        groundCheck, ground = GetGroundZAndNormalFor_3dCoord(x, y, height + 0.0)
+        if groundCheck then
+            PrettyPrint("Ground found!", ground)
+            break
+        end
+    end
+
+    if ground > 0.0 then
+        z = ground
+    end
+    
+    SetEntityCoords(player, x, y, z)
+    SetEntityHeading(player, hospital.heading)
+    Citizen.InvokeNative(0x9587913B9E772D29, player, 0)
+end
+
 local function hoursLaterDisplay()
-    DoScreenFadeOut(2000)
-    Wait(2000)
     AnimpostfxPlay("Title_Gen_FewHoursLater")
     Wait(3000)
     DoScreenFadeIn(2000)
@@ -69,6 +100,9 @@ end
 -- This respawns a player at the closes hospital.'
 -- TODO: Add location to respawn at.
 local function respawnPlayer()
+    DoScreenFadeOut(2000)
+    Wait(2000)
+    teleportToClosestMedical()
     hoursLaterDisplay()
     revivePlayer()
 end
@@ -213,6 +247,7 @@ local function DeadCheck()
                     else
                         deadPrompt:EnabledPrompt(true)
                         if deadPrompt:HasCompleted() then
+                            deadInitiated = false
                             respawnPlayer()
                         end
                     end
