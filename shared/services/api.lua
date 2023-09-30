@@ -7,6 +7,7 @@ function SetupSharedAPI(SharedApi)
     SharedApi.Command = CommandAPI
     SharedApi.Misc = MiscAPI
     SharedApi.Locale = LocalesAPI
+    SharedApi.Math = MathAPI
 
     return SharedApi
 end

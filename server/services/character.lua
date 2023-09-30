@@ -72,6 +72,20 @@ function CharacterAPI.UpdateAttribute(src, key, val)
     CacheAPI.UpdateCacheBySrc('character', src, key, val)
 end
 
+-- Add dollars, tokens, gold, xp from character
+function CharacterAPI.Add(src, type, amount)
+    local activeCharacter = CacheAPI.GetCacheBySrc('character', src)
+    local total = activeCharacter[type] + amount
+    CacheAPI.UpdateCacheBySrc('character', src, type, total)
+end
+
+-- Subtract dollars, tokens, gold, xp from character
+function CharacterAPI.Subtract(src, type, amount)
+    local activeCharacter = CacheAPI.GetCacheBySrc('character', src)
+    local total = activeCharacter[type] - amount
+    CacheAPI.UpdateCacheBySrc('character', src, type, total)
+end
+
 ----------------------------------
 -- Character RPC Registrations --
 ----------------------------------

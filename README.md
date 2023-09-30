@@ -36,7 +36,7 @@ Follow our easy [Guide](https://featherframework.net/guide)
 
 # TODO
 - Job API/Docs
-- Add/Remove Money/Tokens/XP
+- Logout functionality + character script. (currently logout does not take you to character select)
 - Make the UI configurable
 - Optimization pass
 
