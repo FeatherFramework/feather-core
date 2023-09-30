@@ -73,17 +73,17 @@ function CharacterAPI.UpdateAttribute(src, key, val)
 end
 
 -- Add dollars, tokens, gold, xp from character
-function CharacterAPI.Add(src, type, amount)
+function CharacterAPI.Add(src, key, amount)
     local activeCharacter = CacheAPI.GetCacheBySrc('character', src)
-    local total = activeCharacter[type] + amount
-    CacheAPI.UpdateCacheBySrc('character', src, type, total)
+    local total = activeCharacter[key] + amount
+    CacheAPI.UpdateCacheBySrc('character', src, key, total)
 end
 
 -- Subtract dollars, tokens, gold, xp from character
-function CharacterAPI.Subtract(src, type, amount)
+function CharacterAPI.Subtract(src, key, amount)
     local activeCharacter = CacheAPI.GetCacheBySrc('character', src)
-    local total = activeCharacter[type] - amount
-    CacheAPI.UpdateCacheBySrc('character', src, type, total)
+    local total = activeCharacter[key] - amount
+    CacheAPI.UpdateCacheBySrc('character', src, key, total)
 end
 
 ----------------------------------
