@@ -6,7 +6,7 @@ lua54 "yes"
 description 'The Core service for the Feather Framework'
 author 'BCC Scripts'
 name 'feather-core'
-version '1.0.0'
+version '0.1.0'
 
 github_version_check 'true'
 github_version_type 'release'

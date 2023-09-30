@@ -1,6 +1,6 @@
 {
   "name": "ui",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "serve": "NODE_ENV=development yarn run shim && vue-cli-service serve",
