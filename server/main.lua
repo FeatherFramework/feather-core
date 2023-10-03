@@ -7,8 +7,7 @@ function RunCore()
 end
 
 if GetCurrentResourceName() ~= "feather-core" then
-    print("ERROR, resource must be named feather-core otherwise Feather Core will not work properly")
-    print("Feather Core failed to load.")
+    error("ERROR feather-core failed to load, resource must be named feather-core otherwise Feather Core will not work properly")
 else
     RunCore()
 end
