@@ -77,7 +77,6 @@ local function teleportToClosestMedical()
     for height = 1, 1000 do
         groundCheck, ground = GetGroundZAndNormalFor_3dCoord(x, y, height + 0.0)
         if groundCheck then
-            PrettyPrint("Ground found!", ground)
             break
         end
     end
@@ -321,7 +320,7 @@ RegisterNetEvent("Feather:Character:Spawn", function(character)
     NotifyAPI.ToolTip(LocalesAPI.translate(0, "spawn_welcome"), 5000)
 
     ActiveCharacter = character
-
+    DisplayRadar(true)
     TriggerServerEvent("Feather:Character:Spawned", character)
 end)
 
