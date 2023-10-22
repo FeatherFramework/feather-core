@@ -39,6 +39,7 @@ Follow our easy [Guide](https://featherframework.net/guide)
 - Logout functionality + character script. (currently logout does not take you to character select)
 - Make the UI configurable
 - Optimization pass
+- Migrate user/character ID's to UUID
 
 ## API Documentation and usage
 [https://featherframework.net/api](https://featherframework.net/)
