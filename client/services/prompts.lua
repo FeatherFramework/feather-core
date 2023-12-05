@@ -11,6 +11,7 @@ function PromptsAPI:SetupPromptGroup(groupId)
             CreateVarString(10, 'LITERAL_STRING', CheckVar(text, 'Prompt Info')))
     end
 
+    -- TODO: Make a distance check and only show the closest registered prompt (Ideally this should DRASTICALLY help reduce resource consumption)
     function GroupsClass:RegisterPrompt(title, button, enabled, visible, pulsing, mode, options)
         ----------------- Setup Prompt class and add attributes to prompt-----------------
         local PromptClass = {}

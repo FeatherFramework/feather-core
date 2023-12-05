@@ -10,6 +10,8 @@ function StartAPI()
     CoreClientApi.Prompt = PromptsAPI
     CoreClientApi.Render = RenderAPI
     CoreClientApi.Wagon = WagonsAPI
+    CoreClientApi.Keys = KeyPressAPI
+    CoreClientApi.Clip = ClipAPI
 
     CoreClientApi = SetupSharedAPI(CoreClientApi)
 

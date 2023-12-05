@@ -78,7 +78,11 @@ function PrettyPrint(...)
     local args = { ... }
 
     for i, v in ipairs(args) do
-        args[i] = StringChain(v, TableToString, SetColors)
+        if IsOnServer() then
+            args[i] = StringChain(v, TableToString, SetColors)
+        else
+            args[i] = StringChain(v, TableToString)
+        end
     end
 
     print(table.unpack(args));

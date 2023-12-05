@@ -1,7 +1,7 @@
 NotifyAPI = {}
 
-RegisterNetEvent("feather:notify")
-AddEventHandler("feather:notify", function(type, ...)
+RegisterNetEvent("Feather:Notify")
+AddEventHandler("Feather:Notify", function(type, ...)
     NotifyAPI[type](...)
 end)
 
@@ -135,7 +135,7 @@ function NotifyAPI.CenterNotify(text, duration, color)
 
     local maincontent = DataView.ArrayBuffer(8 * 4)
     maincontent:SetInt64(8 * 1, DataView.BigInt(vartext))
-    maincontent:SetInt64(8 * 2, DataView.BigInt(GetHashKey(color or "COLOR_PURE_WHITE"))) --TODO: Check if this can be used in all the basic notifies, if so add color
+    maincontent:SetInt64(8 * 2, DataView.BigInt(GetHashKey(color or "COLOR_PURE_WHITE")))
     Citizen.InvokeNative(0x893128CDB4B81FBB, optionscontent:Buffer(), maincontent:Buffer(), 1)
 end
 

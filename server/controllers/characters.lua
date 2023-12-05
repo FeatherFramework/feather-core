@@ -1,10 +1,8 @@
 CharacterController = {}
 
 function CharacterController.CreateCharacter(userID, roleID, firstname, lastname, dob, dollars, gold, tokens, xp, x, y, z, lang)
-    local timestamp = os.date("%Y-%m-%d %H:%M:%S");
-
     return MySQL.query.await(
-        "INSERT INTO characters (user_id, role_id, first_name, last_name, dob, dollars, gold, xp, tokens, x, y, z, lang, created_at, updated_at) VALUES (@userid, @roleid, @firstname, @lastname, @dob, @dollars, @gold, @tokens, @xp, @x, @y, @z, @lang, @timestamp, @timestamp)",
+        "INSERT INTO characters (user_id, role_id, first_name, last_name, dob, dollars, gold, xp, tokens, x, y, z, lang) VALUES (@userid, @roleid, @firstname, @lastname, @dob, @dollars, @gold, @tokens, @xp, @x, @y, @z, @lang)",
         {
             ['userid'] = userID,
             ['roleid'] = roleID,
@@ -18,8 +16,7 @@ function CharacterController.CreateCharacter(userID, roleID, firstname, lastname
             ['x'] = x,
             ['y'] = y,
             ['z'] = z,
-            ['lang'] = lang,
-            ['timestamp'] = timestamp
+            ['lang'] = lang
         })
 end
 
@@ -39,15 +36,16 @@ function CharacterController.GetAvailableCharacters(userID)
 end
 
 function CharacterController.UpdateCharacter(character)
-    local timestamp = os.date("%Y-%m-%d %H:%M:%S");
 
     if not character then
         print("Character not found for db update")
         return
     end
 
+    --TODO: Make this update dynamic so its not a hard defined list of elelments to update.
+
     MySQL.query.await(
-        "UPDATE characters SET first_name = @firstname, last_name = @lastname, dob = @dob, dollars = @dollars, gold = @gold, tokens = @tokens, xp = @xp, x = @x, y = @y, z = @z, lang = @lang, updated_at = @timestamp WHERE id = @id",
+        "UPDATE characters SET first_name = @firstname, last_name = @lastname, dob = @dob, dollars = @dollars, gold = @gold, tokens = @tokens, xp = @xp, x = @x, y = @y, z = @z, dead = @dead, lang = @lang WHERE id = @id",
         {
             ['firstname'] = character.first_name,
             ['lastname'] = character.last_name,
@@ -60,8 +58,8 @@ function CharacterController.UpdateCharacter(character)
             ['y'] = character.y,
             ['z'] = character.z,
             ['lang'] = character.lang,
-            ['timestamp'] = timestamp,
             ['id'] = character.id,
+            ['dead'] = character.dead
         })
 
     local character = MySQL.query.await(

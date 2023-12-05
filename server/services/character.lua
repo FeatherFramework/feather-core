@@ -41,7 +41,7 @@ function CharacterAPI.InitiateCharacter(src, charid)
         return
     else
         local char = CacheAPI.AddToCache("character", src, charid)
-        TriggerClientEvent("feather:character:spawn", src, char)
+        TriggerClientEvent("Feather:Character:Spawn", src, char)
     end
 end
 
@@ -49,7 +49,7 @@ function CharacterAPI.RemoveCharacter(src)
     Citizen.CreateThread(function()
         CacheAPI.ReloadDBFromCacheRecord("character", src)
         CacheAPI.RemoveFromCache("character", src)
-        TriggerEvent("feather:character:logout", src)
+        TriggerEvent("Feather:Character:Logout", src)
         DebugLog("Dropped Character Source", src)
     end)
 end
@@ -72,6 +72,20 @@ function CharacterAPI.UpdateAttribute(src, key, val)
     CacheAPI.UpdateCacheBySrc('character', src, key, val)
 end
 
+-- Add dollars, tokens, gold, xp from character
+function CharacterAPI.Add(src, key, amount)
+    local activeCharacter = CacheAPI.GetCacheBySrc('character', src)
+    local total = activeCharacter[key] + amount
+    CacheAPI.UpdateCacheBySrc('character', src, key, total)
+end
+
+-- Subtract dollars, tokens, gold, xp from character
+function CharacterAPI.Subtract(src, key, amount)
+    local activeCharacter = CacheAPI.GetCacheBySrc('character', src)
+    local total = activeCharacter[key] - amount
+    CacheAPI.UpdateCacheBySrc('character', src, key, total)
+end
+
 ----------------------------------
 -- Character RPC Registrations --
 ----------------------------------
@@ -86,13 +100,18 @@ RPCAPI.Register("UpdatePlayerLang", function(lang, res, player)
     return res(CharacterAPI.GetCharacterBySrc(player))
 end)
 
-RPCAPI.Register("SyncCharacter", function(_, res, player)
+RPCAPI.Register("GetCharacter", function(_, res, player)
     return res(CharacterAPI.GetCharacterBySrc(player))
 end)
 
 RPCAPI.Register("LogoutCharacter", function(_, res, player)
     CharacterAPI.Logout(source)
+    return res(true)
+end)
 
+RPCAPI.Register("CharacterDeath", function(state, res, player)
+    print('Character dead!', state)
+    CharacterAPI.UpdateAttribute(player, 'dead', state)
     return res(true)
 end)
 
@@ -108,7 +127,7 @@ end)
 if Config.DevMode then
     RegisterCommand('CreateTestCharacter', function(source, args)
         local activeuser = CacheAPI.GetCacheBySrc('user', source)
-        CharacterAPI.CreateCharacter(activeuser.id, 1, 'Test', 'Mcgee', '10-10-1941', 0, 0, 0, 0, 0, 0, "en_us")
+        CharacterAPI.CreateCharacter(activeuser.id, 1, 'Test', 'Mcgee', '10-10-1941', 0, 0, 0, 0, 0, 0, 0, "en_us")
     end)
 
     RegisterCommand('GetAvailableCharacters', function(source)
@@ -125,7 +144,7 @@ if Config.DevMode then
 
         CharacterAPI.InitiateCharacter(source, args[1])
     end)
-    TriggerEvent("chat:addSuggestion", "/InitiateCharacter", "Initiate a character", {
+    TriggerClientEvent("chat:addSuggestion", "/InitiateCharacter", "Initiate a character", {
         { name = "CharID", help = "character ID to spawn" }
     })
 end

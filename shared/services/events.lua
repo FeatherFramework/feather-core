@@ -6,8 +6,6 @@ EventsDevMode = {
 	false
 }
 
---TODO: Test this! This might only work client side.
-
 --? These functions are for DataView memory allocation
 local function pullData(event, eventDataStruct) -- Memory address pull
     local datafields = {}
