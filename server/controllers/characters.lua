@@ -61,8 +61,8 @@ function CharacterController.UpdateCharacter(character)
             ['z'] = character.z,
             ['lang'] = character.lang,
             ['id'] = character.id,
-            ['attributes'] = attributes,
-            ['clothing'] = clothing,
+            ['attributes'] = character.attributes,
+            ['clothing'] = character.clothing,
             ['dead'] = character.dead
         })
 
