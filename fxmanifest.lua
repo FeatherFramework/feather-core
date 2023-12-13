@@ -6,7 +6,7 @@ lua54 "yes"
 description 'The Core service for the Feather Framework'
 author 'BCC Scripts'
 name 'feather-core'
-version '0.1.0'
+version '1.0.0'
 
 github_version_check 'true'
 github_version_type 'release'
@@ -39,11 +39,11 @@ client_scripts {
 }
 
 ui_page {
-    "ui/shim.html"
+    "ui/index.html"
 }
 
 files {
-    "ui/shim.html",
+    "ui/index.html",
     "ui/js/*.*",
     "ui/css/*.*",
     "ui/fonts/*.*",

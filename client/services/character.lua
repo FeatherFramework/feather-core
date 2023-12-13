@@ -49,48 +49,12 @@ local function revivePlayer()
     SetAttributeCoreValue(player, 1, 100)
     RestorePedStamina(player, 1065330373)
 
-    if Config.Character.death.cameraRotation == true then
-        EndDeathCam()
-    end
-
     RPCAPI.Call("CharacterDeath", 0)
-
-    TriggerServerEvent('Feather:Character:Revived')
-end
-
-local function teleportToClosestMedical()
-    local closestIndex = 1
-    local closestDistance = 99999999999999
-    local player = PlayerPedId()
-    local pcoords = GetEntityCoords(player)
-    for index, location in ipairs(Config.RespawnLocations) do
-        local distance = #(location.coords - pcoords)
-        if distance < closestDistance then
-            closestIndex = index
-            closestDistance = distance
-        end
-    end
-
-    local hospital = Config.RespawnLocations[closestIndex]
-    local x, y, z = table.unpack(hospital.coords)
-    local groundCheck, ground = nil, nil
-    for height = 1, 1000 do
-        groundCheck, ground = GetGroundZAndNormalFor_3dCoord(x, y, height + 0.0)
-        if groundCheck then
-            break
-        end
-    end
-
-    if ground > 0.0 then
-        z = ground
-    end
-    
-    SetEntityCoords(player, x, y, z)
-    SetEntityHeading(player, hospital.heading)
-    Citizen.InvokeNative(0x9587913B9E772D29, player, 0)
 end
 
 local function hoursLaterDisplay()
+    DoScreenFadeOut(2000)
+    Wait(2000)
     AnimpostfxPlay("Title_Gen_FewHoursLater")
     Wait(3000)
     DoScreenFadeIn(2000)
@@ -99,9 +63,6 @@ end
 -- This respawns a player at the closes hospital.'
 -- TODO: Add location to respawn at.
 local function respawnPlayer()
-    DoScreenFadeOut(2000)
-    Wait(2000)
-    teleportToClosestMedical()
     hoursLaterDisplay()
     revivePlayer()
 end
@@ -188,25 +149,11 @@ local function startPositionSync()
     end)
 end
 
-local deathTimer = 0
-local function startDeathTimer()
-    Citizen.CreateThread(function()
-        deathTimer = Config.Character.death.timer
-        while deathTimer > 0 do
-            Wait(1000)
-            deathTimer = deathTimer - 1
-        end
-    end)
-end
-
+local deadInitiated = false
 local function DeadCheck()
-    local deadInitiated = false
-    local deadPromptGroup = PromptsAPI:SetupPromptGroup() --Setup Prompt Group
-    local deadPrompt = deadPromptGroup:RegisterPrompt(LocalesAPI.translate(0, "death_prompt"), Keys.R, 1, 1, true, 'hold',
-        { timedeventhash = "MEDIUM_TIMED_EVENT" })        --Register your first prompt
-
-    local deathText = LocalesAPI.translate(0, "death_text")
-    local deathTimerText = LocalesAPI.translate(0, "death_timer")
+    local DeadPromptGroup = PromptsAPI:SetupPromptGroup()                                                                      --Setup Prompt Group
+    local DeadPrompt = DeadPromptGroup:RegisterPrompt("Hold", Keys.R, 1, 1, true, 'hold',
+        { timedeventhash = "MEDIUM_TIMED_EVENT" })                                                                                 --Register your first prompt
 
     CreateThread(function()
         while true do
@@ -214,7 +161,6 @@ local function DeadCheck()
             local player = PlayerPedId()
 
             if IsEntityDead(player) then
-                
                 -- Check to run dead initiate (this ensure it only runs one time when dead)
                 if deadInitiated == false then
                     NetworkSetInSpectatorMode(false, player)
@@ -223,37 +169,21 @@ local function DeadCheck()
                     DisplayRadar(false)
                     deadInitiated = true
 
-                    if Config.Character.death.cameraRotation == true then
-                        StartDeathCam()
-                    end
-
-                    startDeathTimer()
-
                     RPCAPI.Call("CharacterDeath", 1)
+                    -- TODO: Send to server to update DB (then ensure dead is set from db on character initiate)
                 end
+                DeadPromptGroup:ShowGroup("Respawn")
 
-                -- For some reason the prompt is flashing 
-                if deathTimer > 0 then
-                    deadPromptGroup:ShowGroup(tostring(deathTimer) .. " " .. deathTimerText)
-                    deadPrompt:EnabledPrompt(false)
+                --TODO: Account for a countdown for when you can respawn
+                if IsEntityAttachedToAnyPed(player) then
+                    -- Player cant respawn as they are being carried
+                    -- TODO: make sure the camera follows.
+                    DeadPrompt:EnabledPrompt(false)
                 else
-                    deadPromptGroup:ShowGroup(deathText)
-
-                    -- Check if player is being carried
-                    if IsEntityAttachedToAnyPed(player) then
-                        -- TODO: Test this to make sure the camera follows.
-                        deadPrompt:EnabledPrompt(false)
-                    else
-                        deadPrompt:EnabledPrompt(true)
-                        if deadPrompt:HasCompleted() then
-                            deadInitiated = false
-                            respawnPlayer()
-                        end
+                    DeadPrompt:EnabledPrompt(true)
+                    if DeadPrompt:HasCompleted() then
+                        respawnPlayer()
                     end
-                end
-
-                if Config.Character.death.cameraRotation == true then
-                    ProcessCamControls()
                 end
             end
         end
@@ -294,7 +224,7 @@ RegisterNetEvent("Feather:Character:Spawn", function(character)
 
     startPositionSync()
     DeadCheck()
-
+    
     -- Wait for the client natives and loaders to be ready.
     while true do
         Wait(2000)
@@ -320,15 +250,10 @@ RegisterNetEvent("Feather:Character:Spawn", function(character)
     NotifyAPI.ToolTip(LocalesAPI.translate(0, "spawn_welcome"), 5000)
 
     ActiveCharacter = character
-    DisplayRadar(true)
+
     TriggerServerEvent("Feather:Character:Spawned", character)
 end)
 
-RegisterNetEvent("Feather:Character:Revive", function()
-    revivePlayer()
-end)
-
---TODO: Have this re-initiate Character select
 RegisterCommand('logout', function()
     RPCAPI.CallAsync("UpdatePlayerCoords", GetEntityCoords(PlayerPedId()))
     RPCAPI.CallAsync("LogoutCharacter", {})

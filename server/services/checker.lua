@@ -10,11 +10,6 @@ VersionerAPI.checkRelease = function(resourcename, repo)
     PerformHttpRequest('https://api.github.com/repos/' .. repo .. '/releases/latest', function(err, text, headers)
         local response = json.decode(text)
 
-        if err == 403 then
-            print('^3⚠️Version Check limit reached. This should resolve in a few minutes. You are safe to ignore this. ^5[' .. resourcename .. '] ^6(Version ' .. current.version .. ')^0')
-            return
-        end
-
         if response.html_url == nil then
             print('^3⚠️No Release Found! ^5[' .. resourcename .. '] ^6(Version ' .. current.version .. ')^0')
         else
@@ -45,9 +40,8 @@ VersionerAPI.checkRelease = function(resourcename, repo)
                 print('^4CHANGELOG ^0\r\n' .. latest.body)
             end
         end
-    end, 'GET', json.encode({}), {
-        ['Content-Type'] = 'application/json',
-        ['User-Agent'] = 'request'
+    end, 'GET', json.encode(payload), {
+        ['Content-Type'] = 'application/json'
     })
 end
 
@@ -88,7 +82,7 @@ VersionerAPI.checkFile = function(resourcename, repo)
                 local cl = latest.body:gsub("<" .. current.version .. ">.*", "")
                 print('^CHANGELOG ^0\r\n' .. cl)
             end
-        end, 'GET', json.encode({}), {
+        end, 'GET', json.encode(payload), {
         ['Content-Type'] = 'application/json'
     })
 end
