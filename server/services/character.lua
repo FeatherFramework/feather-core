@@ -12,9 +12,9 @@ function CharacterAPI.GetCharacterByID(ID)
     return CacheAPI.GetCacheByID("character", ID)
 end
 
-function CharacterAPI.CreateCharacter(userid, roldid, firstname, lastname, dob, dollars, gold, tokens, xp, x, y, z, lang,clothing)
+function CharacterAPI.CreateCharacter(userid, roldid, firstname, lastname, dob, dollars, gold, tokens, xp, x, y, z, lang,clothing,attributes)
     CharacterController.CreateCharacter(userid, roldid, firstname, lastname, dob, dollars, gold, tokens, xp, x, y, z,
-        lang,clothing)
+        lang,clothing,attributes)
 end
 
 function CharacterAPI.GetAvailableCharactersFromDB(src)
