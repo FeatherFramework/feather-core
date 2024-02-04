@@ -1,8 +1,8 @@
 NotifyAPI = {}
 
 RegisterNetEvent("Feather:Notify")
-AddEventHandler("Feather:Notify", function(type, ...)
-    NotifyAPI[type](...)
+AddEventHandler("Feather:Notify", function(type, options)
+    NotifyAPI[type](table.unpack(options))
 end)
 
 function NotifyAPI.ToolTip(text, duration)
@@ -53,6 +53,7 @@ function NotifyAPI.LocationNotify(text, location, duration)
     Citizen.InvokeNative(0xD05590C1AB38F068, optionscontent:Buffer(), maincontent:Buffer(), 0, 1)
 end
 
+-- TODO: For some reason this is triggering twice when called from server
 function NotifyAPI.RightNotify(text, duration)
     local vartext = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", text, Citizen.ResultAsLong())
 
@@ -139,6 +140,9 @@ function NotifyAPI.CenterNotify(text, duration, color)
     Citizen.InvokeNative(0x893128CDB4B81FBB, optionscontent:Buffer(), maincontent:Buffer(), 1)
 end
 
+
+
+-- TODO: FIX this
 function NotifyAPI.Notify(text, duration)
     local optionscontent = DataView.ArrayBuffer(8 * 3)
     optionscontent:SetInt32(8 * 0, duration)
