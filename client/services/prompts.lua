@@ -9,10 +9,17 @@ function PromptsAPI:SetupPromptGroup(groupId)
     ----------------- ----------------- ----------------- ----------------- ----------
 
     ----------------- PromptGroup Specific APIs below -----------------
-    function GroupsClass:ShowGroup(text)
+    function GroupsClass:ShowGroup(text,option)
+        option = option or {}
+        option.mode = option.mode or nil
+        option.entity = option.entity or false
+        if option.mode == 'ambient' then
+           Citizen.InvokeNative(0x315C81D760609108,option.entity, 1.5, 2, GroupsClass.tabAmount, self.PromptGroup.id, CreateVarString(10, 'LITERAL_STRING', CheckVar(text, 'Prompt Info')), 0)
+        else
         PromptSetActiveGroupThisFrame(
             self.PromptGroup.id,
             CreateVarString(10, 'LITERAL_STRING', CheckVar(text, 'Prompt Info')), GroupsClass.tabAmount, 0)
+        end
     end
 
     function GroupsClass:GetPromptPage() -- returns the tab currently displayed
@@ -75,24 +82,24 @@ function PromptsAPI:SetupPromptGroup(groupId)
 
         ----------------- Prompt Specific APIs below -----------------
         function PromptClass:TogglePrompt(toggle)
-            Citizen.InvokeNative(0x71215ACCFDE075EE, self.Prompt[PromptClass.tabIndex], toggle)
+            Citizen.InvokeNative(0x71215ACCFDE075EE, self.Prompt, toggle)
         end
 
         function PromptClass:EnabledPrompt(toggle)
-            PromptSetEnabled(self.Prompt[PromptClass.tabIndex], toggle)
+            PromptSetEnabled(self.Prompt, toggle)
         end
 
         function PromptClass:DeletePrompt()
-            Citizen.InvokeNative(0x00EDE88D4D13CF59, self.Prompt[PromptClass.tabIndex]) -- UiPromptDelete
+            Citizen.InvokeNative(0x00EDE88D4D13CF59, self.Prompt) -- UiPromptDelete
         end
 
         function PromptClass:HasCompleted(hideoncomplete)
             if self.Mode == 'click' then
-                return Citizen.InvokeNative(0xC92AC953F0A982AE, self.Prompt[PromptClass.tabIndex]) --UiPromptHasStandardModeCompleted
+                return Citizen.InvokeNative(0xC92AC953F0A982AE, self.Prompt) --UiPromptHasStandardModeCompleted
             end
 
             if self.Mode == 'hold' or self.Mode == 'customhold' then
-                local result = Citizen.InvokeNative(0xE0F65F0640EF0617, self.Prompt[PromptClass.tabIndex]) --UiPromptHasHoldModeCompleted
+                local result = Citizen.InvokeNative(0xE0F65F0640EF0617, self.Prompt) --UiPromptHasHoldModeCompleted
 
                 if result then
                     Wait(500) --Prevents the spamming of the result (ensures it only gets triggered 1 time)
@@ -102,7 +109,7 @@ function PromptsAPI:SetupPromptGroup(groupId)
             end
 
             if self.Mode == 'mash' then
-                local result = Citizen.InvokeNative(0x845CE958416DC473, self.Prompt[PromptClass.tabIndex]) --UiPromptHasMashModeCompleted
+                local result = Citizen.InvokeNative(0x845CE958416DC473, self.Prompt) --UiPromptHasMashModeCompleted
                 if result then
                     Wait(500)                                                                              --Prevents the spamming of the result (ensures it only gets triggered 1 time)
                 end
