@@ -38,9 +38,9 @@ end
 --? Global event listener
 local function startGlobalEventListeners(eventgroup)
 	-- Inspired by https://github.com/femga/rdr3_discoveries/tree/master/AI/EVENTS
-	Citizen.CreateThread(function()
+	CreateThread(function()
 		while true do
-			Citizen.Wait(0)
+			Wait(0)
             local eventmode = eventgroup + 1
 			if EventListenerCount > 0 or EventsDevMode[eventmode] == true then
 				local size = GetNumberOfEvents(eventgroup)
@@ -85,7 +85,7 @@ end
 
 --? Register events to be listened for
 function EventsAPI:RegisterEventListener(eventname, cb)
-	local key = GetHashKey(eventname)
+	local key = joaat(eventname)
 	local postition = 1
 	if EventListeners[key] then
 		postition = #EventListeners[key] + 1

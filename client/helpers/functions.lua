@@ -4,3 +4,7 @@ function LoadModel(model)
     Wait(10)
   end
 end
+exports('LoadModel', LoadModel)   
+
+----- exports['feather-core'].LoadModel
+

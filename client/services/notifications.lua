@@ -31,9 +31,9 @@ function NotifyAPI.AdvancedNotify(title, text, dict, icon, duration, color)
     maincontent:SetInt64(8 * 1, DataView.BigInt(vartitle))
     maincontent:SetInt64(8 * 2, DataView.BigInt(vartext))
     maincontent:SetInt32(8 * 3, 0)
-    maincontent:SetInt64(8 * 4, DataView.BigInt(GetHashKey(dict)))
-    maincontent:SetInt64(8 * 5, DataView.BigInt(GetHashKey(icon)))
-    maincontent:SetInt64(8 * 6, DataView.BigInt(GetHashKey(color or "COLOR_WHITE")))
+    maincontent:SetInt64(8 * 4, DataView.BigInt(joaat(dict)))
+    maincontent:SetInt64(8 * 5, DataView.BigInt(joaat(icon)))
+    maincontent:SetInt64(8 * 6, DataView.BigInt(joaat(color or "COLOR_WHITE")))
 
     Citizen.InvokeNative(0x26E87218390E6729, optionscontent:Buffer(), maincontent:Buffer(), 1, 1)
 end
@@ -109,8 +109,8 @@ function NotifyAPI.AdvancedRightNotify(text, dict, icon, color, duration, qualit
     local maincontent = DataView.ArrayBuffer(8 * 10)
     maincontent:SetInt64(8 * 1, DataView.BigInt(vartext))
     maincontent:SetInt64(8 * 2, DataView.BigInt(vardict))
-    maincontent:SetInt64(8 * 3, DataView.BigInt(GetHashKey(icon)))
-    maincontent:SetInt64(8 * 5, DataView.BigInt(GetHashKey(color or "COLOR_WHITE")))
+    maincontent:SetInt64(8 * 3, DataView.BigInt(joaat(icon)))
+    maincontent:SetInt64(8 * 5, DataView.BigInt(joaat(color or "COLOR_WHITE")))
     maincontent:SetInt32(8 * 6, quality or 1)
 
     Citizen.InvokeNative(0xB249EBCB30DD88E0, optionscontent:Buffer(), maincontent:Buffer(), 1)
@@ -136,7 +136,7 @@ function NotifyAPI.CenterNotify(text, duration, color)
 
     local maincontent = DataView.ArrayBuffer(8 * 4)
     maincontent:SetInt64(8 * 1, DataView.BigInt(vartext))
-    maincontent:SetInt64(8 * 2, DataView.BigInt(GetHashKey(color or "COLOR_PURE_WHITE")))
+    maincontent:SetInt64(8 * 2, DataView.BigInt(joaat(color or "COLOR_PURE_WHITE")))
     Citizen.InvokeNative(0x893128CDB4B81FBB, optionscontent:Buffer(), maincontent:Buffer(), 1)
 end
 

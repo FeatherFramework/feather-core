@@ -128,7 +128,7 @@ local function CheckForUIRelease(resource)
 end
 
 function StartVersioner()
-    Citizen.CreateThread(function()
+    CreateThread(function()
         local ResourceCount = GetNumResources()
         for i = 1, ResourceCount - 1, 1 do
             local resource = GetResourceByFindIndex(i)

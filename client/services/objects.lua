@@ -4,7 +4,7 @@ ObjectAPI = {}
 function ObjectAPI:Create(modelhash, x, y, z, heading, networked, method)
     local ObjClass = {}
 
-    local hash = GetHashKey(CheckVar(modelhash, "p_package09"))
+    local hash = joaat(CheckVar(modelhash, "p_package09"))
     while not HasModelLoaded(hash) do
         Wait(10)
         RequestModel(hash)

@@ -1694,11 +1694,11 @@ EVENTS = {
             [0] = { type = "int", data = "iScriptUID" },
         }
     },
-    -- TODO: RUN GetHashKey("EVENT_SHOCKING_ITEM_STOLEN") to get the hash
+    -- TODO: RUN joaat("EVENT_SHOCKING_ITEM_STOLEN") to get the hash
     -- TODO: not sure how to get the id
     -- [toBeFiguredOut] = {
     --     name = "EVENT_SHOCKING_ITEM_STOLEN",
-    --     hash = "RUN GetHashKey("EVENT_SHOCKING_ITEM_STOLEN") to get the hash",
+    --     hash = "RUN joaat("EVENT_SHOCKING_ITEM_STOLEN") to get the hash",
     --     datasize = 3,
     --     group = 0,
     --     dataelements = {

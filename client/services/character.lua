@@ -110,16 +110,16 @@ local function setupCharacterMenuIdle()
     ActiveSystems.menuidle = true
 
     -- This thread handles menu idle animation
-    Citizen.CreateThread(function()
+    CreateThread(function()
         while true do
             Wait(0)
             local ped = PlayerPedId()
 
             if IsPauseMenuActive() and not PauseOpen then
                 SetCurrentPedWeapon(ped, 0xA2719263, true) -- set unarmed
-                SetCurrentPedWeapon(ped, GetHashKey("weapon_unarmed"))
+                SetCurrentPedWeapon(ped, joaat("weapon_unarmed"))
                 if not IsPedOnMount(ped) then
-                    TaskStartScenarioInPlace(PlayerPedId(), GetHashKey("WORLD_HUMAN_SIT_GROUND_READING_BOOK"), -1, true,
+                    TaskStartScenarioInPlace(PlayerPedId(), joaat("WORLD_HUMAN_SIT_GROUND_READING_BOOK"), -1, true,
                         "StartScenario", 0, false)
                 end
                 PauseOpen = true
@@ -129,7 +129,7 @@ local function setupCharacterMenuIdle()
                 ClearPedTasks(ped)
                 Wait(4000)
                 SetCurrentPedWeapon(ped, 0xA2719263, true) -- set unarmed
-                SetCurrentPedWeapon(ped, GetHashKey("weapon_unarmed"))
+                SetCurrentPedWeapon(ped, joaat("weapon_unarmed"))
                 PauseOpen = false
             end
 
@@ -143,7 +143,7 @@ end
 
 local function EssentialsLoop()
     ActiveSystems.spawn = true
-    Citizen.CreateThread(function()
+    CreateThread(function()
         while true do
             if Config.DisableRandomLootPrompts then DisableRandomLootPrompt() end
 
@@ -176,7 +176,7 @@ end
 ----------------------------------
 local function startPositionSync()
     ActiveSystems.possync = true
-    Citizen.CreateThread(function()
+    CreateThread(function()
         while true do
             ActiveCharacter = RPCAPI.CallAsync("UpdatePlayerCoords", GetEntityCoords(PlayerPedId()))
             Wait(Config.PositionSync)
@@ -190,7 +190,7 @@ end
 
 local deathTimer = 0
 local function startDeathTimer()
-    Citizen.CreateThread(function()
+    CreateThread(function()
         deathTimer = Config.Character.death.timer
         while deathTimer > 0 do
             Wait(1000)

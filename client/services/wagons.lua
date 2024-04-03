@@ -35,7 +35,7 @@ function WagonsAPI:Create(modelHash, x, y, z, heading, safeground, networked, ve
     end
   end
 
-  LoadModel(hash)
+  exports['feather-core'].LoadModel(hash)
 
   WagonClass.Wagon = CreateVehicle(hash, x, y, z, heading, networked, false, false, false)
   Citizen.InvokeNative(0x7263332501E07F52, WagonClass.Wagon, true)

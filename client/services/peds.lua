@@ -187,7 +187,7 @@ function PedAPI:Create(modelhash, x, y, z, heading, location, safeground, option
 
     -- https://github.com/femga/rdr3_discoveries/tree/master/AI/COMBAT_STYLES
     function PedClass:SetCombatStyle(combathash, duration)
-        Citizen.InvokeNative(0x8ACC0506743A8A5C, self.Ped, GetHashKey(CheckVar(combathash, 'SituationAllStop')), 1,
+        Citizen.InvokeNative(0x8ACC0506743A8A5C, self.Ped, joaat(CheckVar(combathash, 'SituationAllStop')), 1,
             CheckVar(duration, 240.0))
     end
 
@@ -197,7 +197,7 @@ function PedAPI:Create(modelhash, x, y, z, heading, location, safeground, option
 
     function PedClass:AttackTarget(target, style)
         --styles: GUARD, COMBAT_ANIMAL, LAW, LAW_SHERIFF
-        Citizen.InvokeNative(0xBD75500141E4725C, self.Ped, GetHashKey(CheckVar(style, 'LAW')))     -- SetPedCombatAttributeHash
+        Citizen.InvokeNative(0xBD75500141E4725C, self.Ped, joaat(CheckVar(style, 'LAW')))     -- SetPedCombatAttributeHash
         Citizen.InvokeNative(0xF166E48407BAC484, self.Ped, CheckVar(target, PlayerPedId()), 0, 16) -- TaskCombatPed --Atacks target
     end
 

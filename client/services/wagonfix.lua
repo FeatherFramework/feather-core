@@ -4,7 +4,7 @@
 -----------------------------------
 
 function StartWagonFix()
-    Citizen.CreateThread(function()
+    CreateThread(function()
         local vehiclePool = {}
         local wagon = 0
         local driver = 0
@@ -32,7 +32,7 @@ function StartWagonFix()
                     end
                 end
             end
-            Citizen.Wait(1000)
+            Wait(1000)
         end
     end)
 end

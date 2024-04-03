@@ -2,7 +2,7 @@
 PVPAPI = {}
 PVPAPI.active = Config.PVP
 PVPAPI.pause = Config.pause
-PVPAPI.playerhash = GetHashKey("PLAYER")
+PVPAPI.playerhash = joaat("PLAYER")
 
 function PVPAPI:updatePVPRelationship()
     NetworkSetFriendlyFireOption(self.active)
@@ -28,7 +28,7 @@ CreateThread(function()
         --On press of E (getting onto horse)
         if IsControlPressed(0, 0xCEFD9220) then
             PVPAPI:setPause(true)
-            Citizen.Wait(4000)
+            Wait(4000)
         end
 
         local playerPed = PlayerPedId()
