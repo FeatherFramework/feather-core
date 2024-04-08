@@ -2,7 +2,7 @@ CharacterController = {}
 
 function CharacterController.CreateCharacter(userID, roleID, firstname, lastname, model, dob, img, dollars, gold, tokens, xp, x, y, z, lang, clothing, attributes, desc)
     return MySQL.query.await(
-        "INSERT INTO characters (user_id, role_id, first_name, last_name,model, dob, img, dollars, gold, tokens, xp, x, y, z, lang, clothing, attributes, description, dead) VALUES (@userid, @roleid, @firstname, @lastname, @model, @dob, @img, @dollars, @gold, @tokens, @xp, @x, @y, @z, @lang, @clothing, @attributes, @description, @dead)",
+        "INSERT INTO characters (user_id, role_id, first_name, last_name,model, dob, img, dollars, gold, tokens, xp, x, y, z, lang, description, dead) VALUES (@userid, @roleid, @firstname, @lastname, @model, @dob, @img, @dollars, @gold, @tokens, @xp, @x, @y, @z, @lang, @description, @dead)",
         {
             ['userid'] = userID,
             ['roleid'] = roleID,
@@ -19,8 +19,6 @@ function CharacterController.CreateCharacter(userID, roleID, firstname, lastname
             ['y'] = y,
             ['z'] = z,
             ['lang'] = lang,
-            ['clothing'] = clothing,
-            ['attributes'] = attributes,
             ['description'] = desc,
             ['dead'] = 0
         })
@@ -51,7 +49,7 @@ function CharacterController.UpdateCharacter(character)
     --TODO: Make this update dynamic so its not a hard defined list of elelments to update.
 
     MySQL.query.await(
-        "UPDATE characters SET first_name = @firstname, last_name = @lastname, dob = @dob, dollars = @dollars, gold = @gold, tokens = @tokens, xp = @xp, x = @x, y = @y, z = @z, dead = @dead, clothing = @clothing, attributes = @attributes, lang = @lang WHERE id = @id",
+        "UPDATE characters SET first_name = @firstname, last_name = @lastname, dob = @dob, dollars = @dollars, gold = @gold, tokens = @tokens, xp = @xp, x = @x, y = @y, z = @z, dead = @dead, lang = @lang WHERE id = @id",
         {
             ['firstname'] = character.first_name,
             ['lastname'] = character.last_name,
@@ -65,8 +63,6 @@ function CharacterController.UpdateCharacter(character)
             ['z'] = character.z,
             ['lang'] = character.lang,
             ['id'] = character.id,
-            ['clothing'] = character.clothing,
-            ['attributes'] = character.attributes,
             ['dead'] = character.dead
         })
 
