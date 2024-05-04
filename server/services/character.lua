@@ -12,8 +12,8 @@ function CharacterAPI.GetCharacterByID(ID)
     return CacheAPI.GetCacheByID("character", ID)
 end
 
-function CharacterAPI.CreateCharacter(userid, roldid, firstname, lastname, model, dob,img, dollars, gold, tokens, xp, x, y, z, lang, clothing, attributes, desc)
-    CharacterController.CreateCharacter(userid, roldid, firstname, lastname, model,dob,img, dollars, gold, tokens, xp, x, y, z, lang, clothing, attributes, desc)
+function CharacterAPI.CreateCharacter(userid, roldid, firstname, lastname, model, dob,img, dollars, gold, tokens, xp, x, y, z, lang, desc)
+    CharacterController.CreateCharacter(userid, roldid, firstname, lastname, model, dob, img, dollars, gold, tokens, xp, x, y, z, lang, desc)
 end
 
 function CharacterAPI.GetAvailableCharactersFromDB(src)
@@ -126,7 +126,7 @@ end)
 if Config.DevMode then
     RegisterCommand('CreateTestCharacter', function(source, args)
         local activeuser = CacheAPI.GetCacheBySrc('user', source)
-        CharacterAPI.CreateCharacter(activeuser.id, 1, 'Test', 'Mcgee', '10-10-1941', 0, 0, 0, 0, 0, 0, 0, "en_us")
+        CharacterAPI.CreateCharacter(activeuser.id, 1, 'Test', 'Mcgee', 'somemodel', '10-10-1941', 'someimage', 0, 0, 0, 0, 0, 0, 0, "en_us", '')
     end)
 
     RegisterCommand('GetAvailableCharacters', function(source)

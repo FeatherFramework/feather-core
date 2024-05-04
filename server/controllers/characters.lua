@@ -1,6 +1,6 @@
 CharacterController = {}
 
-function CharacterController.CreateCharacter(userID, roleID, firstname, lastname, model, dob, img, dollars, gold, tokens, xp, x, y, z, lang, clothing, attributes, desc)
+function CharacterController.CreateCharacter(userID, roleID, firstname, lastname, model, dob, img, dollars, gold, tokens, xp, x, y, z, lang, desc)
     return MySQL.query.await(
         "INSERT INTO characters (user_id, role_id, first_name, last_name,model, dob, img, dollars, gold, tokens, xp, x, y, z, lang, description, dead) VALUES (@userid, @roleid, @firstname, @lastname, @model, @dob, @img, @dollars, @gold, @tokens, @xp, @x, @y, @z, @lang, @description, @dead)",
         {
