@@ -12,9 +12,9 @@ function KeyPressAPI.whenKeyJustPressed(key)
 end
 
 function StartKeyListeners()
-    Citizen.CreateThread(function()
+    CreateThread(function()
         while true do
-            Citizen.Wait(4)
+            Wait(4)
             if KeyListenerCount > 0 then
                 for key, _ in pairs(KeyListeners) do
                     local keycode = Keys[key]

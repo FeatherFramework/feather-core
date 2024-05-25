@@ -10,7 +10,7 @@ function MathI:instanced()
 
         while self.usedInts[rando] do
             rando = math.random(1, 2000)
-            Citizen.Wait(1)
+            Wait(1)
         end
 
         return rando

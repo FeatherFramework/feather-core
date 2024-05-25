@@ -2422,9 +2422,9 @@ end
 
 
 function StartInteriorsFix()
-    Citizen.CreateThread(function()
+    CreateThread(function()
         -- while true do -- Will neeed to test if this really needs to be done in a loop
-            Citizen.Wait(5000) --Will need to test if this wait is really needed
+            Wait(5000) --Will need to test if this wait is really needed
 
             if InteriorsActive == false then
                 ActivateInterior(45314, "Emerald Ranch saloon", {

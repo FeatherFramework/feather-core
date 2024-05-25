@@ -11,7 +11,7 @@ if Config.DevMode then
 end
 
 function SetupCache()
-    Citizen.CreateThread(function()
+    CreateThread(function()
         while true do
             CacheAPI.ReloadDBFromCache('user')
             CacheAPI.ReloadDBFromCache('character')

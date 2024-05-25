@@ -7,7 +7,7 @@ local angleY = 0.0
 local angleZ = 0.0
 
 function StartDeathCam()
-    Citizen.CreateThread(function()
+    CreateThread(function()
         ClearFocus()
         local playerPed = PlayerPedId()
         deathcam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", GetEntityCoords(playerPed), 0, 0, 0,
@@ -18,7 +18,7 @@ function StartDeathCam()
 end
 
 function EndDeathCam()
-    Citizen.CreateThread(function()
+    CreateThread(function()
         NetworkSetInSpectatorMode(false, PlayerPedId())
         ClearFocus()
         RenderScriptCams(false, false, 0, true, false)
@@ -28,7 +28,7 @@ function EndDeathCam()
 end
 
 function ProcessCamControls()
-    Citizen.CreateThread(function()
+    CreateThread(function()
         local playerCoords = GetEntityCoords(PlayerPedId())
         local newPos = ProcessNewPosition()
         SetCamCoord(deathcam, newPos.x, newPos.y, newPos.z)

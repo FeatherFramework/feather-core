@@ -24,12 +24,12 @@ function SetupDensities(multipliers)
 		SetRandomVehicleDensityMultiplierThisFrame(multipliers.randomVehicles)
 		SetVehicleDensityMultiplierThisFrame(multipliers.vehicles)
 
-		Citizen.Wait(0)
+		Wait(0)
 	end
 end
 
 function StartPopulationDensity()
-    Citizen.CreateThread(function()
+    CreateThread(function()
 		local multipliers = RPCAPI.CallAsync("popdensity:sync")
 		SetupDensities(multipliers)
     end)
