@@ -16,9 +16,9 @@ AddEventHandler('playerSpawned', function()
     end
 end)
 
-Citizen.CreateThread(function()
+CreateThread(function()
     while true do
-        Citizen.Wait(0)
+        Wait(0)
         if Citizen.InvokeNative(0x580417101DDB492F, 0, 0xD9D0E1C0) or online then
             spacebar = true
             break

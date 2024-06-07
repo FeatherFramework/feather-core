@@ -110,7 +110,7 @@ local function setupCharacterMenuIdle()
     ActiveSystems.menuidle = true
 
     -- This thread handles menu idle animation
-    Citizen.CreateThread(function()
+    CreateThread(function()
         while true do
             Wait(0)
             local ped = PlayerPedId()
@@ -143,7 +143,7 @@ end
 
 local function EssentialsLoop()
     ActiveSystems.spawn = true
-    Citizen.CreateThread(function()
+    CreateThread(function()
         while true do
             if Config.DisableRandomLootPrompts then DisableRandomLootPrompt() end
 
@@ -176,7 +176,7 @@ end
 ----------------------------------
 local function startPositionSync()
     ActiveSystems.possync = true
-    Citizen.CreateThread(function()
+    CreateThread(function()
         while true do
             ActiveCharacter = RPCAPI.CallAsync("UpdatePlayerCoords", GetEntityCoords(PlayerPedId()))
             Wait(Config.PositionSync)
@@ -190,7 +190,7 @@ end
 
 local deathTimer = 0
 local function startDeathTimer()
-    Citizen.CreateThread(function()
+    CreateThread(function()
         deathTimer = Config.Character.death.timer
         while deathTimer > 0 do
             Wait(1000)

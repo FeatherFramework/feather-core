@@ -45,7 +45,7 @@ function CharacterAPI.InitiateCharacter(src, charid)
 end
 
 function CharacterAPI.RemoveCharacter(src)
-    Citizen.CreateThread(function()
+    CreateThread(function()
         CacheAPI.ReloadDBFromCacheRecord("character", src)
         CacheAPI.RemoveFromCache("character", src)
         TriggerEvent("Feather:Character:Logout", src)

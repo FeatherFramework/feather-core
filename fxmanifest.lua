@@ -4,9 +4,9 @@ rdr3_warning "I acknowledge that this is a prerelease build of RedM, and I am aw
 lua54 "yes"
 
 description 'The Core service for the Feather Framework'
-author 'BCC Scripts'
+author 'Feather @Bytesizd'
 name 'feather-core'
-version '0.1.0'
+version '0.1.1'
 
 github_version_check 'true'
 github_version_type 'release'
