@@ -4,6 +4,7 @@ function StartAPI()
     CoreServerApi.Discord.Webhook = DiscordWebHookAPI
     
     CoreServerApi.User = UserAPI
+    CoreServerApi.Files = FilesAPI
     CoreServerApi.Character = CharacterAPI
     CoreServerApi.Instance = InstanceAPI
     CoreServerApi.Notify = SNotifyAPI
