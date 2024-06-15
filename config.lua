@@ -2,6 +2,8 @@ Config = {}
 
 Config.DevMode = false
 
+Config.DefaultLang = "en_us" -- Default Language that will be used when we can not get the individual players preferred language.
+
 Config.IdleAnimation = true
 Config.DisableRandomLootPrompts = true
 

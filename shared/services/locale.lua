@@ -4,7 +4,11 @@ LocalesAPI.translations = {}
 local function getLang(src)
     if IsOnServer() then
         local char = CharacterAPI.GetCharacterBySrc(src)
-        return char.lang
+        if not char then
+            return Config.DefaultLang
+        else
+            return char.lang
+        end
     else
         print('Not for use on client')
     end
