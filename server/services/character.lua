@@ -4,12 +4,56 @@
 CharacterAPI = {}
 
 -- Character- caching funtions
-function CharacterAPI.GetCharacterBySrc(src)
-    return CacheAPI.GetCacheBySrc("character", src)
-end
+function CharacterAPI.GetCharacter(src)
+    local char, charClass = nil, {}
+    if src then -- Use only source as src is used in litrally every function so getting char by id is just not needed or optimal
+        char = CacheAPI.GetCacheBySrc("character", src)
+    else
+        return false
+    end
+    charClass.char = char
+    charClass.src = src
 
-function CharacterAPI.GetCharacterByID(ID)
-    return CacheAPI.GetCacheByID("character", ID)
+    -- Cache Functions
+    function charClass:UpdateCharacterPOS(x, y, z)
+        CacheAPI.UpdateCacheBySrc('character', self.src, "x", x)
+        CacheAPI.UpdateCacheBySrc('character', self.src, "y", y)
+        CacheAPI.UpdateCacheBySrc('character', self.src, "z", z)
+        self.char = CacheAPI.GetCacheBySrc("character", self.src) -- Update the char object to reflect the changes
+    end
+    function charClass:UpdateLang(lang)
+        CacheAPI.UpdateCacheBySrc('character', self.src, "lang", lang)
+        self.char = CacheAPI.GetCacheBySrc("character", self.src)
+    end
+    function charClass:UpdateAttribute(key, val)
+        CacheAPI.UpdateCacheBySrc('character', self.src, key, val)
+        self.char = CacheAPI.GetCacheBySrc("character", self.src)
+    end
+
+    -- Add and Subtract functions
+    function charClass:Add(key, amount) -- Add dollars, tokens, gold, xp from character
+        CacheAPI.UpdateCacheBySrc('character', self.src, key, self.char[key] + amount)
+        self.char = CacheAPI.GetCacheBySrc("character", self.src)
+    end
+    function charClass:Subtract(key, amount) -- Subtract dollars, tokens, gold, xp from character
+        CacheAPI.UpdateCacheBySrc('character', self.src, key, self.char[key] - amount)
+        self.char = CacheAPI.GetCacheBySrc("character", self.src)
+    end
+
+    -- Misc Functions
+    function charClass:RemoveCharacter()
+        CreateThread(function()
+            CacheAPI.ReloadDBFromCacheRecord("character", self.src)
+            CacheAPI.RemoveFromCache("character", self.src)
+            TriggerEvent("Feather:Character:Logout", self.src)
+            DebugLog("Dropped Character Source", self.src)
+        end)
+    end
+    function charClass:Logout()
+        self:RemoveCharacter()
+    end
+
+    return charClass
 end
 
 function CharacterAPI.CreateCharacter(userid, roldid, firstname, lastname, model, dob,img, dollars, gold, tokens, xp, x, y, z, lang, desc)
@@ -44,79 +88,43 @@ function CharacterAPI.InitiateCharacter(src, charid)
     end
 end
 
-function CharacterAPI.RemoveCharacter(src)
-    CreateThread(function()
-        CacheAPI.ReloadDBFromCacheRecord("character", src)
-        CacheAPI.RemoveFromCache("character", src)
-        TriggerEvent("Feather:Character:Logout", src)
-        DebugLog("Dropped Character Source", src)
-    end)
-end
-
-function CharacterAPI.Logout(src)
-    CharacterAPI.RemoveCharacter(src)
-end
-
-function CharacterAPI.UpdateCharacterPOS(src, x, y, z)
-    CacheAPI.UpdateCacheBySrc('character', src, "x", x)
-    CacheAPI.UpdateCacheBySrc('character', src, "y", y)
-    CacheAPI.UpdateCacheBySrc('character', src, "z", z)
-end
-
-function CharacterAPI.UpdateLang(src, lang)
-    CacheAPI.UpdateCacheBySrc('character', src, "lang", lang)
-end
-
-function CharacterAPI.UpdateAttribute(src, key, val)
-    CacheAPI.UpdateCacheBySrc('character', src, key, val)
-end
-
--- Add dollars, tokens, gold, xp from character
-function CharacterAPI.Add(src, key, amount)
-    local activeCharacter = CacheAPI.GetCacheBySrc('character', src)
-    local total = activeCharacter[key] + amount
-    CacheAPI.UpdateCacheBySrc('character', src, key, total)
-end
-
--- Subtract dollars, tokens, gold, xp from character
-function CharacterAPI.Subtract(src, key, amount)
-    local activeCharacter = CacheAPI.GetCacheBySrc('character', src)
-    local total = activeCharacter[key] - amount
-    CacheAPI.UpdateCacheBySrc('character', src, key, total)
-end
-
 ----------------------------------
 -- Character RPC Registrations --
 ----------------------------------
 RPCAPI.Register("UpdatePlayerCoords", function(coords, res, player)
     local x, y, z = table.unpack(coords)
-    CharacterAPI.UpdateCharacterPOS(player, x, y, z)
-    return res(CharacterAPI.GetCharacterBySrc(player))
+    local char = CharacterAPI.GetCharacter(player)
+    char:UpdateCharacterPOS(x, y, z)
+    return res(char.char)
 end)
 
 RPCAPI.Register("UpdatePlayerLang", function(lang, res, player)
-    CharacterAPI.UpdateLang(player, lang)
-    return res(CharacterAPI.GetCharacterBySrc(player))
+    local char = CharacterAPI.GetCharacter(player)
+    char:UpdateLang(lang)
+    return res(char.char)
 end)
 
 RPCAPI.Register("GetCharacter", function(_, res, player)
-    return res(CharacterAPI.GetCharacterBySrc(player))
+    local char = CharacterAPI.GetCharacter(player)
+    return res(char.char)
 end)
 
 RPCAPI.Register("LogoutCharacter", function(_, res, player)
-    CharacterAPI.Logout(source)
+    local char = CharacterAPI.GetCharacter(player)
+    char:Logout()
     return res(true)
 end)
 
 RPCAPI.Register("CharacterDeath", function(state, res, player)
     print('Character dead!', state)
-    CharacterAPI.UpdateAttribute(player, 'dead', state)
+    local char = CharacterAPI.GetCharacter(player)
+    char:UpdateAttribute('dead', state)
     return res(true)
 end)
 
 AddEventHandler('playerDropped', function()
-    local src = source
-    CharacterAPI.RemoveCharacter(src)
+    local char = CharacterAPI.GetCharacter(source)
+    char:RemoveCharacter()
 end)
 
 
