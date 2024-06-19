@@ -4,15 +4,21 @@
 CharacterAPI = {}
 
 -- Character- caching funtions
-function CharacterAPI.GetCharacter(src)
+function CharacterAPI.GetCharacter(opts)
     local char, charClass = nil, {}
-    if src then -- Use only source as src is used in litrally every function so getting char by id is just not needed or optimal
-        char = CacheAPI.GetCacheBySrc("character", src)
+
+    if opts.id ~= nil then
+        char = CacheAPI.GetCacheByID("character", opts.id)
+        charClass.src = char.src
+    elseif opts.src ~= nil then
+        char = CacheAPI.GetCacheBySrc("character", opts.src)
+        charClass.src = opts.src
     else
+        print("Character src or ID must be defined")
         return false
     end
+
     charClass.char = char
-    charClass.src = src
 
     -- Cache Functions
     function charClass:UpdateCharacterPOS(x, y, z)
@@ -93,38 +99,40 @@ end
 ----------------------------------
 RPCAPI.Register("UpdatePlayerCoords", function(coords, res, player)
     local x, y, z = table.unpack(coords)
-    local char = CharacterAPI.GetCharacter(player)
+    local char = CharacterAPI.GetCharacter({src = player})
     char:UpdateCharacterPOS(x, y, z)
     return res(char.char)
 end)
 
 RPCAPI.Register("UpdatePlayerLang", function(lang, res, player)
-    local char = CharacterAPI.GetCharacter(player)
+    local char = CharacterAPI.GetCharacter({src = player})
     char:UpdateLang(lang)
     return res(char.char)
 end)
 
 RPCAPI.Register("GetCharacter", function(_, res, player)
-    local char = CharacterAPI.GetCharacter(player)
+    local char = CharacterAPI.GetCharacter({src = player})
     return res(char.char)
 end)
 
 RPCAPI.Register("LogoutCharacter", function(_, res, player)
-    local char = CharacterAPI.GetCharacter(player)
+    local char = CharacterAPI.GetCharacter({src = player})
     char:Logout()
     return res(true)
 end)
 
 RPCAPI.Register("CharacterDeath", function(state, res, player)
-    print('Character dead!', state)
-    local char = CharacterAPI.GetCharacter(player)
+    local char = CharacterAPI.GetCharacter({src = player})
     char:UpdateAttribute('dead', state)
     return res(true)
 end)
 
 AddEventHandler('playerDropped', function()
-    local char = CharacterAPI.GetCharacter(source)
-    char:RemoveCharacter()
+    local char = CharacterAPI.GetCharacter({src = source})
+
+    if char ~= nil then
+        char:RemoveCharacter()
+    end
 end)
 
 

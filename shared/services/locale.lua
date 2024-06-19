@@ -3,7 +3,7 @@ LocalesAPI.translations = {}
 
 local function getLang(src)
     if IsOnServer() then
-        local char = CharacterAPI.GetCharacter(src)
+        local char = CharacterAPI.GetCharacter({ src = src})
         if not char or not char.char or not char.char.lang then
             return Config.DefaultLang
         else
@@ -26,7 +26,7 @@ if IsOnServer() then
     end)
 
     RPCAPI.Register("SetCharLang", function(params, res, player)
-        local char = CharacterAPI.GetCharacter(player)
+        local char = CharacterAPI.GetCharacter({ src = player })
         char:UpdateLang(params.lang)
         return res(LocalesAPI.translations[params.lang])
     end)
