@@ -91,9 +91,10 @@ function CacheAPI.GetCacheByID(type, ID)
         tempCache = CharacterCache
     end
 
-    for _, value in pairs(tempCache) do
+    for src, value in pairs(tempCache) do
         if value.id == ID then
             targetCache = value
+            targetCache.src = src
             break
         end
     end
