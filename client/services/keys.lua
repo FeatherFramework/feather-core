@@ -48,7 +48,16 @@ function KeyPressAPI:RegisterListener(keycode, cb)
         print("KeyPressListener Registered", keycode);
     end
 
-    return { keycode, postition }
+    local keyClass = {}
+
+    keyClass.position = postition
+    keyClass.keycode = keycode
+
+    function keyClass:RemoveListener()
+        KeyPressAPI:RemoveListener({ self.keycode, self.postition })
+    end
+
+    return keyClass
 end
 
 -- remove event listeners is best practice for memory management. however, this only applies if you are creating temporary listeners.
