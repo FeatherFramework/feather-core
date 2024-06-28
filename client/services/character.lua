@@ -322,7 +322,7 @@ RegisterNetEvent("Feather:Character:Spawn", function(character)
     ActiveCharacter = character
     DisplayRadar(true)
     TriggerServerEvent("Feather:Character:Spawned", character)
-    TriggerEvent("Feather:Character:Spawned")
+    TriggerEvent("Feather:Character:Spawned", character)
 end)
 
 RegisterNetEvent("Feather:Character:Revive", function()
