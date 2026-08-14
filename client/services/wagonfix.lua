@@ -3,6 +3,11 @@
 -- OG Script: https://github.com/kaddarem-tebex/RedM-FixWagon
 -----------------------------------
 
+-- Cleans up "buggy" wagons -- ones RedM spawned with a stopped vehicle body
+-- but a still-walking horse (a desync the base game occasionally produces)
+-- -- by deleting the wagon and its non-player driver. Runs continuously,
+-- skips anything player-driven or spawned intentionally by a script
+-- (IsEntityAMissionEntity).
 function StartWagonFix()
     CreateThread(function()
         local vehiclePool = {}

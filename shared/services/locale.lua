@@ -14,9 +14,34 @@ local function getLang(src)
     end
 end
 
---This handles syncing the translations between client/server
+--This handles syncing the translations between client/server.
+-- (CORE-01) Previously did `LocalesAPI.translations = params.translations`,
+-- which let any unauthenticated caller (this RPC has no IsOnServer guard,
+-- since e.g. feather-admin's client-only translations legitimately need to
+-- reach the server this way) replace the ENTIRE global translation table,
+-- wiping every other resource's locale strings for every player. Fixed to
+-- merge additively instead -- same "first writer wins" semantics as
+-- LocalesAPI.register below -- so a caller can only fill in keys nobody has
+-- registered yet, never overwrite or wipe existing ones.
 RPCAPI.Register("SyncTranslations", function(params, res, player)
-    LocalesAPI.translations = params.translations
+    if not params or type(params.translations) ~= "table" then
+        return res(false)
+    end
+
+    for lang, translations in pairs(params.translations) do
+        if type(translations) == "table" then
+            if LocalesAPI.translations[lang] == nil then
+                LocalesAPI.translations[lang] = translations
+            else
+                for tkey, tvalue in pairs(translations) do
+                    if LocalesAPI.translations[lang][tkey] == nil then
+                        LocalesAPI.translations[lang][tkey] = tvalue
+                    end
+                end
+            end
+        end
+    end
+
     return res(true)
 end)
 

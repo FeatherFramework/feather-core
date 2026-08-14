@@ -1,3 +1,12 @@
+-- Polls RedM's native game-event queue (GET_EVENT_AT_INDEX/GET_EVENT_DATA)
+-- every tick and dispatches to whichever Lua callbacks have registered for
+-- that event via EventsAPI:RegisterEventListener -- this is how the
+-- framework observes native engine events (e.g. entity damage) that don't
+-- have a CFX AddEventHandler equivalent. Two independent event groups are
+-- polled: 0 = entity/client-side events, 1 = network events (see
+-- StartGlobalEventListeners below). Only runs at all while
+-- EventListenerCount > 0 or dev mode is on, to avoid an always-on Wait(0)
+-- loop doing native calls for nothing.
 EventsAPI = {}
 EventListeners = {}
 EventListenerCount = 0

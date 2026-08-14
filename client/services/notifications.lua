@@ -1,8 +1,26 @@
+-- Native RedM notification/toast wrappers. Every function below builds the
+-- raw memory buffers (DataView.ArrayBuffer) those specific notification
+-- natives expect and invokes them directly -- RedM has no high-level notify
+-- API, so this is boilerplate byte-packing repeated per notification style
+-- (ToolTip, AdvancedNotify, LocationNotify, etc). Dispatched dynamically by
+-- name: server-side SNotifyAPI (server/services/notifications.lua) sends a
+-- `type` string over Feather:Notify, and the handler below indexes
+-- NotifyAPI[type] to call the matching function here.
 NotifyAPI = {}
 
 RegisterNetEvent("Feather:Notify")
-AddEventHandler("Feather:Notify", function(type, options)
-    NotifyAPI[type](table.unpack(options))
+AddEventHandler("Feather:Notify", function(notifyType, options)
+    -- (CORE-07) `notifyType` indexed straight into NotifyAPI and called it
+    -- -- since this is a RegisterNetEvent, a local client could also fire
+    -- it on itself with an arbitrary type and hit a nil-call error.
+    -- Guarding the lookup keeps that self-inflicted-only case from erroring
+    -- at all. (NotifyAPI only ever holds functions, so a presence check is
+    -- enough -- no need to shadow the global `type()`.)
+    local notifyFn = NotifyAPI[notifyType]
+    if not notifyFn then
+        return
+    end
+    notifyFn(table.unpack(options))
 end)
 
 function NotifyAPI.ToolTip(text, duration)

@@ -1,3 +1,8 @@
+-- Wrapper around RedM's native "hold/press E" style prompt UI. A
+-- PromptGroup (SetupPromptGroup) holds one or more registered prompts and
+-- must call ShowGroup() every frame to stay visible -- used throughout the
+-- framework for interactions (ground item pickup in feather-inventory,
+-- death/revive in feather-core, etc).
 PromptsAPI = {}
 
 function PromptsAPI:SetupPromptGroup(groupId)

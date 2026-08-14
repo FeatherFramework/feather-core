@@ -1,3 +1,8 @@
+-- Server-side notify API: every function here just packages its args and
+-- relays them to a specific client's `Feather:Notify` handler (see
+-- client/services/notifications.lua), which dynamically dispatches to the
+-- matching NotifyAPI[<functionName>] on the client to actually render it.
+-- The function name IS the notification "type" sent over the wire.
 SNotifyAPI = {}
 
 function SNotifyAPI.ToolTip(src, text, duration)
@@ -20,6 +25,11 @@ function SNotifyAPI.LeftNotify(src, text, duration)
     TriggerClientEvent("Feather:Notify", src, "LeftNotify", { text, duration })
 end
 
+-- NOTE: argument order is swapped vs. every other function here --
+-- ("TopBanner", src, ...) instead of (src, "TopBanner", ...) -- so this
+-- passes the string "TopBanner" as the TriggerClientEvent target and `src`
+-- as the notify type. Latent bug (tracked in the Phase 1 audit), not fixed
+-- here.
 function SNotifyAPI.TopBanner(src, title, text, duration)
     TriggerClientEvent("Feather:Notify", "TopBanner", src, { title, text, duration })
 end

@@ -1,3 +1,9 @@
+-- Startup version checker: for every OTHER currently-loaded resource that
+-- opts in via its fxmanifest (`github_version_check`), fetches the latest
+-- GitHub release/version file and logs whether it's current, outdated, or
+-- ahead of the published release. Purely informational (console logging),
+-- never blocks startup. Driven by StartVersioner() at the bottom, called
+-- once from RunCore().
 VersionerAPI = {}
 
 VersionerAPI.checkRelease = function(resourcename, repo)
@@ -26,6 +32,10 @@ VersionerAPI.checkRelease = function(resourcename, repo)
             local uptodate = false
             local overdate = false
 
+            -- NOTE: lexical string comparison, not a real semver compare --
+            -- e.g. "0.9.0" > "0.10.0" lexically even though it's the older
+            -- version. feather-menu fixed this with a numeric comparator;
+            -- this repo (and feather-progressbar) still don't.
             if current.version > latest.version then
                 overdate = true
             elseif current.version < latest.version then
@@ -68,6 +78,10 @@ VersionerAPI.checkFile = function(resourcename, repo)
             local uptodate = false
             local overdate = false
 
+            -- NOTE: lexical string comparison, not a real semver compare --
+            -- e.g. "0.9.0" > "0.10.0" lexically even though it's the older
+            -- version. feather-menu fixed this with a numeric comparator;
+            -- this repo (and feather-progressbar) still don't.
             if current.version > latest.version then
                 overdate = true
             elseif current.version < latest.version then

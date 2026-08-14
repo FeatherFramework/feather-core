@@ -1,4 +1,8 @@
 --This is a helper for loadscreens. Specifically for bcc-loadscreen. https://github.com/BryceCanyonCounty/bcc-loadscreen
+-- The loadscreen's own JS polls `isgameinitiated` to know when it's safe to
+-- let the player through: `online` flips true the first time playerSpawned
+-- fires, `spacebar` flips true once either the player presses space or
+-- `online` is already true (a skip/continue prompt).
 
 local online, spacebar, firstSpawn = false, false, true
 

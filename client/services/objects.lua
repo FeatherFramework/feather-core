@@ -1,3 +1,5 @@
+-- Class-based wrapper for spawning/managing world objects (props): handles
+-- model loading and the common "place on ground + freeze" setup.
 ObjectAPI = {}
 
 -- networked: Whether to create a network object for the object. If false, the object exists only locally.

@@ -1,6 +1,13 @@
+-- The core Vue-based HUD (ui/ folder) that shows player info/PVP toggle/
+-- locale switch, plus a wrapper around RedM's native XP/rank bar HUD
+-- element. Opened via the Config.UI.command chat command or
+-- Config.UI.hotkey keybind (both wired up at the bottom of this file).
 UIAPI = {}
 UIState = false
 
+-- Wraps the native "mp_rank_bar" HUD databinding element (health/stamina-
+-- style progress bar with a label) so callers can set its fields without
+-- touching the raw DatabindingAddData* natives directly.
 function UIAPI.CreateRankBar(text, header, alpha, min, max, xp, visible)
     local RBClass = {}
 
@@ -66,6 +73,8 @@ function UIAPI.CreateRankBar(text, header, alpha, min, max, xp, visible)
     return RBClass
 end
 
+-- Shows/hides the core HUD, sending it a fresh snapshot of the active
+-- character, XP config, PVP state, and locale strings each time it opens.
 function UIAPI.ToggleUI()
     ActiveCharacter = RPCAPI.CallAsync("GetCharacter", {})
     if ActiveCharacter == nil or ActiveCharacter == {} then

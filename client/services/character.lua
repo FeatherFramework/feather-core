@@ -1,3 +1,8 @@
+-- Client-side character lifecycle: spawn-in, the death/respawn loop, and
+-- position sync. `ActiveSystems` flags gate the three long-running
+-- CreateThread loops below (EssentialsLoop/setupCharacterMenuIdle/
+-- startPositionSync) so /logout can cleanly stop them without leaving
+-- orphaned threads running for a character that's no longer active.
 local PauseOpen = false
 ActiveCharacter = {}
 local ActiveSystems = {
@@ -34,6 +39,11 @@ local function killPlayer()
     SetEntityHealth(PlayerPedId(), 0, 0)
 end
 
+-- Resets the ped to a healthy, controllable state after death (health,
+-- cores, stamina, camera) and tells the server the character is alive
+-- again via the CharacterDeath RPC (state 0). Called both from the normal
+-- respawnPlayer() flow and directly by the server-pushed
+-- Feather:Character:Revive event.
 local function revivePlayer()
     exports.spawnmanager.setAutoSpawn(true)
     DisplayHud(true)
@@ -58,6 +68,10 @@ local function revivePlayer()
     TriggerServerEvent('Feather:Character:Revived')
 end
 
+-- Finds the nearest configured respawn point (Config.RespawnLocations) and
+-- moves the ped there, probing upward for solid ground (RedM has no direct
+-- "get ground height" that always works from below terrain) before setting
+-- final coords.
 local function teleportToClosestMedical()
     local closestIndex = 1
     local closestDistance = 99999999999999
@@ -106,6 +120,9 @@ local function respawnPlayer()
     revivePlayer()
 end
 
+-- While the pause menu is open, disarms the ped and plays a sit-and-read
+-- idle animation (skipped if mounted); reverts back to unarmed/no-anim once
+-- the menu closes. Purely cosmetic, gated by Config.IdleAnimation.
 local function setupCharacterMenuIdle()
     ActiveSystems.menuidle = true
 
@@ -141,6 +158,11 @@ local function setupCharacterMenuIdle()
 end
 
 
+-- Runs every tick while a character is spawned: disables loot-prompt spam
+-- (if configured), hides parts of the HUD/UI cards, and blocks the weapon
+-- wheel controls that are known to soft-lock input if left enabled. Started
+-- once from StartCharacterEssentials(), stopped by /logout via
+-- ActiveSystems.spawn.
 local function EssentialsLoop()
     ActiveSystems.spawn = true
     CreateThread(function()
@@ -174,6 +196,10 @@ end
 ----------------------------------
 -- Character Position handling --
 ----------------------------------
+-- Periodically reports the ped's current world position to the server via
+-- the UpdatePlayerCoords RPC, which persists it to the character row (see
+-- feather-core's CORE-05 note: this is trusted verbatim server-side, no
+-- speed/bounds sanity check). Interval is Config.PositionSync (ms).
 local function startPositionSync()
     ActiveSystems.possync = true
     CreateThread(function()
@@ -199,6 +225,12 @@ local function startDeathTimer()
     end)
 end
 
+-- The core death/respawn loop: polls IsEntityDead every tick. On first
+-- detecting death, hides HUD/radar, starts the death camera + countdown
+-- timer, and tells the server (CharacterDeath RPC, state 1). While the
+-- countdown is running the player can only watch; once it hits 0 a "hold R"
+-- prompt appears (skipped if being carried) and completing it triggers
+-- respawnPlayer(). Runs for the lifetime of the spawned character.
 local function DeadCheck()
     local deadInitiated = false
     local deadPromptGroup = PromptsAPI:SetupPromptGroup() --Setup Prompt Group
@@ -263,6 +295,14 @@ end
 ----------------------------------
 -- Character Spawn handling --
 ----------------------------------
+-- Server-pushed once CharacterAPI.InitiateCharacter succeeds (see
+-- server/services/character.lua). Places the ped at the character's saved
+-- coords (probing for ground height the same way teleportToClosestMedical
+-- does), waits for interiors/maps/core to finish loading, starts the
+-- position-sync and death-watch loops, and finally re-broadcasts
+-- Feather:Character:Spawned both to the server (so other resources like
+-- feather-weapons/feather-inventory can react) and locally on the client.
+-- `character.dead == 1` replays the death state if they logged out dead.
 RegisterNetEvent("Feather:Character:Spawn", function(character)
     DoScreenFadeOut(2000)
 

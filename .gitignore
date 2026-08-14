@@ -31,3 +31,5 @@ ui/*.sln
 ui/*.sw?
 
 .vscode
+
+AUDIT*

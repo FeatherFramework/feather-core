@@ -1,3 +1,6 @@
+-- Small helpers for drawing 2D UI in world space: converting a world
+-- position to screen/HUD coordinates, and drawing a sprite/rectangle at a
+-- given screen position.
 RenderAPI = {}
 
 function RenderAPI:WorldToScreen(pos)

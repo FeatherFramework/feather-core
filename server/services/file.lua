@@ -1,6 +1,24 @@
+-- Thin wrapper over LoadResourceFile/SaveResourceFile for reading/writing a
+-- resource's own files (JSON or raw text, per the `mode` param).
 FilesAPI = {}
 
--- GetCurrentResourceName()
+-- (CORE-12) `IsEmpty`/`CheckMode` were referenced below but never defined
+-- anywhere in the repo -- every FilesAPI function errored at runtime.
+-- `mode == 'json'` is the only mode this file's callers were ever written
+-- against (json.encode/decode below), so that's the contract made explicit
+-- here. (`MiscAPI`, the other half of CORE-12, is defined in
+-- shared/services/api.lua so it exists on both client and server.)
+function IsEmpty(str)
+    return str == nil or str == ""
+end
+
+function CheckMode(mode)
+    return mode == "json"
+end
+
+-- Returns a FileClass bound to a specific resource+path, with Read/Save/
+-- Update methods (see below) so repeated operations on the same file don't
+-- need to re-pass resourcename/filepath every time.
 function FilesAPI:Open(resourcename, filepath)
     if IsEmpty(resourcename) or IsEmpty(filepath) then
         print("You must have a resource name and filepath defined!")

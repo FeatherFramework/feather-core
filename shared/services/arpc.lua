@@ -57,6 +57,41 @@ local function GetResponseFunction(id)
     end
 end
 
+-----------------------
+-- Rate limiting --
+-----------------------
+
+-- Per-source rolling window over the shared Feather:Call bus. Every
+-- procedure registered by every resource (core and downstream repos alike,
+-- since RPCAPI.Register is a single table shared via the export) is
+-- dispatched through the handler below, so limiting there protects the
+-- whole RPC surface at once instead of each procedure reinventing a
+-- throttle. (CORE-06)
+local rpcCallWindows = {}
+
+local function IsRateLimited(src)
+    if not IsOnServer() or not src or src == 0 then
+        return false
+    end
+
+    local now = GetGameTimer()
+    local window = rpcCallWindows[src]
+
+    if not window or (now - window.start) > Config.RPCRateLimit.windowMs then
+        rpcCallWindows[src] = { start = now, count = 1 }
+        return false
+    end
+
+    window.count = window.count + 1
+    return window.count > Config.RPCRateLimit.maxCalls
+end
+
+if IsOnServer() then
+    AddEventHandler('playerDropped', function()
+        rpcCallWindows[source] = nil
+    end)
+end
+
 ---------------------
 --  Main functions --
 ---------------------
@@ -79,12 +114,23 @@ end
 
 -- Handle the outgoing rpc
 AddEventHandler("Feather:Call", function(id, name, params)
+    -- (CORE-11) The rate-limit check used to run *after* the type/
+    -- registration checks below, so a client spamming malformed or
+    -- unregistered procedure names never actually hit IsRateLimited and
+    -- could flood the server console (and, via the old `registeredProcedures`
+    -- dump, leak every registered RPC name) at an unbounded rate. Checking
+    -- first means every call -- valid or not -- counts against the same
+    -- window.
+    if IsRateLimited(source) then
+        return
+    end
+
     if type(name) ~= "string" then
         print("Name must be a string")
         return
     end
     if not registeredProcedures[name] then
-        print("Procedure is not registered:", name, registeredProcedures)
+        print("Procedure is not registered:", name)
         return
     end
 
