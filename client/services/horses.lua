@@ -1,3 +1,7 @@
+-- Class-based wrapper for spawning/managing a horse ped: handles model
+-- loading, ground-height probing (same pattern as
+-- teleportToClosestMedical/spawn in client/services/character.lua), and
+-- exposes component/gear methods on the returned HorseClass.
 HorseAPI = {}
 
 function HorseAPI:Create(modelHash, x, y, z, heading, gender, safeground, networked, vector4)

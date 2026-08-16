@@ -1,3 +1,9 @@
+-- Polling-based key press listener system: RegisterListener attaches a
+-- callback to a key name (from shared/data/keys.lua's `Keys` table);
+-- StartKeyListeners() polls every registered key every 4ms via the native
+-- IS_DISABLED_CONTROL_JUST_PRESSED-style check and fires callbacks for
+-- whichever keys were pressed since the last tick. Only polls at all while
+-- KeyListenerCount > 0, to skip the native calls otherwise.
 KeyPressAPI = {}
 
 KeyListeners = {}

@@ -1,6 +1,11 @@
 ------- File Information --------
 -- Inspired by Vorp Legacy Death Camera
 -----------------------------------
+-- Free-look orbit camera used while the player is dead (see DeadCheck in
+-- client/services/character.lua). ProcessNewPosition() turns raw
+-- mouse-delta input into an orbit angle around the ped, then raycasts from
+-- the ped to that orbit point so the camera stops short of any wall/object
+-- in the way instead of clipping through it.
 
 local deathcam = nil
 local angleY = 0.0

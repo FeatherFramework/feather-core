@@ -1,3 +1,8 @@
+-- Metadata table for RedM's native game events, keyed by event hash: how
+-- many data fields each event carries, their types, and which event group
+-- (0 = entity, 1 = network) they belong to. Consumed by
+-- shared/services/events.lua's polling loop to know how to read each
+-- event's raw memory data off the native event queue.
 EVENTS = {
     [1385704366] = {
         name = "EVENT_NETWORK_PICKUP_RESPAWNED",

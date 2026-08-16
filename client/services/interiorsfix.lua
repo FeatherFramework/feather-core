@@ -1,3 +1,10 @@
+-- One-time startup fixup for RedM's known map/interior bugs: a long,
+-- individually-commented list of RequestImap/RemoveImap calls (each
+-- comment names the real-world location) that patches holes, duplicate
+-- props, and broken campaign-mission leftovers across the map, plus
+-- interior activation helpers below. InteriorsActive/IMapsActive flip true
+-- once this pass completes -- the character spawn flow (client/services/
+-- character.lua) waits on both before finishing spawn-in.
 InteriorsActive = false
 IMapsActive = false
 

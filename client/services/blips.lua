@@ -1,3 +1,4 @@
+-- Thin class-based wrapper for creating/configuring a map blip.
 BlipAPI = {}
 
 function BlipAPI:SetBlip(name, sprite, scale, x, y, z)

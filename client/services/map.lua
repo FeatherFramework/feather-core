@@ -1,3 +1,5 @@
+-- Thin wrappers over minimap/GPS natives: fog-of-war toggle (see
+-- Config.UseFogOfWar), radar visibility, and a 2-point GPS route helper.
 MapAPI = {}
 
 function MapAPI.setFOW(toggle)

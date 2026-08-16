@@ -1,3 +1,8 @@
+-- Class-based wrapper for spawning/managing NPC peds: model loading,
+-- ground-height probing, and behavior/outfit setup on the returned
+-- PedClass. Used throughout the framework (feather-admin's hostile ped/
+-- bear troll effects, feather-character's spawn-select display peds, etc.)
+-- wherever a resource needs to spawn a ped without repeating this boilerplate.
 PedAPI = {}
 
 function PedAPI:Create(modelhash, x, y, z, heading, location, safeground, options, outfit, networked, vector4)

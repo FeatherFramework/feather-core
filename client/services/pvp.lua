@@ -1,9 +1,18 @@
 -- TODO: Test this thouroughly
+-- Client-local, per-player PVP toggle (see CORE-10 in the Phase 1 audit:
+-- there is no server-side PVP authority, each player's friendly-fire state
+-- is entirely self-controlled). `pause` auto-suspends PVP for ~4s after
+-- mounting/entering a vehicle (native 0xCEFD9220 = the "mount" control) so
+-- getting on a horse doesn't instantly flag you hostile mid-mount, and
+-- resumes once you're settled in or fully dismounted.
 PVPAPI = {}
 PVPAPI.active = Config.PVP
 PVPAPI.pause = Config.pause
 PVPAPI.playerhash = GetHashKey("PLAYER")
 
+-- Applies the current active/pause state to the engine every tick (see the
+-- CreateThread loop below) via NetworkSetFriendlyFireOption and the
+-- PLAYER-vs-PLAYER relationship group (5 = can fight, 1 = can't).
 function PVPAPI:updatePVPRelationship()
     NetworkSetFriendlyFireOption(self.active)
     if not self.pause and self.active then

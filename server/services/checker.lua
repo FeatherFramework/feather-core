@@ -1,3 +1,9 @@
+-- Startup version checker: for every OTHER currently-loaded resource that
+-- opts in via its fxmanifest (`github_version_check`), fetches the latest
+-- GitHub release/version file and logs whether it's current, outdated, or
+-- ahead of the published release. Purely informational (console logging),
+-- never blocks startup. Driven by StartVersioner() at the bottom, called
+-- once from RunCore().
 VersionerAPI = {}
 
 VersionerAPI.checkRelease = function(resourcename, repo)
@@ -11,12 +17,12 @@ VersionerAPI.checkRelease = function(resourcename, repo)
         local response = json.decode(text)
 
         if err == 403 then
-            print('^3⚠️Version Check limit reached. This should resolve in a few minutes. You are safe to ignore this. ^5[' .. resourcename .. '] ^6(Version ' .. current.version .. ')^0')
+            print('^3⚠️ Version Check limit reached. This should resolve in a few minutes. You are safe to ignore this. ^5[' .. resourcename .. '] ^6(Version ' .. current.version .. ')^0')
             return
         end
 
         if response.html_url == nil then
-            print('^3⚠️No Release Found! ^5[' .. resourcename .. '] ^6(Version ' .. current.version .. ')^0')
+            print('^3⚠️ No Release Found! ^5[' .. resourcename .. '] ^6(Version ' .. current.version .. ')^0')
         else
             local latest = {
                 url = response.html_url,
@@ -26,6 +32,10 @@ VersionerAPI.checkRelease = function(resourcename, repo)
             local uptodate = false
             local overdate = false
 
+            -- NOTE: lexical string comparison, not a real semver compare --
+            -- e.g. "0.9.0" > "0.10.0" lexically even though it's the older
+            -- version. feather-menu fixed this with a numeric comparator;
+            -- this repo (and feather-progressbar) still don't.
             if current.version > latest.version then
                 overdate = true
             elseif current.version < latest.version then
@@ -35,12 +45,12 @@ VersionerAPI.checkRelease = function(resourcename, repo)
             end
 
             if uptodate then
-                print('^2✅Up to Date! ^5[' .. resourcename .. '] ^6(Current Version ' .. current.version .. ')^0')
+                print('^2✅ Up to Date! ^5[' .. resourcename .. '] ^6(Current Version ' .. current.version .. ')^0')
             elseif overdate then
-                print('^3⚠️Unsupported! ^5[' .. resourcename .. '] ^6(Version ' .. current.version .. ')^0')
+                print('^3⚠️ Unsupported! ^5[' .. resourcename .. '] ^6(Version ' .. current.version .. ')^0')
                 print('^4Current Version ^2(' .. latest.version .. ') ^3<' .. latest.url .. '>^0')
             else
-                print('^1❌Outdated! ^5[' .. resourcename .. '] ^6(Version ' .. current.version .. ')^0')
+                print('^1❌ Outdated! ^5[' .. resourcename .. '] ^6(Version ' .. current.version .. ')^0')
                 print('^4NEW VERSION ^2(' .. latest.version .. ') ^3<' .. latest.url .. '>^0')
                 print('^4CHANGELOG ^0\r\n' .. latest.body)
             end
@@ -68,6 +78,10 @@ VersionerAPI.checkFile = function(resourcename, repo)
             local uptodate = false
             local overdate = false
 
+            -- NOTE: lexical string comparison, not a real semver compare --
+            -- e.g. "0.9.0" > "0.10.0" lexically even though it's the older
+            -- version. feather-menu fixed this with a numeric comparator;
+            -- this repo (and feather-progressbar) still don't.
             if current.version > latest.version then
                 overdate = true
             elseif current.version < latest.version then
@@ -77,12 +91,12 @@ VersionerAPI.checkFile = function(resourcename, repo)
             end
 
             if uptodate then
-                print('^2✅Up to Date! ^5[' .. resourcename .. '] ^6(Current Version ' .. current.version .. ')^0')
+                print('^2✅ Up to Date! ^5[' .. resourcename .. '] ^6(Current Version ' .. current.version .. ')^0')
             elseif overdate then
-                print('^3⚠️Unsupported! ^5[' .. resourcename .. '] ^6(Version ' .. current.version .. ')^0')
+                print('^3⚠️ Unsupported! ^5[' .. resourcename .. '] ^6(Version ' .. current.version .. ')^0')
                 print('^4Current Version ^2(' .. latest.version .. ') ^3<' .. latest.url .. '>^0')
             else
-                print('^1❌Outdated! ^5[' .. resourcename .. '] ^6(Version ' .. current.version .. ')^0')
+                print('^1❌ Outdated! ^5[' .. resourcename .. '] ^6(Version ' .. current.version .. ')^0')
                 print('^4NEW VERSION ^2(' .. latest.version .. ') ^3<' .. latest.url .. '>^0')
 
                 local cl = latest.body:gsub("<" .. current.version .. ">.*", "")

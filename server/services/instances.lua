@@ -1,3 +1,9 @@
+-- Thin wrapper over RedM's native routing buckets: a player's routing
+-- bucket determines which other entities/players they can see and interact
+-- with (everyone in bucket 0, the default, sees each other; a player moved
+-- to bucket N is isolated from bucket 0 and from every other bucket).
+-- GameInstances just tracks which src's are currently registered to which
+-- bucket id so leave()/cleanup know who's still in an instance.
 GameInstances = {}
 
 InstanceAPI = {}
@@ -6,7 +12,10 @@ InstanceAPI = {}
 local MathInstance = MathI:instanced()
 
 
--- Create an instance for a given player/src
+-- Moves `tsrc` (or the caller, if omitted) into routing bucket `id`,
+-- creating a fresh randomly-generated bucket id if `id` is nil. Also
+-- migrates the player out of whatever instance they were previously
+-- registered to, since a player can only be routed to one bucket at a time.
 function InstanceAPI.create(id, tsrc)
     local src = source
     if tsrc ~= nil then
@@ -52,6 +61,9 @@ function InstanceAPI.create(id, tsrc)
     return id
 end
 
+-- Removes `tsrc` (or the caller) from instance `id` and routes them back to
+-- the global bucket (0). Deletes the instance entirely once it has no
+-- players left registered to it.
 function InstanceAPI.leave(id, tsrc)
     local src = source
     if tsrc ~= nil then
@@ -91,8 +103,20 @@ function InstanceAPI.getInstanceCharacters(id)
     return GameInstances[id].characters
 end
 
+-- Client-callable entry points for the API above.
+-- (CORE-03) `params.id` used to be honored verbatim -- any client could
+-- request any existing bucket id and join an instance meant to isolate
+-- someone else. Only ids in Config.PublicInstanceIds may be requested by
+-- number now; anything else silently falls back to a fresh, private,
+-- randomly-generated bucket (InstanceAPI.create with id = nil), same as if
+-- the caller hadn't requested a specific id at all.
 RPCAPI.Register("CreateInstance", function(params, res, player)
-    local id = InstanceAPI.create(params.id, player)
+    local requestedId = params.id
+    if requestedId ~= nil and not (Config.PublicInstanceIds and Config.PublicInstanceIds[requestedId]) then
+        DebugLog(("[feather-core] CreateInstance: src %s requested non-public instance %s, issuing a private one instead"):format(player, tostring(requestedId)))
+        requestedId = nil
+    end
+    local id = InstanceAPI.create(requestedId, player)
     return res(id)
 end)
 
@@ -101,6 +125,8 @@ RPCAPI.Register("LeaveInstance", function(params, res, player)
     return res()
 end)
 
+-- NOTE: references the undefined global `id` instead of `params.id` -- this
+-- always operates on nil and has never worked (tracked in the Phase 1 audit).
 RPCAPI.Register("GetInstancedCharacters", function(params, res, player)
     local instances = InstanceAPI.getInstanceCharacters(id)
     return res(instances)

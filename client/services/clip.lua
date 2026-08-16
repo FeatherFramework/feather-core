@@ -1,3 +1,5 @@
+-- Single-purpose wrapper: writes text to the OS clipboard via the native
+-- clipboard hook.
 ClipAPI = {}
 
 function ClipAPI.CopyToClipboard(text)

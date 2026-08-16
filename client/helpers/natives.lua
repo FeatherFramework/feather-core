@@ -1,3 +1,5 @@
+-- Thin per-native wrappers for RedM natives that don't have friendly names
+-- in the standard native list, used by popdensity.lua/character.lua.
 function SetAmbientAnimalDensityMultiplierThisFrame(multiplier)
 	Citizen.InvokeNative(0xC0258742B034DFAF, multiplier)
 end

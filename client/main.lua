@@ -1,3 +1,6 @@
+-- Flipped true once every client subsystem below has started; the spawn
+-- handler in client/services/character.lua waits on this (and on
+-- InteriorsActive/IMapsActive) before finishing the spawn sequence.
 ClientReady = false
 
 function RunCore()

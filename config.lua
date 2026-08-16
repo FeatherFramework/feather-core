@@ -44,6 +44,34 @@ Config.XP = {
     perLevel = 1900
 }
 
+-- Per-source throttle applied to every RPC dispatched over the Feather:Call
+-- bus (see shared/services/arpc.lua). Framework-wide, not per-procedure --
+-- protects every resource's registered RPCs from spam without each one
+-- needing its own rate limiter. (CORE-06)
+Config.RPCRateLimit = {
+    windowMs = 1000, -- size of the rolling window
+    maxCalls = 30    -- max Feather:Call invocations per source per window
+}
+
+-- Minimum characters.roles.level required for CharacterAPI.IsAdmin(src) to
+-- return true. Matches the framework's seeded roles (see migration.sql/
+-- seed.sql): 'general' = 0 (default for every new character), 'admin' = 99.
+Config.AdminLevel = 99
+
+-- (CORE-03 / CHAR-05) CreateInstance's `params.id` used to be honored
+-- verbatim from any client -- since a routing bucket's only access control
+-- IS its id, any client could request any existing bucket id and force
+-- themselves into an instance meant to isolate someone else (housing,
+-- admin staging, minigames, etc). Only ids listed here may be requested by
+-- number; any other requested id is ignored in favor of a fresh private
+-- bucket (see server/services/instances.lua). 123 is feather-character's
+-- shared character-select room (client/services/character/selector.lua) --
+-- everyone in character select is meant to share visibility, so it's safe
+-- to leave joinable by id.
+Config.PublicInstanceIds = {
+    [123] = true
+}
+
 -- All commands that the core has access to on startup (not including API registered commands)
 Config.Commands = {
     {
