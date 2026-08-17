@@ -17,7 +17,7 @@ function RenderAPI:DrawSprite(pos, size, rotation, color, textureDict, textureNa
     if not HasStreamedTextureDictLoaded(textureDict) then
         RequestStreamedTextureDict(textureDict, false);
     else
-        DrawSprite(textureDict, textureName, pos.x, pos.y, tofloat(size.x), tofloat(size.y), tofloat(rotation), color.r,
+        DrawSprite(textureDict, textureName, pos.x, pos.y, size.x, size.y, rotation, color.r,
             color.g, color.b, color.a)
     end
 end
@@ -43,7 +43,7 @@ end
 function RenderAPI:Draw3DText(pos, text, scale, color, font, background)
     scale = CheckVar(scale, 1)
     font = CheckVar(font, 1)
-    background = CheckVar(font, 0)
+    background = CheckVar(background, 0)
 
     local onScreen, _x, _y = GetScreenCoordFromWorldCoord(pos.x, pos.y, pos.z)
     local str = CreateVarString(10, "LITERAL_STRING", text)
@@ -51,14 +51,14 @@ function RenderAPI:Draw3DText(pos, text, scale, color, font, background)
         SetTextColor(math.floor(color.r), math.floor(color.g), math.floor(color.b), math.floor(color.a))
         SetTextScale(scale, scale)
         SetTextFontForCurrentCommand(font)
-        SetTextCentre(1)
+        SetTextCentre(true)
         DisplayText(str, _x, _y - 0.0)
 
         if background > 0 then
             local factor = (string.len(text)) / 225
 
             DrawSprite("feeds", "hud_menu_4a", _x, _y + scale / 50, (scale / 20) + factor, scale / 5, 0.1,
-                Text.Colors[background][1], Text.Colors[background][2], Text.Colors[background][3], 190, 0)
+                Text.Colors[background][1], Text.Colors[background][2], Text.Colors[background][3], 190, false)
         end
     end
 end
