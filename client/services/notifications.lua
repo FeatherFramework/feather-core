@@ -8,6 +8,12 @@
 -- NotifyAPI[type] to call the matching function here.
 NotifyAPI = {}
 
+local DEFAULT_DURATION = 3000
+
+local function normalizeNotification(text, duration)
+    return tostring(text or ''), tonumber(duration) or DEFAULT_DURATION
+end
+
 RegisterNetEvent("Feather:Notify")
 AddEventHandler("Feather:Notify", function(notifyType, options)
     -- (CORE-07) `notifyType` indexed straight into NotifyAPI and called it
@@ -17,13 +23,14 @@ AddEventHandler("Feather:Notify", function(notifyType, options)
     -- at all. (NotifyAPI only ever holds functions, so a presence check is
     -- enough -- no need to shadow the global `type()`.)
     local notifyFn = NotifyAPI[notifyType]
-    if not notifyFn then
+    if type(notifyFn) ~= 'function' or type(options) ~= 'table' then
         return
     end
     notifyFn(table.unpack(options))
 end)
 
 function NotifyAPI.ToolTip(text, duration)
+    text, duration = normalizeNotification(text, duration)
     local vartext = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", text, Citizen.ResultAsLong())
     local optionscontent = DataView.ArrayBuffer(8 * 7)
     local inputtext = DataView.ArrayBuffer(8 * 3)
@@ -71,8 +78,8 @@ function NotifyAPI.LocationNotify(text, location, duration)
     Citizen.InvokeNative(0xD05590C1AB38F068, optionscontent:Buffer(), maincontent:Buffer(), 0, 1)
 end
 
--- TODO: For some reason this is triggering twice when called from server
 function NotifyAPI.RightNotify(text, duration)
+    text, duration = normalizeNotification(text, duration)
     local vartext = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", text, Citizen.ResultAsLong())
 
     local optionscontent = DataView.ArrayBuffer(8 * 7)
