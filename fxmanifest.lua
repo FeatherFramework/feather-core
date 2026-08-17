@@ -33,7 +33,6 @@ server_scripts {
 
 client_scripts {
     "/client/helpers/*.lua",
-    "/client/services/notifications.lua",
     "/client/services/*.lua",
     "/client/main.lua"
 }
