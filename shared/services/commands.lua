@@ -2,8 +2,10 @@ CommandAPI = {}
 
 -- Registers a command and its chat autocomplete suggestion in one call.
 function CommandAPI.Register(command, suggestion, callback, params)
+    if type(command) ~= 'string' or command == '' or not IsCallable(callback) then return false end
     RegisterCommand(command, callback)
     TriggerEvent("chat:addSuggestion", "/" .. command, suggestion, params)
+    return true
 end
 
 -- Registers every command listed in Config.Commands (config.lua) -- the
