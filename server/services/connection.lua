@@ -3,6 +3,11 @@ ConnectionAPI = {}
 local gates = {}
 local nextSequence = 0
 
+local function isFunctionReference(callback)
+    return type(callback) == 'table'
+        and type(rawget(callback, '__cfx_functionReference')) == 'string'
+end
+
 local function ownerResource()
     local owner = GetInvokingResource and GetInvokingResource() or nil
     if type(owner) ~= 'string' or owner == '' then return GetCurrentResourceName() end
@@ -22,8 +27,8 @@ end
 -- Registers one connection check. Returning a non-empty string rejects the
 -- connection; returning nil accepts it and advances to the next gate.
 function ConnectionAPI.RegisterGate(name, callback, options)
-    local directCallback = type(callback) == 'function'
-    local exportCallback = type(callback) == 'table'
+    local directCallback = type(callback) == 'function' or isFunctionReference(callback)
+    local exportCallback = not directCallback and type(callback) == 'table'
         and type(callback.resource) == 'string' and callback.resource ~= ''
         and type(callback.export) == 'string' and callback.export ~= ''
     if type(name) ~= 'string' or name == '' or (not directCallback and not exportCallback) then
