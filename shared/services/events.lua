@@ -99,7 +99,7 @@ end
 
 --? Register events to be listened for
 function EventsAPI:RegisterEventListener(eventname, cb)
-	if type(eventname) ~= 'string' or type(cb) ~= 'function' then return nil end
+	if type(eventname) ~= 'string' or not IsCallable(cb) then return nil end
 	local key = GetHashKey(eventname)
 	local bucket = EventListeners[key]
 	if not bucket then
