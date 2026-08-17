@@ -1,8 +1,8 @@
 -- Raw DB access for the `characters` table. Nothing in this file re-derives
 -- or checks identity -- ownership validation happens one layer up, in
 -- CharacterAPI (server/services/character.lua). Every SELECT here joins in
--- `roles.name`/`roles.level` so the caller always gets the character's role
--- alongside its data (see CharacterAPI.IsAdmin, which reads `.level` off
+-- aliased role fields so they cannot collide with future character columns
+-- alongside its data (see CharacterAPI.IsAdmin, which reads `.role_level` off
 -- of this join).
 CharacterController = {}
 
@@ -37,7 +37,7 @@ end
 -- this character before calling this.
 function CharacterController.GetCharacter(characterID)
     local character = MySQL.query.await(
-    "SELECT characters.*, roles.name, roles.level FROM characters INNER JOIN roles ON characters.role_id=roles.id WHERE characters.id = @id",
+    "SELECT characters.*, roles.name AS role_name, roles.level AS role_level FROM characters INNER JOIN roles ON characters.role_id=roles.id WHERE characters.id = @id",
         { ['id'] = characterID })
     return character[1]
 end
@@ -48,7 +48,7 @@ end
 -- top of this).
 function CharacterController.GetAvailableCharacters(userID)
     local characters = MySQL.query.await(
-    "SELECT characters.*, roles.name, roles.level FROM characters INNER JOIN roles ON characters.role_id=roles.id WHERE characters.user_id = @UserID",
+    "SELECT characters.*, roles.name AS role_name, roles.level AS role_level FROM characters INNER JOIN roles ON characters.role_id=roles.id WHERE characters.user_id = @UserID",
         { ['UserID'] = userID })
     return characters
 end
@@ -84,7 +84,7 @@ function CharacterController.UpdateCharacter(character)
         })
 
     local character = MySQL.query.await(
-    "SELECT characters.*, roles.name, roles.level FROM characters INNER JOIN roles ON characters.role_id=roles.id WHERE characters.id = @id",
+    "SELECT characters.*, roles.name AS role_name, roles.level AS role_level FROM characters INNER JOIN roles ON characters.role_id=roles.id WHERE characters.id = @id",
         { ['id'] = character.id })
 
     return character
