@@ -400,4 +400,6 @@ RegisterCommand('logout', function()
     }
 
     MapAPI.setFOW(true)
+    -- Local lifecycle signal for resources that keep character-scoped UI/state.
+    TriggerEvent("Feather:Character:Logout")
 end, false)
