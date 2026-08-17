@@ -11,6 +11,7 @@ local pendingCallbackCount = 0
 
 -- Remote methods table
 local registeredProcedures = {}
+local procedureCallWindows = {}
 
 -- RPC API
 RPCAPI = {}
@@ -48,12 +49,15 @@ local function TriggerRemoteEvent(eventName, source, ...)
 end
 
 -- Gets the response of the RPC, if available.
-local function GetResponseFunction(id)
+local function GetResponseFunction(id, requestSource)
     if not id then
         return function() end
     end
+    local responded = false
     return function(...)
-        TriggerRemoteEvent("Feather:Response", source, id, ...)
+        if responded then return end
+        responded = true
+        TriggerRemoteEvent("Feather:Response", requestSource, id, ...)
     end
 end
 
@@ -86,9 +90,35 @@ local function IsRateLimited(src)
     return window.count > Config.RPCRateLimit.maxCalls
 end
 
+local function IsProcedureRateLimited(src, name, policy)
+    if not IsOnServer() or not src or src == 0 or not policy.maxCalls then return false end
+
+    local now = GetGameTimer()
+    procedureCallWindows[src] = procedureCallWindows[src] or {}
+    local window = procedureCallWindows[src][name]
+    if not window or (now - window.start) > policy.windowMs then
+        procedureCallWindows[src][name] = { start = now, count = 1 }
+        return false
+    end
+
+    window.count = window.count + 1
+    return window.count > policy.maxCalls
+end
+
+local function RpcError(code, message)
+    return { code = code, message = message }
+end
+
 if IsOnServer() then
     AddEventHandler('playerDropped', function()
         rpcCallWindows[source] = nil
+        procedureCallWindows[source] = nil
+    end)
+
+    AddEventHandler('onResourceStop', function(resourceName)
+        for name, procedure in pairs(registeredProcedures) do
+            if procedure.owner == resourceName then registeredProcedures[name] = nil end
+        end
     end)
 end
 
@@ -97,11 +127,21 @@ end
 ---------------------
 
 -- Enacts the RPC Procedures that was registered. if the RPC has a callback, add it the the queue.
-local function CallRemoteProcedures(name, params, callback, source)
+local function CallRemoteProcedures(name, params, callback, source, timeoutMs)
     local id = nil
     if callback then
         id = GetNextId()
-        pendingCallbacks[id] = callback
+        local expectedSource = IsOnServer() and source or nil
+        pendingCallbacks[id] = { callback = callback, expectedSource = expectedSource, name = name }
+
+        local timeout = tonumber(timeoutMs) or tonumber(Config.RPCRateLimit.timeoutMs) or 10000
+        SetTimeout(math.max(1000, timeout), function()
+            local pending = pendingCallbacks[id]
+            if not pending then return end
+            pendingCallbacks[id] = nil
+            local ok, err = pcall(pending.callback, nil, RpcError('timeout', ('RPC timed out: %s'):format(tostring(name))))
+            if not ok then print(('RPC timeout callback failed: %s'):format(tostring(err))) end
+        end)
     end
 
     return TriggerRemoteEvent("Feather:Call", source, id, name, params)
@@ -114,6 +154,7 @@ end
 
 -- Handle the outgoing rpc
 AddEventHandler("Feather:Call", function(id, name, params)
+    local requestSource = source
     -- (CORE-11) The rate-limit check used to run *after* the type/
     -- registration checks below, so a client spamming malformed or
     -- unregistered procedure names never actually hit IsRateLimited and
@@ -122,40 +163,57 @@ AddEventHandler("Feather:Call", function(id, name, params)
     -- first means every call -- valid or not -- counts against the same
     -- window.
     if IsRateLimited(source) then
+        if id then TriggerRemoteEvent("Feather:Response", requestSource, id, nil, RpcError('rate_limited', 'RPC rate limit exceeded.')) end
         return
     end
 
     if type(name) ~= "string" then
         print("Name must be a string")
+        if id then TriggerRemoteEvent("Feather:Response", requestSource, id, nil, RpcError('invalid_request', 'RPC name must be a string.')) end
         return
     end
     if not registeredProcedures[name] then
         print("Procedure is not registered:", name)
+        if id then TriggerRemoteEvent("Feather:Response", requestSource, id, nil, RpcError('not_found', 'RPC procedure is not registered.')) end
         return
     end
 
-    local activeProcedure = registeredProcedures[name]
+    local registered = registeredProcedures[name]
+    local policy = registered.policy
+    if IsProcedureRateLimited(requestSource, name, policy) then
+        if id then TriggerRemoteEvent("Feather:Response", requestSource, id, nil, RpcError('rate_limited', 'RPC procedure rate limit exceeded.')) end
+        return
+    end
 
-    local returnValues = { activeProcedure(params, GetResponseFunction(id), source) }
+    local encodedOk, encoded = pcall(json.encode, params)
+    if not encodedOk or type(encoded) ~= 'string' or #encoded > policy.maxPayloadBytes then
+        if id then TriggerRemoteEvent("Feather:Response", requestSource, id, nil, RpcError('payload_too_large', 'RPC payload is too large.')) end
+        return
+    end
+
+    local ok, returnValues = pcall(function()
+        return { registered.callback(params, GetResponseFunction(id, requestSource), requestSource) }
+    end)
+    if not ok then
+        print(("RPC procedure '%s' failed: %s"):format(name, tostring(returnValues)))
+        if id then TriggerRemoteEvent("Feather:Response", requestSource, id, nil, RpcError('internal_error', 'RPC procedure failed.')) end
+        return
+    end
     if #returnValues > 0 and id then
-        TriggerRemoteEvent("Feather:Response", source, id, table.unpack(returnValues))
+        TriggerRemoteEvent("Feather:Response", requestSource, id, table.unpack(returnValues))
     end
 end)
 
 -- Handle the incomming response from the rpc
 AddEventHandler("Feather:Response", function(id, ...)
-    if not id then
-        print("RPC callback ID not found: ", id)
-        return
-    end
-    if not pendingCallbacks[id] then
-        print("RPC callback not found: ", id)
-        return
-    end
+    if type(id) ~= 'number' then return end
+    local pending = pendingCallbacks[id]
+    if not pending then return end
+    if IsOnServer() and pending.expectedSource ~= source then return end
 
-
-    pendingCallbacks[id](...)
     pendingCallbacks[id] = nil
+    local ok, err = pcall(pending.callback, ...)
+    if not ok then print(('RPC response callback failed: %s'):format(tostring(err))) end
 end)
 
 --------------------
@@ -163,12 +221,28 @@ end)
 --------------------
 
 -- Register the procedure/method
-function RPCAPI.Register(name, callback)
+function RPCAPI.Register(name, callback, options)
+    if type(name) ~= 'string' or name == '' or type(callback) ~= 'function' then return false end
+    options = type(options) == 'table' and options or {}
+    local owner = GetInvokingResource and GetInvokingResource() or nil
+    owner = owner or GetCurrentResourceName()
+    local existing = registeredProcedures[name]
+    if existing and existing.owner ~= owner then
+        print(("RPC procedure '%s' is already owned by %s; registration from %s rejected."):format(name, existing.owner, owner))
+        return false
+    end
+
+    local defaults = Config.RPCRateLimit or {}
+    local policy = {
+        windowMs = math.max(100, tonumber(options.windowMs) or tonumber(defaults.windowMs) or 1000),
+        maxCalls = options.maxCalls and math.max(1, tonumber(options.maxCalls) or 1) or nil,
+        maxPayloadBytes = math.max(64, tonumber(options.maxPayloadBytes) or tonumber(defaults.maxPayloadBytes) or 65536)
+    }
     if Config.DevMode then
         print("Registered RPC: ", name)
     end
 
-    registeredProcedures[name] = callback
+    registeredProcedures[name] = { callback = callback, policy = policy, owner = owner }
 
     return true
 end
@@ -182,15 +256,15 @@ function RPCAPI.Notify(name, params, source)
 end
 
 -- Send a single rpc
-function RPCAPI.Call(name, params, callback, source)
+function RPCAPI.Call(name, params, callback, source, timeoutMs)
     if not params then
         params = {}
     end
-    return CallRemoteProcedures(name, params, callback, source)
+    return CallRemoteProcedures(name, params, callback, source, timeoutMs)
 end
 
 -- Send a single rpc but with async
-function RPCAPI.CallAsync(name, params, source)
+function RPCAPI.CallAsync(name, params, source, timeoutMs)
     if not params then
         params = {}
     end
@@ -201,7 +275,7 @@ function RPCAPI.CallAsync(name, params, source)
     CallRemoteProcedures(name, params, function(...)
         -- Resolve the promise (tell the promise that it is done and can now proceed.)
         p:resolve({ ... })
-    end, source)
+    end, source, timeoutMs)
 
     -- Unpack the "awaited" promise. (Waits for the promise to be "done"/resolved)
     return table.unpack(Citizen.Await(p))
