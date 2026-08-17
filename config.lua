@@ -50,10 +50,12 @@ Config.XP = {
 -- needing its own rate limiter. (CORE-06)
 Config.RPCRateLimit = {
     windowMs = 1000, -- size of the rolling window
-    maxCalls = 30    -- max Feather:Call invocations per source per window
+    maxCalls = 30,   -- max Feather:Call invocations per source per window
+    timeoutMs = 10000, -- default client/server callback timeout
+    maxPayloadBytes = 65536 -- maximum encoded params size per call
 }
 
--- Minimum characters.roles.level required for CharacterAPI.IsAdmin(src) to
+-- Minimum roles.level required for CharacterAPI.IsAdmin(src) to
 -- return true. Matches the framework's seeded roles (see migration.sql/
 -- seed.sql): 'general' = 0 (default for every new character), 'admin' = 99.
 Config.AdminLevel = 99
