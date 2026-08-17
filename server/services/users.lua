@@ -43,24 +43,27 @@ end
 -- list -- this is what `users.license` is keyed on (see migration.sql),
 -- so it's the actual "who is this person" anchor everything else hangs off.
 function GetIdentifiers(src)
-    local identifiers = GetPlayerIdentifiers(src)
-
-    local license
-
-    for _, v in pairs(identifiers) do
-        if string.find(v, 'license') then
-            license = v
-        end
-
-        if license then
-            break
+    for _, identifier in ipairs(GetPlayerIdentifiers(src)) do
+        if identifier:sub(1, 8) == 'license:' then
+            return { license = identifier }
         end
     end
-
-    return {
-        license = license
-    }
+    return { license = nil }
 end
+
+ConnectionAPI.RegisterGate('feather-core:credentials', function(src, playerName)
+    local username = type(playerName) == 'string' and playerName:gsub('%s+', '') or ''
+    local identifiers = GetIdentifiers(src)
+    if not identifiers.license then return 'Invalid License' end
+    if username == '' then return 'Invalid Username' end
+    return nil
+end, {
+    priority = 0,
+    timeoutMs = 5000,
+    failClosed = true,
+    label = 'credentials',
+    failureMessage = 'Credential validation could not be completed. Please try again.'
+})
 
 -- Wires up the three CFX connection lifecycle events. Called once from
 -- RunCore() in server/main.lua. This is the only place user rows enter/
@@ -95,25 +98,16 @@ function SetupPlayerEvents()
     -- username, rejecting the connection outright if not.
     AddEventHandler('playerConnecting', function(name, kickreason, deferrals)
         local src = source
-        local username = string.gsub(name, "%s+", "")
-
         deferrals.defer()
         Wait(0)
 
-        deferrals.update("Checking Credentials")
-        local identifiers = GetIdentifiers(src)
-        Wait(0)
-
-        if not identifiers.license then
-            deferrals.done("Invalid License")
-            return
-        elseif not username then
-            deferrals.done("Invalid Username")
-            return
-        else
-            deferrals.update("Connecting to server...")
-            deferrals.done()
+        local rejection = ConnectionAPI.RunGates(src, name, deferrals)
+        if rejection then
+            deferrals.done(rejection)
             return
         end
+
+        deferrals.update('Connecting to server...')
+        deferrals.done()
     end)
 end
