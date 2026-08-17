@@ -40,7 +40,7 @@ end
 
 --? Register events to be listened for
 function KeyPressAPI:RegisterListener(keycode, cb)
-    if type(cb) ~= 'function' or Keys[keycode] == nil then return nil end
+    if not IsCallable(cb) or Keys[keycode] == nil then return nil end
 
     local bucket = KeyListeners[keycode]
     if not bucket then

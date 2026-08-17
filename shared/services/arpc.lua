@@ -222,7 +222,11 @@ end)
 
 -- Register the procedure/method
 function RPCAPI.Register(name, callback, options)
-    if type(name) ~= 'string' or name == '' or type(callback) ~= 'function' then return false end
+    if type(name) ~= 'string' or name == '' or not IsCallable(callback) then
+        print(('RPC.Register rejected invalid registration: name=%s callbackType=%s')
+            :format(tostring(name), type(callback)))
+        return false
+    end
     options = type(options) == 'table' and options or {}
     local owner = GetInvokingResource and GetInvokingResource() or nil
     owner = owner or GetCurrentResourceName()
