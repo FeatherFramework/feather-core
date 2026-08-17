@@ -315,17 +315,32 @@ RegisterNetEvent("Feather:Character:Spawn", function(character)
     local y = tonumber(character.y)
     local z = tonumber(character.z)
 
-    local groundCheck, ground = nil, nil
-    for height = 1, 1000 do
-        groundCheck, ground = GetGroundZAndNormalFor_3dCoord(x, y, height + 0.0)
-        if groundCheck then
-            break
-        end
+    if x == nil or y == nil or z == nil then
+        print(('[feather-core] Cannot spawn character %s: invalid saved coordinates (%s, %s, %s)'):format(
+            tostring(character.id or 'unknown'),
+            tostring(character.x),
+            tostring(character.y),
+            tostring(character.z)
+        ))
+        ShutdownLoadingScreen()
+        DoScreenFadeIn(500)
+        return
     end
-    z = ground
 
-    SetEntityCoords(player, x, y, z)
-    SetEntityHeading(player, GetEntityHeading(player))
+    -- Preserve the exact saved position. Ground probes can select terrain
+    -- beneath docks or the wrong surface around buildings and interiors.
+    FreezeEntityPosition(player, true)
+    RequestCollisionAtCoord(x, y, z)
+    SetEntityCoordsNoOffset(player, x, y, z, false, false, false)
+
+    local collisionDeadline = GetGameTimer() + 5000
+    while not HasCollisionLoadedAroundEntity(player)
+        and GetGameTimer() < collisionDeadline do
+        RequestCollisionAtCoord(x, y, z)
+        Wait(0)
+    end
+
+    FreezeEntityPosition(player, false)
     Wait(500)
 
     GuarmaCheck(player)
@@ -371,8 +386,12 @@ end)
 
 --TODO: Have this re-initiate Character select
 RegisterCommand('logout', function()
-    RPCAPI.CallAsync("UpdatePlayerCoords", GetEntityCoords(PlayerPedId()))
-    RPCAPI.CallAsync("LogoutCharacter", {})
+    -- Save the final position and flush the character in one request.
+    RPCAPI.CallAsync(
+        "LogoutCharacter",
+        GetEntityCoords(PlayerPedId())
+    )
+
     ActiveCharacter = {}
     ActiveSystems = {
         spawn = false,
@@ -381,4 +400,4 @@ RegisterCommand('logout', function()
     }
 
     MapAPI.setFOW(true)
-end)
+end, false)

@@ -1,7 +1,14 @@
--- Single-purpose wrapper: writes text to the OS clipboard via the native
--- clipboard hook.
+-- Sends clipboard requests through the Core NUI. Clipboard access belongs to
+-- the embedded browser and is not exposed as a RedM game native.
 ClipAPI = {}
 
 function ClipAPI.CopyToClipboard(text)
-    Citizen.InvokeNative(0x6A1738B4323FE2D9, "CLIPBOARD", text)
+    text = tostring(text or '')
+    if text == '' then return false end
+
+    SendNUIMessage({
+        type = 'clipboard',
+        text = text
+    })
+    return true
 end

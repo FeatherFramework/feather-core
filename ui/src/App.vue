@@ -11,6 +11,28 @@ const pvp = ref(false)
 const store = usePlayerStore();
 const locale = useLocaleStore();
 
+const copyToClipboard = async (text) => {
+  const value = String(text ?? "");
+  if (!value) return;
+
+  try {
+    await navigator.clipboard.writeText(value);
+    return;
+  } catch (_) {
+    // RedM may deny the modern clipboard API while the NUI is hidden.
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = value;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
+};
+
 onMounted(() => {
   window.addEventListener("message", onMessage);
 });
@@ -21,6 +43,9 @@ onUnmounted(() => {
 
 const onMessage = (event) => {
   switch (event.data.type) {
+    case "clipboard":
+      copyToClipboard(event.data.text);
+      break;
     case "toggle":
       store.storePlayer(event.data.player, event.data.config);
 

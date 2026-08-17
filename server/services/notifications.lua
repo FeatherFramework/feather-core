@@ -25,13 +25,8 @@ function SNotifyAPI.LeftNotify(src, text, duration)
     TriggerClientEvent("Feather:Notify", src, "LeftNotify", { text, duration })
 end
 
--- NOTE: argument order is swapped vs. every other function here --
--- ("TopBanner", src, ...) instead of (src, "TopBanner", ...) -- so this
--- passes the string "TopBanner" as the TriggerClientEvent target and `src`
--- as the notify type. Latent bug (tracked in the Phase 1 audit), not fixed
--- here.
 function SNotifyAPI.TopBanner(src, title, text, duration)
-    TriggerClientEvent("Feather:Notify", "TopBanner", src, { title, text, duration })
+    TriggerClientEvent("Feather:Notify", src, "TopBanner", { title, text, duration })
 end
 
 function SNotifyAPI.AdvancedRightNotify(src, text, dict, icon, color, duration, quality)
