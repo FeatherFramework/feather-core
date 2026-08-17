@@ -75,39 +75,56 @@ function CharacterAPI.GetCharacter(opts)
     -- becoming a "give money" exploit. Validates key + amount so a bad
     -- caller can't corrupt the field with a negative/non-numeric amount or
     -- drive a balance negative.
-    function charClass:Add(key, amount) -- Add dollars, tokens, gold, xp from character
-        if not EconomyKeys[key] then
-            print("[feather-core] Add rejected for non-economy key '" .. tostring(key) .. "'")
-            return false
-        end
-        amount = tonumber(amount)
-        if not amount or amount < 0 then
-            print("[feather-core] Add requires a non-negative numeric amount")
-            return false
-        end
-        CacheAPI.UpdateCacheBySrc('character', self.src, key, (self.char[key] or 0) + amount)
-        self.char = CacheAPI.GetCacheBySrc("character", self.src)
-        return true
+    function charClass:Add(key, amount)
+    if not EconomyKeys[key] then
+        print("[feather-core] Add rejected for non-economy key '" .. tostring(key) .. "'")
+        return false
     end
-    function charClass:Subtract(key, amount) -- Subtract dollars, tokens, gold, xp from character
-        if not EconomyKeys[key] then
-            print("[feather-core] Subtract rejected for non-economy key '" .. tostring(key) .. "'")
-            return false
-        end
-        amount = tonumber(amount)
-        if not amount or amount < 0 then
-            print("[feather-core] Subtract requires a non-negative numeric amount")
-            return false
-        end
-        local current = self.char[key] or 0
-        if current < amount then
-            print("[feather-core] Subtract rejected: insufficient " .. key)
-            return false
-        end
-        CacheAPI.UpdateCacheBySrc('character', self.src, key, current - amount)
-        self.char = CacheAPI.GetCacheBySrc("character", self.src)
-        return true
+
+    amount = tonumber(amount)
+    if not amount or amount < 0 then
+        print("[feather-core] Add requires a non-negative numeric amount")
+        return false
     end
+
+    local current = tonumber(self.char[key])
+    if current == nil then
+        print("[feather-core] Add rejected: invalid current " .. key .. " balance")
+        return false
+    end
+
+    CacheAPI.UpdateCacheBySrc('character', self.src, key, current + amount)
+    self.char = CacheAPI.GetCacheBySrc("character", self.src)
+    return true
+end
+
+function charClass:Subtract(key, amount)
+    if not EconomyKeys[key] then
+        print("[feather-core] Subtract rejected for non-economy key '" .. tostring(key) .. "'")
+        return false
+    end
+
+    amount = tonumber(amount)
+    if not amount or amount < 0 then
+        print("[feather-core] Subtract requires a non-negative numeric amount")
+        return false
+    end
+
+    local current = tonumber(self.char[key])
+    if current == nil then
+        print("[feather-core] Subtract rejected: invalid current " .. key .. " balance")
+        return false
+    end
+
+    if current < amount then
+        print("[feather-core] Subtract rejected: insufficient " .. key)
+        return false
+    end
+
+    CacheAPI.UpdateCacheBySrc('character', self.src, key, current - amount)
+    self.char = CacheAPI.GetCacheBySrc("character", self.src)
+    return true
+end
 
     -- Misc Functions
     function charClass:RemoveCharacter()
@@ -234,8 +251,21 @@ RPCAPI.Register("GetCharacter", function(_, res, player)
     return res(char.char)
 end)
 
-RPCAPI.Register("LogoutCharacter", function(_, res, player)
+RPCAPI.Register("LogoutCharacter", function(coords, res, player)
     local char = CharacterAPI.GetCharacter({src = player})
+
+    if not char or not char.char then
+        return res(false)
+    end
+
+    local x, y, z = table.unpack(coords or {})
+    x, y, z = tonumber(x), tonumber(y), tonumber(z)
+    if x and y and z then
+        char:UpdateCharacterPOS(x, y, z)
+    else
+        print(("[feather-core] LogoutCharacter received invalid coordinates from source %s"):format(tostring(player)))
+    end
+
     char:Logout()
     return res(true)
 end)
