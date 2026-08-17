@@ -12,6 +12,7 @@ function StartAPI()
     CoreClientApi.Wagon = WagonsAPI
     CoreClientApi.Keys = KeyPressAPI
     CoreClientApi.Clip = ClipAPI
+    CoreClientApi.Teleport = TeleportAPI
 
     CoreClientApi = SetupSharedAPI(CoreClientApi)
 
