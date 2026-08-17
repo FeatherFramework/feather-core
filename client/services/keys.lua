@@ -22,11 +22,14 @@ function StartKeyListeners()
         while true do
             Wait(4)
             if KeyListenerCount > 0 then
-                for key, _ in pairs(KeyListeners) do
+                for key, bucket in pairs(KeyListeners) do
                     local keycode = Keys[key]
                     if Citizen.InvokeNative(0x580417101DDB492F, 0, keycode) then
-                        for index, event in ipairs(KeyListeners[key]) do
-                            event.trigger()
+                        for _, event in pairs(bucket.listeners) do
+                            local ok, err = pcall(event.trigger)
+                            if not ok then
+                                print(('[feather-core] Key listener failed for %s: %s'):format(tostring(key), tostring(err)))
+                            end
                         end
                     end
                 end
@@ -37,16 +40,20 @@ end
 
 --? Register events to be listened for
 function KeyPressAPI:RegisterListener(keycode, cb)
-    local postition = 1
-    if KeyListeners[keycode] then
-        postition = #KeyListeners[keycode] + 1
-    else
-        KeyListeners[keycode] = {}
-        postition = 1
-    end
+    if type(cb) ~= 'function' or Keys[keycode] == nil then return nil end
 
-    KeyListeners[keycode][postition] = {
-        trigger = cb
+    local bucket = KeyListeners[keycode]
+    if not bucket then
+        bucket = { nextId = 0, listeners = {} }
+        KeyListeners[keycode] = bucket
+    end
+    bucket.nextId = bucket.nextId + 1
+    local position = bucket.nextId
+    local owner = GetInvokingResource and GetInvokingResource() or nil
+    if type(owner) ~= 'string' or owner == '' then owner = GetCurrentResourceName() end
+    bucket.listeners[position] = {
+        trigger = cb,
+        owner = owner
     }
     KeyListenerCount = KeyListenerCount + 1
 
@@ -56,11 +63,11 @@ function KeyPressAPI:RegisterListener(keycode, cb)
 
     local keyClass = {}
 
-    keyClass.position = postition
+    keyClass.position = position
     keyClass.keycode = keycode
 
     function keyClass:RemoveListener()
-        KeyPressAPI:RemoveListener({ self.keycode, self.postition })
+        KeyPressAPI:RemoveListener({ self.keycode, self.position })
     end
 
     return keyClass
@@ -68,12 +75,24 @@ end
 
 -- remove event listeners is best practice for memory management. however, this only applies if you are creating temporary listeners.
 function KeyPressAPI:RemoveListener(listener)
-    if KeyListeners[listener[1]] and KeyListeners[listener[1]][listener[2]] then
-        KeyListeners[listener[1]][listener[2]] = nil
-        KeyListenerCount = KeyListenerCount - 1
-    end
+    if type(listener) ~= 'table' then return false end
+    local bucket, id = KeyListeners[listener[1]], listener[2]
+    if not bucket or id == nil or bucket.listeners[id] == nil then return false end
 
-    if #KeyListeners[listener[1]] < 1 then --clear memory if there are not registered listeners for this event
-        KeyListeners[listener[1]] = nil
-    end
+    bucket.listeners[id] = nil
+    KeyListenerCount = math.max(0, KeyListenerCount - 1)
+    if next(bucket.listeners) == nil then KeyListeners[listener[1]] = nil end
+    return true
 end
+
+AddEventHandler('onClientResourceStop', function(resourceName)
+    for keycode, bucket in pairs(KeyListeners) do
+        for id, listener in pairs(bucket.listeners) do
+            if listener.owner == resourceName then
+                bucket.listeners[id] = nil
+                KeyListenerCount = math.max(0, KeyListenerCount - 1)
+            end
+        end
+        if next(bucket.listeners) == nil then KeyListeners[keycode] = nil end
+    end
+end)

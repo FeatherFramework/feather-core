@@ -74,10 +74,15 @@ local function startGlobalEventListeners(eventgroup)
 								DebugLog("EVENT TRIGGERED:", EVENTS[eventAtIndex].name, datafields)
 							end
           
-							if EventListeners[eventAtIndex] then
-								for index, event in ipairs(EventListeners[eventAtIndex]) do
-									event.trigger(datafields)
-								end
+                            local bucket = EventListeners[eventAtIndex]
+                            if bucket then
+                                for _, event in pairs(bucket.listeners) do
+                                    local ok, err = pcall(event.trigger, datafields)
+                                    if not ok then
+                                        print(('[feather-core] Event listener failed for %s: %s'):format(
+                                            tostring(event.eventname), tostring(err)))
+                                    end
+                                end
 							end
 						end
 					end
@@ -94,35 +99,52 @@ end
 
 --? Register events to be listened for
 function EventsAPI:RegisterEventListener(eventname, cb)
+	if type(eventname) ~= 'string' or type(cb) ~= 'function' then return nil end
 	local key = GetHashKey(eventname)
-	local postition = 1
-	if EventListeners[key] then
-		postition = #EventListeners[key] + 1
-	else
-		EventListeners[key] = {}
-		postition = 1
+	local bucket = EventListeners[key]
+	if not bucket then
+		bucket = { nextId = 0, listeners = {} }
+		EventListeners[key] = bucket
 	end
-
-	EventListeners[key][postition] = {
+	bucket.nextId = bucket.nextId + 1
+	local position = bucket.nextId
+	local owner = GetInvokingResource and GetInvokingResource() or nil
+	if type(owner) ~= 'string' or owner == '' then owner = GetCurrentResourceName() end
+	bucket.listeners[position] = {
 		eventname = eventname,
-		trigger = cb
+		trigger = cb,
+		owner = owner
 	}
     EventListenerCount = EventListenerCount + 1
 
 	print("EventListener Registered", eventname);
-	return { key, postition }
+	return { key, position }
 end
 
 -- remove event listeners is best practice for memory management. however, this only applies if you are creating temporary listeners.
 function EventsAPI:RemoveEventListener(listener)
-	if EventListeners[listener[1]] and EventListeners[listener[1]][listener[2]] then
-		EventListeners[listener[1]][listener[2]] = nil
-        EventListenerCount = EventListenerCount - 1
-	end
+	if type(listener) ~= 'table' then return false end
+	local bucket, id = EventListeners[listener[1]], listener[2]
+	if not bucket or id == nil or bucket.listeners[id] == nil then return false end
 
-	if #EventListeners[listener[1]] < 1 then --clear memory if there are not registered listeners for this event
-		EventListeners[listener[1]] = nil
-	end
+	bucket.listeners[id] = nil
+    EventListenerCount = math.max(0, EventListenerCount - 1)
+	if next(bucket.listeners) == nil then EventListeners[listener[1]] = nil end
+	return true
+end
+
+if not IsOnServer() then
+	AddEventHandler('onClientResourceStop', function(resourceName)
+		for eventHash, bucket in pairs(EventListeners) do
+			for id, listener in pairs(bucket.listeners) do
+				if listener.owner == resourceName then
+					bucket.listeners[id] = nil
+					EventListenerCount = math.max(0, EventListenerCount - 1)
+				end
+			end
+			if next(bucket.listeners) == nil then EventListeners[eventHash] = nil end
+		end
+	end)
 end
 
 function EventsAPI:DevMode(state, type)

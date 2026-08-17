@@ -82,13 +82,22 @@ function CharacterAPI.GetCharacter(opts)
     end
 
     amount = tonumber(amount)
-    if not amount or amount < 0 then
+    if not amount or amount ~= amount or amount == math.huge or amount < 0 then
         print("[feather-core] Add requires a non-negative numeric amount")
         return false
     end
 
-    local current = tonumber(self.char[key])
-    if current == nil then
+    -- API objects crossing a resource boundary contain a marshaled snapshot.
+    -- Always calculate from Core's live cache so concurrent adjustments do
+    -- not overwrite one another using an older balance.
+    local cached = CacheAPI.GetCacheBySrc('character', self.src)
+    if not cached then
+        print("[feather-core] Add rejected: character cache not found")
+        return false
+    end
+
+    local current = tonumber(cached[key])
+    if current == nil or current ~= current or current == math.huge or current == -math.huge then
         print("[feather-core] Add rejected: invalid current " .. key .. " balance")
         return false
     end
@@ -105,13 +114,20 @@ function charClass:Subtract(key, amount)
     end
 
     amount = tonumber(amount)
-    if not amount or amount < 0 then
+    if not amount or amount ~= amount or amount == math.huge or amount < 0 then
         print("[feather-core] Subtract requires a non-negative numeric amount")
         return false
     end
 
-    local current = tonumber(self.char[key])
-    if current == nil then
+    -- Read from the authoritative cache for the same reason as Add above.
+    local cached = CacheAPI.GetCacheBySrc('character', self.src)
+    if not cached then
+        print("[feather-core] Subtract rejected: character cache not found")
+        return false
+    end
+
+    local current = tonumber(cached[key])
+    if current == nil or current ~= current or current == math.huge or current == -math.huge then
         print("[feather-core] Subtract rejected: invalid current " .. key .. " balance")
         return false
     end
@@ -194,10 +210,11 @@ end
 -- claims about itself.
 function CharacterAPI.IsAdmin(src)
     local char = CharacterAPI.GetCharacter({ src = src })
-    if not char or not char.char or not char.char.level then
+    if not char or not char.char or not char.char.role_level then
         return false
     end
-    return char.char.level >= (Config.AdminLevel or 99)
+    local roleLevel = tonumber(char.char.role_level)
+    return roleLevel ~= nil and roleLevel >= (Config.AdminLevel or 99)
 end
 
 function CharacterAPI.InitiateCharacter(src, charid)

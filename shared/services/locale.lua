@@ -73,7 +73,12 @@ function LocalesAPI.register(key, translation)
     end
 
     
-    RPCAPI.CallAsync("SyncTranslations", { translations = LocalesAPI.translations })
+    -- Client-only resource translations need to reach the server. The server
+    -- already owns its local table and must not broadcast a callback RPC to
+    -- every client, since a callback has exactly one expected responder.
+    if not IsOnServer() then
+        RPCAPI.CallAsync("SyncTranslations", { translations = LocalesAPI.translations })
+    end
 end
 
 function LocalesAPI.translate(src, str, ...)

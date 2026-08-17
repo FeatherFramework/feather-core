@@ -9,6 +9,7 @@ function StartAPI()
     CoreServerApi.Instance = InstanceAPI
     CoreServerApi.Notify = SNotifyAPI
     CoreServerApi.Database = DatabaseAPI
+    CoreServerApi.Connection = ConnectionAPI
 
     CoreServerApi = SetupSharedAPI(CoreServerApi)
     
