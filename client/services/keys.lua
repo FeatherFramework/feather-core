@@ -9,12 +9,13 @@ KeyPressAPI = {}
 KeyListeners = {}
 KeyListenerCount = 0
 
+local function isKeyJustPressed(key)
+    return Citizen.InvokeNative(0x580417101DDB492F, 0, key) -- IS_CONTROL_JUST_PRESSED
+        or Citizen.InvokeNative(0x91AEF906BCA88877, 0, key) -- IS_DISABLED_CONTROL_JUST_PRESSED
+end
+
 function KeyPressAPI.whenKeyJustPressed(key)
-    if Citizen.InvokeNative(0x580417101DDB492F, 0, key) then
-        return true
-    else
-        return false
-    end
+    return isKeyJustPressed(key)
 end
 
 function StartKeyListeners()
@@ -24,7 +25,7 @@ function StartKeyListeners()
             if KeyListenerCount > 0 then
                 for key, bucket in pairs(KeyListeners) do
                     local keycode = Keys[key]
-                    if Citizen.InvokeNative(0x580417101DDB492F, 0, keycode) then
+                    if isKeyJustPressed(keycode) then
                         for _, event in pairs(bucket.listeners) do
                             local ok, err = pcall(event.trigger)
                             if not ok then
