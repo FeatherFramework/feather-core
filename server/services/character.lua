@@ -327,13 +327,52 @@ end)
 
 -- (CORE-04) `state` is a client-decided death flag with no server-side
 -- damage/eligibility check, persisted straight to the character. Flagged,
--- not fixed, in this pass -- a real fix needs a server-tracked
--- health/damage source of truth (out of scope here) rather than a
--- point patch on this handler. Safe to defer only because there's no
--- trusted-player server running yet; revisit before that changes.
+-- not fixed -- and, after actually verifying it against the CFX source
+-- rather than assuming, not fixable as a point patch on this handler at
+-- all on RedM today:
+--
+--   * GET_ENTITY_HEALTH is registered server-side (ServerGameState_Scripting.cpp),
+--     but reads through syncTree->GetPedHealth() -- and RDR3's sync tree
+--     (SyncTrees_RDR3.h) hardcodes that accessor to `return nullptr;`,
+--     unlike FiveM's (SyncTrees_Five.h), which actually pulls the synced
+--     node. Confirmed by reading both, not assumed. Always returns 0
+--     server-side for any RedM ped, healthy or not.
+--   * The native event queue behind EVENT_NETWORK_DAMAGE_ENTITY /
+--     EVENT_ENTITY_DESTROYED (GET_NUMBER_OF_EVENTS / GET_EVENT_AT_INDEX)
+--     has no server-side implementation in citizen-server-impl at all
+--     (grep-confirmed) -- client-observed only, for either game.
+--   * IS_PLAYER_DEAD is client-API-set only; no server equivalent exists
+--     to even attempt.
+--
+-- Every path bottoms out at the same wall: there is no server-side
+-- vantage point on RedM that observes a player's actual health/death
+-- state independent of that same player's client telling it. This isn't
+-- a gap in this handler, it's the current shape of the platform. A real
+-- improvement here is graduated trust, not verification: relay the richer
+-- native event payload (killer/weapon/coords) instead of a bare boolean,
+-- corroborate against IS_PLAYER_DEAD via a server-initiated RPC poll, and
+-- gate anything economically consequential (bounties, insurance, loot)
+-- behind that corroboration -- while accepting a determined client can
+-- still fake all of it at once, and keeping the cosmetic "show the death
+-- screen" path cheap and trusting since faking that only griefs yourself.
+-- Log claims either way so a real anti-cheat/admin pass has signal to
+-- work with. Revisit if RedM ever ships a real server-side health sync.
 RPCAPI.Register("CharacterDeath", function(state, res, player)
+    -- `state` still can't be verified server-side (see the note above), but
+    -- it can at least be locked to the two values this framework actually
+    -- understands -- 0 (alive) or 1 (dead) -- instead of accepting whatever
+    -- a client sends verbatim.
+    local deadState = tonumber(state)
+    if deadState ~= 0 and deadState ~= 1 then
+        return res(false)
+    end
+
     local char = CharacterAPI.GetCharacter({src = player})
-    char:UpdateAttribute('dead', state)
+    if not char or not char.char then
+        return res(false)
+    end
+
+    char:UpdateAttribute('dead', deadState)
     return res(true)
 end)
 
