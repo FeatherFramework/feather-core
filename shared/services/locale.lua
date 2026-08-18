@@ -1,6 +1,26 @@
 LocalesAPI = {}
 LocalesAPI.translations = {}
 
+-- (CORE-17) `LocalesAPI.translate` used to round-trip the "GetCharLang" RPC
+-- to the server on every single call -- every translated string in every
+-- UI, every frame it's redrawn. Cache the resolved language client-side
+-- instead: seeded from the character payload the server already sends on
+-- spawn (no extra RPC needed for that), refreshed by LocalesAPI.SetClientLang
+-- whenever the language actually changes (see client/services/ui.lua's
+-- 'updatelocale' NUI callback), and falls back to the RPC only if translate()
+-- is ever called before either of those has populated it.
+local ClientLangCache = nil
+
+function LocalesAPI.SetClientLang(lang)
+    ClientLangCache = lang
+end
+
+if not IsOnServer() then
+    RegisterNetEvent("Feather:Character:Spawn", function(character)
+        ClientLangCache = character and character.lang or ClientLangCache
+    end)
+end
+
 local function getLang(src)
     if IsOnServer() then
         local char = CharacterAPI.GetCharacter({ src = src})
@@ -86,7 +106,10 @@ function LocalesAPI.translate(src, str, ...)
     if IsOnServer() then
         lang = getLang(src)
     else
-        lang = RPCAPI.CallAsync("GetCharLang", {})
+        if ClientLangCache == nil then
+            ClientLangCache = RPCAPI.CallAsync("GetCharLang", {})
+        end
+        lang = ClientLangCache
     end
 
     if LocalesAPI.translations[lang] ~= nil then

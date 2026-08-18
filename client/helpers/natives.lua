@@ -24,12 +24,19 @@ function SetAttributeCoreValue(player, type, val)
     Citizen.InvokeNative(0xC6258F41D86676E0, player, type, val)
 end
 
+-- (CORE-27) `_RESTORE_PED_STAMINA` takes a float 0.0-100.0 stamina amount.
+-- This ignored its own `val` param and passed the literal 1065330373 --
+-- 1.0's raw IEEE-754 bit pattern, not the value 1.0 -- as if InvokeNative
+-- needed the reinterpreted bits rather than the float itself. `+ 0.0` is
+-- the correct way to force float marshaling here, same convention already
+-- used correctly for this same native in client/services/horses.lua.
 function RestorePedStamina(player, val)
-    Citizen.InvokeNative(0x675680D089BFA21F, player, 1065330373)
+    Citizen.InvokeNative(0x675680D089BFA21F, player, (tonumber(val) or 100.0) + 0.0)
 end
 
 function GuarmaCheck(player)
-    if Citizen.InvokeNative(0x43AD8FC02B429D33, GetEntityCoords(player), 10) == -512529193 then
+    local coords = GetEntityCoords(player)
+    if Citizen.InvokeNative(0x43AD8FC02B429D33, coords.x, coords.y, coords.z, 10) == -512529193 then
         Citizen.InvokeNative(0xA657EC9DBC6CC900, 1935063277) -- SetMinimapZone
         Citizen.InvokeNative(0xE8770EE02AEE45C2, 1)          -- SetWorldWaterType
         Citizen.InvokeNative(0x74E2261D2A66849A, true)       -- SetGuarmaWorldhorizonActive

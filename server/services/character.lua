@@ -32,10 +32,25 @@ function CharacterAPI.GetCharacter(opts)
     -- Cache Functions
     function charClass:UpdateCharacterPOS(x, y, z)
         -- (CORE-05) Trusts client-reported coords verbatim and persists them
-        -- every 30s -- no speed/bounds sanity check. Flagged, not fixed, in
-        -- this pass: deferred because it's inherent to RedM's
-        -- client-authoritative movement and this is a dev-only server with
-        -- no anti-cheat expectation yet. Revisit before any public launch.
+        -- every 30s -- no speed sanity check. Flagged, not fixed, in this
+        -- pass: deferred because it's inherent to RedM's client-authoritative
+        -- movement and this is a dev-only server with no anti-cheat
+        -- expectation yet. Revisit before any public launch.
+        --
+        -- (CORE-32) Range IS enforced now, though: `characters.x/y/z` are
+        -- `decimal(15,10)` (5 digits before the point), so a client sending
+        -- something like `x = 1e9` produced an out-of-range DB error ~30s
+        -- later on the cache flush thread -- which had no per-row pcall
+        -- (see CacheAPI.ReloadDBFromCache) and so died permanently, silently
+        -- ending persistence for every player until restart. 50000 is far
+        -- outside any real RDR3 map coordinate but safely inside the
+        -- column's range.
+        if type(x) ~= 'number' or type(y) ~= 'number' or type(z) ~= 'number'
+            or math.abs(x) > 50000 or math.abs(y) > 50000 or math.abs(z) > 50000 then
+            print(("[feather-core] Rejected UpdateCharacterPOS: out-of-range coords from src %s (%s, %s, %s)")
+                :format(tostring(self.src), tostring(x), tostring(y), tostring(z)))
+            return
+        end
         CacheAPI.UpdateCacheBySrc('character', self.src, "x", x)
         CacheAPI.UpdateCacheBySrc('character', self.src, "y", y)
         CacheAPI.UpdateCacheBySrc('character', self.src, "z", z)
@@ -159,7 +174,10 @@ end
 end
 
 function CharacterAPI.CreateCharacter(userid, roldid, firstname, lastname, model, dob,img, dollars, gold, tokens, xp, x, y, z, lang, desc)
-    CharacterController.CreateCharacter(userid, roldid, firstname, lastname, model, dob, img, dollars, gold, tokens, xp, x, y, z, lang, desc)
+    -- (CORE-21) Was dropping CharacterController.CreateCharacter's return
+    -- value entirely -- callers (feather-character's character-creation
+    -- flow) always got nil back instead of the new row/id.
+    return CharacterController.CreateCharacter(userid, roldid, firstname, lastname, model, dob, img, dollars, gold, tokens, xp, x, y, z, lang, desc)
 end
 
 -- The scoped character list: the only character ids a given src is allowed
@@ -243,7 +261,27 @@ function CharacterAPI.InitiateCharacter(src, charid)
     end
 
     local char = CacheAPI.AddToCache("character", src, charid)
+
+    -- `char.first_spawn` (see controllers/characters.lua) is read here and
+    -- immediately cleared in the DB so this is the only spawn that ever
+    -- sees it set -- the client uses it to decide whether to surface-find
+    -- this placement (first-ever spawn, a designer-picked town coordinate)
+    -- or trust it exactly (every later login, a previously-occupied
+    -- position).
+    if tonumber(char.first_spawn) == 1 then
+        CharacterController.ClearFirstSpawn(charid)
+    end
+
     TriggerClientEvent("Feather:Character:Spawn", src, char)
+
+    -- (INV-13) Server-internal signal for other resources (feather-inventory,
+    -- feather-weapons, ...) that need to react to a spawn with a trustworthy
+    -- character id. `char` and `src` are both authoritative here -- ownership
+    -- was just verified above -- unlike the client's re-broadcast
+    -- `TriggerServerEvent("Feather:Character:Spawned", ...)`, which any
+    -- client can call directly with a forged character. TriggerEvent only,
+    -- never networked.
+    TriggerEvent("Feather:Server:Character:Spawned", char, src)
     return true
 end
 

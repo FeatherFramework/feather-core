@@ -39,9 +39,15 @@ function InstanceAPI.create(id, tsrc)
             id = MathInstance:GetRandomInt()
         end
 
+        -- (CORE-19) Was `{ characters = { src = src } }` -- a table literal
+        -- with a field literally named "src", not `characters[src] = src`.
+        -- Every instance's membership table was therefore keyed on the
+        -- string "src" instead of the player's actual src, so lookups like
+        -- `GameInstances[id].characters[someSrc]` never matched the
+        -- creator -- membership tracking was broken from creation.
         GameInstances[id] = {
             characters = {
-                src = src
+                [src] = src
             }
         }
     elseif GameInstances[id] and not GameInstances[id].characters[src] then
@@ -75,11 +81,19 @@ function InstanceAPI.leave(id, tsrc)
         GameInstances[id].characters[src] = nil
     end
 
-    -- If the instance has no more characters registered, then remove the instance.
-    if GameInstances[id] and #GameInstances[id].characters <= 0 then
-        GameInstances[id] = nil
-    else
-        id = 0
+    -- (CORE-19) `#GameInstances[id].characters` used the length operator on
+    -- a table keyed by player src -- sparse, non-sequential integer keys,
+    -- which `#` has no defined behavior for. Count entries explicitly
+    -- instead.
+    if GameInstances[id] then
+        local remaining = 0
+        for _ in pairs(GameInstances[id].characters) do
+            remaining = remaining + 1
+        end
+        if remaining <= 0 then
+            GameInstances[id] = nil
+            MathInstance:ReleaseInt(id)
+        end
     end
 
     -- Set the character back to the global instance (0).
@@ -125,9 +139,9 @@ RPCAPI.Register("LeaveInstance", function(params, res, player)
     return res()
 end)
 
--- NOTE: references the undefined global `id` instead of `params.id` -- this
--- always operates on nil and has never worked (tracked in the Phase 1 audit).
+-- (CORE-19) Was referencing the undefined global `id` instead of `params.id`
+-- -- always operated on nil and never actually worked.
 RPCAPI.Register("GetInstancedCharacters", function(params, res, player)
-    local instances = InstanceAPI.getInstanceCharacters(id)
+    local instances = InstanceAPI.getInstanceCharacters(params.id)
     return res(instances)
 end)

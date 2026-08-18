@@ -28,8 +28,12 @@ function ObjectAPI:Create(modelhash, x, y, z, heading, networked, method)
         FreezeEntityPosition(self.Obj, CheckVar(state, true))
     end
 
-    function ObjClass:SetHeading(head) 
-        SetEntityHeading(self.Obj, CheckVar(state, head))
+    function ObjClass:SetHeading(head)
+        -- (Tier 1 audit sweep) Was `CheckVar(state, head)` -- `state` is an
+        -- undefined global, not a parameter of this method, so this only
+        -- ever worked by coincidence (CheckVar returns its 2nd arg whenever
+        -- the 1st is nil, which `state` always was).
+        SetEntityHeading(self.Obj, CheckVar(head, 0))
     end
 
     function ObjClass:PlaceOnGround(state) 

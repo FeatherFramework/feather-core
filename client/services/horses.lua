@@ -11,15 +11,16 @@ function HorseAPI:Create(modelHash, x, y, z, heading, gender, safeground, networ
     x, y, z, heading = table.unpack(vector4)
   end
 
+  -- (CORE-28) Was the same naive upward ground-probe as
+  -- teleportToClosestMedical/spawn used to have, but worse: `z = ground` was
+  -- unconditional -- if the 1..1000 scan never found anything, `ground`
+  -- held whatever the last failed probe returned (often 0 or garbage), and
+  -- the horse got created there regardless. TeleportAPI:FindSurface (this
+  -- same resource's client/services/teleport.lua) does the real raycast +
+  -- top-down ground-probe TeleportAPI:ToCoords uses, and returns the
+  -- original z unchanged if both fail, instead of an unguarded bad value.
   if CheckVar(safeground, true) then
-    local groundCheck, ground = nil, nil
-    for height = 1, 1000 do
-      groundCheck, ground = GetGroundZAndNormalFor_3dCoord(x, y, height + 0.0)
-      if groundCheck then
-        break
-      end
-    end
-    z = ground
+    z = TeleportAPI:FindSurface(x, y, z) or z
   end
 
   local countToBreak = 100

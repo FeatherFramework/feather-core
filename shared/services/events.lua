@@ -147,13 +147,21 @@ if not IsOnServer() then
 	end)
 end
 
+-- (Tier 1 audit sweep) The poll loop above reads `EventsDevMode[eventgroup + 1]`
+-- (Lua's 1-based indexing on a `{false, false}` literal, which occupies
+-- slots 1 and 2, never 0) -- this wrote to `EventsDevMode[0]`/`[1]` instead
+-- of `[1]`/`[2]`, so `DevMode('entities')` set a slot nothing ever reads,
+-- and `DevMode('network')` set the slot the loop actually reads for
+-- *entities* (eventgroup 0 -> index 1). Network logging could never be
+-- enabled, and "entities" logging was silently controlled by the
+-- 'network' call instead of its own.
 function EventsAPI:DevMode(state, type)
 	if type == 'entities' then
-		EventsDevMode[0] = state
+		EventsDevMode[1] = state
 	elseif type == 'network' then
-		EventsDevMode[1] = state
+		EventsDevMode[2] = state
 	else
-		EventsDevMode[0] = state
 		EventsDevMode[1] = state
+		EventsDevMode[2] = state
 	end
 end
