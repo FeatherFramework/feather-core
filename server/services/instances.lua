@@ -2,119 +2,117 @@
 -- bucket determines which other entities/players they can see and interact
 -- with (everyone in bucket 0, the default, sees each other; a player moved
 -- to bucket N is isolated from bucket 0 and from every other bucket).
--- GameInstances just tracks which src's are currently registered to which
--- bucket id so leave()/cleanup know who's still in an instance.
+-- GameInstances tracks which src's are currently registered to which bucket
+-- id; PlayerInstances is the reverse index (src -> instance id) that makes
+-- lookups/leaves/disconnect-cleanup authoritative instead of trusting
+-- whatever the client claims its current instance is.
 GameInstances = {}
+PlayerInstances = {}
 
 InstanceAPI = {}
 
 --An instanced math is used to keep track of prior instance ID's and prevent collision
 local MathInstance = MathI:instanced()
 
+-- Removes src from whatever instance PlayerInstances says it's actually in
+-- (not whatever a caller claims) and tears the instance down once empty,
+-- releasing its id back to the pool.
+local function removePlayerFromInstance(src)
+    local instanceId = PlayerInstances[src]
+    if not instanceId then return end
 
--- Moves `tsrc` (or the caller, if omitted) into routing bucket `id`,
+    local instance = GameInstances[instanceId]
+    if instance then
+        instance.characters[src] = nil
+
+        if next(instance.characters) == nil then
+            GameInstances[instanceId] = nil
+            MathInstance:ReleaseInt(instanceId)
+        end
+    end
+
+    PlayerInstances[src] = nil
+end
+
+-- Moves `targetSource` (or the caller, if omitted) into routing bucket `id`,
 -- creating a fresh randomly-generated bucket id if `id` is nil. Also
 -- migrates the player out of whatever instance they were previously
--- registered to, since a player can only be routed to one bucket at a time.
-function InstanceAPI.create(id, tsrc)
-    local src = source
-    if tsrc ~= nil then
-        src = tsrc
+-- registered to (via the reverse index, not a scan), since a player can
+-- only be routed to one bucket at a time.
+function InstanceAPI.create(id, targetSource)
+    local src = tonumber(targetSource) or source
+    if not src or src < 1 then return nil end
+
+    removePlayerFromInstance(src)
+
+    id = tonumber(id)
+    if not id then
+        id = MathInstance:GetRandomInt()
     end
 
-    -- Check to see if the player is already in a registered instance.
-    for key, value in pairs(GameInstances) do
-        if value.characters[src] then
-            DebugLog('Migrating user from instance ', key, ' to instance', id)
-
-            --Remove character from old instance
-            GameInstances[key].characters[src] = nil
-        end
-    end
-
-    if not GameInstances[id] then
-        -- Instance not found, create a new one
-        --Generate an instance ID if one was not provided
-        if id == nil then
-            id = MathInstance:GetRandomInt()
-        end
-
-        -- (CORE-19) Was `{ characters = { src = src } }` -- a table literal
-        -- with a field literally named "src", not `characters[src] = src`.
-        -- Every instance's membership table was therefore keyed on the
-        -- string "src" instead of the player's actual src, so lookups like
-        -- `GameInstances[id].characters[someSrc]` never matched the
-        -- creator -- membership tracking was broken from creation.
-        GameInstances[id] = {
-            characters = {
-                [src] = src
-            }
+    local instance = GameInstances[id]
+    if not instance then
+        instance = {
+            characters = {}
         }
-    elseif GameInstances[id] and not GameInstances[id].characters[src] then
-        -- If the instance exists, and the player is not already within the instance, add them
-        GameInstances[id].characters[src] = src
+        GameInstances[id] = instance
     end
 
+    instance.characters[src] = true
+    PlayerInstances[src] = id
 
-
-    SetPlayerRoutingBucket(
-        src,
-        id
-    )
+    SetPlayerRoutingBucket(src, id)
 
     -- Trigger Client Event for the isntanced player and send the ID
     TriggerClientEvent('Feather:Instance:Created', src, id)
     return id
 end
 
--- Removes `tsrc` (or the caller) from instance `id` and routes them back to
--- the global bucket (0). Deletes the instance entirely once it has no
--- players left registered to it.
-function InstanceAPI.leave(id, tsrc)
-    local src = source
-    if tsrc ~= nil then
-        src = tsrc
-    end
+-- Removes `targetSource` (or the caller) from whatever instance they're
+-- actually registered to -- looked up authoritatively via PlayerInstances,
+-- never trusted from a caller-supplied instance id -- and routes them back
+-- to the global bucket (0).
+function InstanceAPI.leave(targetSource)
+    local src = tonumber(targetSource) or source
+    if not src or src < 1 then return false end
 
-    -- If character is registered to the instance, remove them.
-    if GameInstances[id] and GameInstances[id].characters[src] then
-        GameInstances[id].characters[src] = nil
-    end
-
-    -- (CORE-19) `#GameInstances[id].characters` used the length operator on
-    -- a table keyed by player src -- sparse, non-sequential integer keys,
-    -- which `#` has no defined behavior for. Count entries explicitly
-    -- instead.
-    if GameInstances[id] then
-        local remaining = 0
-        for _ in pairs(GameInstances[id].characters) do
-            remaining = remaining + 1
-        end
-        if remaining <= 0 then
-            GameInstances[id] = nil
-            MathInstance:ReleaseInt(id)
-        end
-    end
+    removePlayerFromInstance(src)
 
     -- Set the character back to the global instance (0).
-    SetPlayerRoutingBucket(
-        src,
-        0
-    )
+    SetPlayerRoutingBucket(src, 0)
 
     -- Trigger Client Event for the isntanced player and send the
     TriggerClientEvent('Feather:Instance:Leave', src, 0)
+    return true
 end
 
--- Returns a list of all characters in a given instance
+-- Returns the raw internal membership table for a given instance. Not
+-- exposed to clients directly (see the GetInstancedCharacters RPC below) --
+-- intended for trusted server-side resources (e.g. feather-admin, after its
+-- own permission check) calling this export directly.
 function InstanceAPI.getInstanceCharacters(id)
-    if not GameInstances[id] then
-        print("Game instance does not exist")
+    id = tonumber(id)
+    local instance = id and GameInstances[id]
+    return instance and instance.characters or {}
+end
 
-        return {}
+function InstanceAPI.getPlayerInstance(src)
+    return PlayerInstances[tonumber(src)]
+end
+
+-- Public, RPC-safe view of an instance's roster: a plain sorted array of
+-- src ids, not the internal membership table (which uses src as both key
+-- and a `true` sentinel value -- an implementation detail callers shouldn't
+-- see or be able to hold a reference into).
+local function publicRoster(instanceId)
+    local roster = {}
+
+    for src in pairs(InstanceAPI.getInstanceCharacters(instanceId)) do
+        roster[#roster + 1] = src
     end
 
-    return GameInstances[id].characters
+    table.sort(roster)
+    return roster
 end
 
 -- Client-callable entry points for the API above.
@@ -134,14 +132,49 @@ RPCAPI.Register("CreateInstance", function(params, res, player)
     return res(id)
 end)
 
-RPCAPI.Register("LeaveInstance", function(params, res, player)
-    InstanceAPI.leave(params.id, player)
+-- (CORE-19 follow-up) Used to take a client-supplied instance id and leave
+-- *that* instance regardless of whether the caller was actually in it.
+-- Now only ever leaves whatever instance PlayerInstances says this src is
+-- actually registered to -- there's no longer an id for the client to lie
+-- about.
+RPCAPI.Register("LeaveInstance", function(_, res, player)
+    InstanceAPI.leave(player)
     return res()
 end)
 
--- (CORE-19) Was referencing the undefined global `id` instead of `params.id`
--- -- always operated on nil and never actually worked.
+-- (CORE-19 / info-disclosure follow-up) Was referencing the undefined
+-- global `id` instead of `params.id`, so it always operated on nil and
+-- returned {} -- but naively fixing that to `params.id` without adding
+-- authorization would let any client query any instance's full roster by
+-- id (a private instance's membership is meant to be isolated from anyone
+-- not routed into it). Now only returns a roster when the caller is
+-- asking about the instance it's actually currently in -- cross-checked
+-- both against the framework's own PlayerInstances bookkeeping and the
+-- real native routing bucket, so a desync between the two fails closed.
+--
+-- Deliberately not admin-gated as an alternative path: core has no way to
+-- know which admin permission should justify an arbitrary instance lookup,
+-- and a client has no legitimate reason to discover another instance's
+-- roster at all. A trusted server resource (e.g. feather-admin, after its
+-- own permission check) should call InstanceAPI.getInstanceCharacters(id)
+-- directly rather than going through this RPC.
 RPCAPI.Register("GetInstancedCharacters", function(params, res, player)
-    local instances = InstanceAPI.getInstanceCharacters(params.id)
-    return res(instances)
+    if type(params) ~= 'table' then
+        return res({})
+    end
+
+    local requestedId = tonumber(params.id)
+    local currentId = InstanceAPI.getPlayerInstance(player)
+
+    if not requestedId
+        or requestedId ~= currentId
+        or GetPlayerRoutingBucket(player) ~= currentId then
+        return res({})
+    end
+
+    return res(publicRoster(currentId))
+end)
+
+AddEventHandler('playerDropped', function()
+    removePlayerFromInstance(source)
 end)
