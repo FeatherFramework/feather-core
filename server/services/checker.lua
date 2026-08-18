@@ -6,6 +6,27 @@
 -- once from RunCore().
 VersionerAPI = {}
 
+-- (CORE-25) Was a plain string comparison (current.version > latest.version)
+-- in both checkRelease and checkFile below, which is a lexical compare, not
+-- semver -- "0.9.0" > "0.10.0" is true lexically even though 0.10.0 is the
+-- newer release. Compares dot-separated numeric segments left to right
+-- instead; a missing/non-numeric segment is treated as 0 so uneven lengths
+-- ("1.2" vs "1.2.1") and stray prefixes/suffixes ("v1.2.0", "1.2.0-beta")
+-- degrade gracefully rather than erroring.
+-- @return -1 if a < b, 0 if equal, 1 if a > b
+local function CompareVersions(a, b)
+    a, b = tostring(a or ''), tostring(b or '')
+    local aParts, bParts = {}, {}
+    for part in a:gmatch('%d+') do aParts[#aParts + 1] = tonumber(part) end
+    for part in b:gmatch('%d+') do bParts[#bParts + 1] = tonumber(part) end
+
+    for i = 1, math.max(#aParts, #bParts) do
+        local av, bv = aParts[i] or 0, bParts[i] or 0
+        if av ~= bv then return av < bv and -1 or 1 end
+    end
+    return 0
+end
+
 VersionerAPI.checkRelease = function(resourcename, repo)
     repo = repo:gsub("https://github.com/", "")
 
@@ -32,13 +53,10 @@ VersionerAPI.checkRelease = function(resourcename, repo)
             local uptodate = false
             local overdate = false
 
-            -- NOTE: lexical string comparison, not a real semver compare --
-            -- e.g. "0.9.0" > "0.10.0" lexically even though it's the older
-            -- version. feather-menu fixed this with a numeric comparator;
-            -- this repo (and feather-progressbar) still don't.
-            if current.version > latest.version then
+            local cmp = CompareVersions(current.version, latest.version)
+            if cmp > 0 then
                 overdate = true
-            elseif current.version < latest.version then
+            elseif cmp < 0 then
                 uptodate = false
             else
                 uptodate = true
@@ -78,13 +96,10 @@ VersionerAPI.checkFile = function(resourcename, repo)
             local uptodate = false
             local overdate = false
 
-            -- NOTE: lexical string comparison, not a real semver compare --
-            -- e.g. "0.9.0" > "0.10.0" lexically even though it's the older
-            -- version. feather-menu fixed this with a numeric comparator;
-            -- this repo (and feather-progressbar) still don't.
-            if current.version > latest.version then
+            local cmp = CompareVersions(current.version, latest.version)
+            if cmp > 0 then
                 overdate = true
-            elseif current.version < latest.version then
+            elseif cmp < 0 then
                 uptodate = false
             else
                 uptodate = true

@@ -57,7 +57,7 @@ local function revivePlayer()
     SetAttributeCoreValue(player, 0, 100)
     SetEntityHealth(player, 600, 1)
     SetAttributeCoreValue(player, 1, 100)
-    RestorePedStamina(player, 1065330373)
+    RestorePedStamina(player, 100.0)
 
     if Config.Character.death.cameraRotation == true then
         EndDeathCam()
@@ -69,9 +69,8 @@ local function revivePlayer()
 end
 
 -- Finds the nearest configured respawn point (Config.RespawnLocations) and
--- moves the ped there, probing upward for solid ground (RedM has no direct
--- "get ground height" that always works from below terrain) before setting
--- final coords.
+-- moves the ped there via TeleportAPI:ToCoords (client/services/teleport.lua),
+-- which handles surface/ground detection and collision streaming.
 local function teleportToClosestMedical()
     local closestIndex = 1
     local closestDistance = 99999999999999
@@ -86,21 +85,23 @@ local function teleportToClosestMedical()
     end
 
     local hospital = Config.RespawnLocations[closestIndex]
-    local x, y, z = table.unpack(hospital.coords)
-    local groundCheck, ground = nil, nil
-    for height = 1, 1000 do
-        groundCheck, ground = GetGroundZAndNormalFor_3dCoord(x, y, height + 0.0)
-        if groundCheck then
-            break
-        end
-    end
-
-    if ground > 0.0 then
-        z = ground
-    end
-    
-    SetEntityCoords(player, x, y, z)
-    SetEntityHeading(player, hospital.heading)
+    -- (CORE-28) Was a naive upward ground-probe (z=1..1000, one unit at a
+    -- time), which stops at the FIRST solid surface it crosses -- often a
+    -- dock, bridge, or floor slab below the real outdoor terrain -- instead
+    -- of the actual ground, and silently does nothing if the real terrain
+    -- sits above z=1000. TeleportAPI:ToCoords (this same resource's own
+    -- client/services/teleport.lua, already used by feather-admin's
+    -- teleport tooling) does this properly: a downward raycast for the true
+    -- topmost surface, a top-down ground-probe fallback, streaming the
+    -- destination area in before probing so collision is actually loaded,
+    -- and a coordinate fallback if surface detection fails outright.
+    -- fade=false because respawnPlayer() (the only caller) has already
+    -- faded to black and fades back in itself via hoursLaterDisplay().
+    TeleportAPI:ToCoords(hospital.coords, {
+        entity = player,
+        heading = hospital.heading,
+        fade = false
+    })
     Citizen.InvokeNative(0x9587913B9E772D29, player, 0)
 end
 
@@ -232,7 +233,6 @@ end
 -- prompt appears (skipped if being carried) and completing it triggers
 -- respawnPlayer(). Runs for the lifetime of the spawned character.
 local function DeadCheck()
-    local deadInitiated = false
     local deadPromptGroup = PromptsAPI:SetupPromptGroup() --Setup Prompt Group
     local deadPrompt = deadPromptGroup:RegisterPrompt(LocalesAPI.translate(0, "death_prompt"), Keys.R, 1, 1, true, 'hold',
         { timedeventhash = "MEDIUM_TIMED_EVENT" })        --Register your first prompt
@@ -240,8 +240,23 @@ local function DeadCheck()
     local deathText = LocalesAPI.translate(0, "death_text")
     local deathTimerText = LocalesAPI.translate(0, "death_timer")
 
+    -- (CORE-29) DeadCheck() is called once per spawn (see the
+    -- "Feather:Character:Spawn" handler below), and its `while true do`
+    -- loop had no exit condition -- every respawn/character-switch left the
+    -- previous call's loop running forever in the background, permanently
+    -- polling IsEntityDead every tick. `Feather:Character:Logout` already
+    -- fires on logout; this loop now stops itself on the next logout after
+    -- it started, so only the current spawn's loop is ever alive.
+    local stopped = false
+    local stopHandler
+    stopHandler = AddEventHandler('Feather:Character:Logout', function()
+        stopped = true
+        RemoveEventHandler(stopHandler)
+    end)
+
+    local deadInitiated = false
     CreateThread(function()
-        while true do
+        while not stopped do
             Wait(0)
             local player = PlayerPedId()
 
@@ -297,11 +312,11 @@ end
 ----------------------------------
 -- Server-pushed once CharacterAPI.InitiateCharacter succeeds (see
 -- server/services/character.lua). Places the ped at the character's saved
--- coords (probing for ground height the same way teleportToClosestMedical
--- does), waits for interiors/maps/core to finish loading, starts the
--- position-sync and death-watch loops, and finally re-broadcasts
--- Feather:Character:Spawned both to the server (so other resources like
--- feather-weapons/feather-inventory can react) and locally on the client.
+-- coords via TeleportAPI:ToCoords (client/services/teleport.lua), waits for
+-- interiors/maps/core to finish loading, starts the position-sync and
+-- death-watch loops, and finally re-broadcasts Feather:Character:Spawned
+-- both to the server (so other resources like feather-weapons/
+-- feather-inventory can react) and locally on the client.
 -- `character.dead == 1` replays the death state if they logged out dead.
 RegisterNetEvent("Feather:Character:Spawn", function(character)
     DoScreenFadeOut(2000)
@@ -327,21 +342,24 @@ RegisterNetEvent("Feather:Character:Spawn", function(character)
         return
     end
 
-    -- Preserve the exact saved position. Ground probes can select terrain
-    -- beneath docks or the wrong surface around buildings and interiors.
-    FreezeEntityPosition(player, true)
-    RequestCollisionAtCoord(x, y, z)
-    SetEntityCoordsNoOffset(player, x, y, z, false, false, false)
-
-    local collisionDeadline = GetGameTimer() + 5000
-    while not HasCollisionLoadedAroundEntity(player)
-        and GetGameTimer() < collisionDeadline do
-        RequestCollisionAtCoord(x, y, z)
-        Wait(0)
+    -- (CORE-28) `first_spawn` (see controllers/characters.lua, cleared
+    -- one-shot by InitiateCharacter) tells a brand-new character's very
+    -- first placement -- a designer-picked town coordinate from
+    -- feather-character's creation flow, which may need surface-correction
+    -- the same way the hospital respawn locations do -- apart from every
+    -- later login, whose saved position was actually occupied (a dock,
+    -- porch, upper floor, ...) and must be trusted exactly, never
+    -- surface-corrected. fade=false because this handler owns its own
+    -- loading-screen/fade choreography around the whole spawn sequence.
+    local placed = TeleportAPI:ToCoords(vector3(x, y, z), {
+        entity = player,
+        findSurface = tonumber(character.first_spawn) == 1,
+        fade = false
+    })
+    if not placed.success then
+        print(('[feather-core] Spawn placement for character %s did not complete cleanly: %s'):format(
+            tostring(character.id or 'unknown'), tostring(placed.reason)))
     end
-
-    FreezeEntityPosition(player, false)
-    Wait(500)
 
     GuarmaCheck(player)
     SetEagleEye(player, Config.UseEagleEye)

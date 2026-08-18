@@ -27,15 +27,15 @@ function PedAPI:Create(modelhash, x, y, z, heading, location, safeground, option
         x, y, z, heading = table.unpack(vector4)
     end
 
+    -- (same pattern as CORE-28) Was a naive upward ground-probe (z=1..1000,
+    -- one unit at a time) with `z = ground` applied unconditionally -- if
+    -- the scan never found anything, the ped got created at whatever the
+    -- last failed probe returned (often 0 or garbage). TeleportAPI:FindSurface
+    -- (client/services/teleport.lua) does a real raycast + top-down
+    -- ground-probe and returns the original z unchanged if both fail,
+    -- instead of an unguarded bad value.
     if CheckVar(safeground, true) then
-        local groundCheck, ground = nil, nil
-        for height = 1, 1000 do
-            groundCheck, ground = GetGroundZAndNormalFor_3dCoord(x, y, height + 0.0)
-            if groundCheck then
-                break
-            end
-        end
-        z = ground
+        z = TeleportAPI:FindSurface(x, y, z) or z
     end
 
     if location == nil or location == 'world' then

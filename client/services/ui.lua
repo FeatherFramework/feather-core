@@ -103,6 +103,14 @@ end)
 
 RegisterNUICallback('updatelocale', function(args, nuicb)
     ActiveCharacter = RPCAPI.CallAsync("UpdatePlayerLang", args.locale, function()end)
+    -- (CORE-17) Keep LocalesAPI's client-side language cache in sync
+    -- immediately instead of leaving it stale until the next spawn. Synced
+    -- from the server's response (what it actually persisted) rather than
+    -- args.locale directly, since UpdatePlayerLang silently rejects unknown
+    -- languages and leaves the character's lang unchanged in that case.
+    if ActiveCharacter then
+        LocalesAPI.SetClientLang(ActiveCharacter.lang)
+    end
     nuicb('ok')
 end)
 

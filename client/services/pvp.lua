@@ -42,7 +42,11 @@ CreateThread(function()
 
         local playerPed = PlayerPedId()
 
-        local isPlayerOutOfVehicle = not IsPedOnMount(PlayerPed) and not IsPedInAnyVehicle(PlayerPed, false)
+        -- (Tier 1 audit sweep) Was the bare global `PlayerPed` (undefined),
+        -- not the local `playerPed` defined above -- both natives ran
+        -- against nil, so this check never reflected real mount/vehicle
+        -- state.
+        local isPlayerOutOfVehicle = not IsPedOnMount(playerPed) and not IsPedInAnyVehicle(playerPed, false)
         local isPlayerDriver = IsPedOnMount(playerPed) or IsPedInAnyVehicle(playerPed, false)
         if isPlayerOutOfVehicle or isPlayerDriver then
             PVPAPI:setPause(false)

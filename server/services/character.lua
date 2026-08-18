@@ -32,10 +32,25 @@ function CharacterAPI.GetCharacter(opts)
     -- Cache Functions
     function charClass:UpdateCharacterPOS(x, y, z)
         -- (CORE-05) Trusts client-reported coords verbatim and persists them
-        -- every 30s -- no speed/bounds sanity check. Flagged, not fixed, in
-        -- this pass: deferred because it's inherent to RedM's
-        -- client-authoritative movement and this is a dev-only server with
-        -- no anti-cheat expectation yet. Revisit before any public launch.
+        -- every 30s -- no speed sanity check. Flagged, not fixed, in this
+        -- pass: deferred because it's inherent to RedM's client-authoritative
+        -- movement and this is a dev-only server with no anti-cheat
+        -- expectation yet. Revisit before any public launch.
+        --
+        -- (CORE-32) Range IS enforced now, though: `characters.x/y/z` are
+        -- `decimal(15,10)` (5 digits before the point), so a client sending
+        -- something like `x = 1e9` produced an out-of-range DB error ~30s
+        -- later on the cache flush thread -- which had no per-row pcall
+        -- (see CacheAPI.ReloadDBFromCache) and so died permanently, silently
+        -- ending persistence for every player until restart. 50000 is far
+        -- outside any real RDR3 map coordinate but safely inside the
+        -- column's range.
+        if type(x) ~= 'number' or type(y) ~= 'number' or type(z) ~= 'number'
+            or math.abs(x) > 50000 or math.abs(y) > 50000 or math.abs(z) > 50000 then
+            print(("[feather-core] Rejected UpdateCharacterPOS: out-of-range coords from src %s (%s, %s, %s)")
+                :format(tostring(self.src), tostring(x), tostring(y), tostring(z)))
+            return
+        end
         CacheAPI.UpdateCacheBySrc('character', self.src, "x", x)
         CacheAPI.UpdateCacheBySrc('character', self.src, "y", y)
         CacheAPI.UpdateCacheBySrc('character', self.src, "z", z)
@@ -159,7 +174,10 @@ end
 end
 
 function CharacterAPI.CreateCharacter(userid, roldid, firstname, lastname, model, dob,img, dollars, gold, tokens, xp, x, y, z, lang, desc)
-    CharacterController.CreateCharacter(userid, roldid, firstname, lastname, model, dob, img, dollars, gold, tokens, xp, x, y, z, lang, desc)
+    -- (CORE-21) Was dropping CharacterController.CreateCharacter's return
+    -- value entirely -- callers (feather-character's character-creation
+    -- flow) always got nil back instead of the new row/id.
+    return CharacterController.CreateCharacter(userid, roldid, firstname, lastname, model, dob, img, dollars, gold, tokens, xp, x, y, z, lang, desc)
 end
 
 -- The scoped character list: the only character ids a given src is allowed
@@ -243,7 +261,27 @@ function CharacterAPI.InitiateCharacter(src, charid)
     end
 
     local char = CacheAPI.AddToCache("character", src, charid)
+
+    -- `char.first_spawn` (see controllers/characters.lua) is read here and
+    -- immediately cleared in the DB so this is the only spawn that ever
+    -- sees it set -- the client uses it to decide whether to surface-find
+    -- this placement (first-ever spawn, a designer-picked town coordinate)
+    -- or trust it exactly (every later login, a previously-occupied
+    -- position).
+    if tonumber(char.first_spawn) == 1 then
+        CharacterController.ClearFirstSpawn(charid)
+    end
+
     TriggerClientEvent("Feather:Character:Spawn", src, char)
+
+    -- (INV-13) Server-internal signal for other resources (feather-inventory,
+    -- feather-weapons, ...) that need to react to a spawn with a trustworthy
+    -- character id. `char` and `src` are both authoritative here -- ownership
+    -- was just verified above -- unlike the client's re-broadcast
+    -- `TriggerServerEvent("Feather:Character:Spawned", ...)`, which any
+    -- client can call directly with a forged character. TriggerEvent only,
+    -- never networked.
+    TriggerEvent("Feather:Server:Character:Spawned", char, src)
     return true
 end
 
@@ -289,13 +327,52 @@ end)
 
 -- (CORE-04) `state` is a client-decided death flag with no server-side
 -- damage/eligibility check, persisted straight to the character. Flagged,
--- not fixed, in this pass -- a real fix needs a server-tracked
--- health/damage source of truth (out of scope here) rather than a
--- point patch on this handler. Safe to defer only because there's no
--- trusted-player server running yet; revisit before that changes.
+-- not fixed -- and, after actually verifying it against the CFX source
+-- rather than assuming, not fixable as a point patch on this handler at
+-- all on RedM today:
+--
+--   * GET_ENTITY_HEALTH is registered server-side (ServerGameState_Scripting.cpp),
+--     but reads through syncTree->GetPedHealth() -- and RDR3's sync tree
+--     (SyncTrees_RDR3.h) hardcodes that accessor to `return nullptr;`,
+--     unlike FiveM's (SyncTrees_Five.h), which actually pulls the synced
+--     node. Confirmed by reading both, not assumed. Always returns 0
+--     server-side for any RedM ped, healthy or not.
+--   * The native event queue behind EVENT_NETWORK_DAMAGE_ENTITY /
+--     EVENT_ENTITY_DESTROYED (GET_NUMBER_OF_EVENTS / GET_EVENT_AT_INDEX)
+--     has no server-side implementation in citizen-server-impl at all
+--     (grep-confirmed) -- client-observed only, for either game.
+--   * IS_PLAYER_DEAD is client-API-set only; no server equivalent exists
+--     to even attempt.
+--
+-- Every path bottoms out at the same wall: there is no server-side
+-- vantage point on RedM that observes a player's actual health/death
+-- state independent of that same player's client telling it. This isn't
+-- a gap in this handler, it's the current shape of the platform. A real
+-- improvement here is graduated trust, not verification: relay the richer
+-- native event payload (killer/weapon/coords) instead of a bare boolean,
+-- corroborate against IS_PLAYER_DEAD via a server-initiated RPC poll, and
+-- gate anything economically consequential (bounties, insurance, loot)
+-- behind that corroboration -- while accepting a determined client can
+-- still fake all of it at once, and keeping the cosmetic "show the death
+-- screen" path cheap and trusting since faking that only griefs yourself.
+-- Log claims either way so a real anti-cheat/admin pass has signal to
+-- work with. Revisit if RedM ever ships a real server-side health sync.
 RPCAPI.Register("CharacterDeath", function(state, res, player)
+    -- `state` still can't be verified server-side (see the note above), but
+    -- it can at least be locked to the two values this framework actually
+    -- understands -- 0 (alive) or 1 (dead) -- instead of accepting whatever
+    -- a client sends verbatim.
+    local deadState = tonumber(state)
+    if deadState ~= 0 and deadState ~= 1 then
+        return res(false)
+    end
+
     local char = CharacterAPI.GetCharacter({src = player})
-    char:UpdateAttribute('dead', state)
+    if not char or not char.char then
+        return res(false)
+    end
+
+    char:UpdateAttribute('dead', deadState)
     return res(true)
 end)
 
