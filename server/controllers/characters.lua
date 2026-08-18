@@ -33,8 +33,15 @@ end
 
 -- Inserts a brand-new character row. Called from feather-character's
 -- SaveCharacterData RPC handler once a user finishes character creation.
+-- (CHAR-07/TOCTOU) Was MySQL.query.await, whose return for an INSERT is an
+-- OkPacket-shaped table, not a usable id -- callers had no way to learn the
+-- new row's id except re-deriving it with a separate SELECT, which is where
+-- CHAR-07's wrong-character-id race lived. MySQL.insert.await returns the
+-- real insertId directly (the convention already used elsewhere in the
+-- framework, e.g. feather-admin's audit_log.lua), so the caller never needs
+-- to re-derive it.
 function CharacterController.CreateCharacter(userID, roleID, firstname, lastname, model, dob, img, dollars, gold, tokens, xp, x, y, z, lang, desc)
-    return MySQL.query.await(
+    return MySQL.insert.await(
         "INSERT INTO characters (user_id, role_id, first_name, last_name,model, dob, img, dollars, gold, tokens, xp, x, y, z, lang, description, dead) VALUES (@userid, @roleid, @firstname, @lastname, @model, @dob, @img, @dollars, @gold, @tokens, @xp, @x, @y, @z, @lang, @description, @dead)",
         {
             ['userid'] = userID,
