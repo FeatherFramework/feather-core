@@ -91,15 +91,17 @@ local function teleportToClosestMedical()
     -- of the actual ground, and silently does nothing if the real terrain
     -- sits above z=1000. TeleportAPI:ToCoords (this same resource's own
     -- client/services/teleport.lua, already used by feather-admin's
-    -- teleport tooling) does this properly: a downward raycast for the true
-    -- topmost surface, a top-down ground-probe fallback, streaming the
-    -- destination area in before probing so collision is actually loaded,
-    -- and a coordinate fallback if surface detection fails outright.
+    -- teleport tooling) does this properly: it streams the destination first
+    -- and requires repeated downward raycasts to agree on the topmost surface.
     -- fade=false because respawnPlayer() (the only caller) has already
     -- faded to black and fades back in itself via hoursLaterDisplay().
     TeleportAPI:ToCoords(hospital.coords, {
         entity = player,
         heading = hospital.heading,
+        mode = 'surface',
+        streamTimeout = 10000,
+        surfaceTimeout = 10000,
+        settleTimeout = 10000,
         fade = false
     })
     Citizen.InvokeNative(0x9587913B9E772D29, player, 0)
@@ -351,9 +353,14 @@ RegisterNetEvent("Feather:Character:Spawn", function(character)
     -- porch, upper floor, ...) and must be trusted exactly, never
     -- surface-corrected. fade=false because this handler owns its own
     -- loading-screen/fade choreography around the whole spawn sequence.
+    local firstSpawn = tonumber(character.first_spawn) == 1
     local placed = TeleportAPI:ToCoords(vector3(x, y, z), {
         entity = player,
-        findSurface = tonumber(character.first_spawn) == 1,
+        mode = firstSpawn and 'surface' or 'exact',
+        requireNearbySurface = firstSpawn,
+        streamTimeout = 10000,
+        surfaceTimeout = 10000,
+        settleTimeout = 10000,
         fade = false
     })
     if not placed.success then
