@@ -1,9 +1,8 @@
--- The core Vue-based HUD (ui/ folder) that shows player info/PVP toggle/
--- locale switch, plus a wrapper around RedM's native XP/rank bar HUD
--- element. Opened via the Config.UI.command chat command or
--- Config.UI.hotkey keybind (both wired up at the bottom of this file).
+-- Wrapper around RedM's native "mp_rank_bar" HUD element. The Vue-based
+-- player HUD (player info/PVP toggle/locale switch) moved to the
+-- feather-hud resource -- see feather-hud/client/services/ui.lua -- since
+-- it's unrelated to this native databinding wrapper.
 UIAPI = {}
-UIState = false
 
 -- Wraps the native "mp_rank_bar" HUD databinding element (health/stamina-
 -- style progress bar with a label) so callers can set its fields without
@@ -72,57 +71,3 @@ function UIAPI.CreateRankBar(text, header, alpha, min, max, xp, visible)
 
     return RBClass
 end
-
--- Shows/hides the core HUD, sending it a fresh snapshot of the active
--- character, XP config, PVP state, and locale strings each time it opens.
-function UIAPI.ToggleUI()
-    ActiveCharacter = RPCAPI.CallAsync("GetCharacter", {})
-    if ActiveCharacter == nil or ActiveCharacter == {} then
-        print("No active character found")
-        return
-    end
-
-    UIState = not UIState
-    SendNUIMessage({
-        type = 'toggle',
-        visible = UIState,
-        player = ActiveCharacter,
-        config = {
-            xp = Config.XP
-        },
-        pvp = PVPAPI.active,
-        locale = LocalesAPI.translations
-    })
-end
-
-RegisterNUICallback('updatestate', function(args, nuicb)
-    UIState = args.state
-    SetNuiFocus(UIState, UIState)
-    nuicb('ok')
-end)
-
-RegisterNUICallback('updatelocale', function(args, nuicb)
-    ActiveCharacter = RPCAPI.CallAsync("UpdatePlayerLang", args.locale, function()end)
-    -- (CORE-17) Keep LocalesAPI's client-side language cache in sync
-    -- immediately instead of leaving it stale until the next spawn. Synced
-    -- from the server's response (what it actually persisted) rather than
-    -- args.locale directly, since UpdatePlayerLang silently rejects unknown
-    -- languages and leaves the character's lang unchanged in that case.
-    if ActiveCharacter then
-        LocalesAPI.SetClientLang(ActiveCharacter.lang)
-    end
-    nuicb('ok')
-end)
-
-RegisterNUICallback('togglepvp', function(args, nuicb)
-    PVPAPI:togglePVP()
-    nuicb('ok')
-end)
-
-CommandAPI.Register(Config.UI.command, Config.UI.suggestion, function()
-    UIAPI.ToggleUI()
-end)
-
-KeyPressAPI:RegisterListener(Config.UI.hotkey, function()
-    UIAPI.ToggleUI()
-end)
