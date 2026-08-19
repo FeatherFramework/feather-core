@@ -18,6 +18,12 @@ function StartAPI()
     -- any other resource despite the export mechanism existing for exactly
     -- this purpose.
     CoreClientApi.PVP = PVPAPI
+    -- Read-only passthrough so resources like feather-hud can display
+    -- core economy config (e.g. XP-per-level) without duplicating it in
+    -- their own config.lua.
+    CoreClientApi.Config = {
+        XP = Config.XP
+    }
 
     CoreClientApi = SetupSharedAPI(CoreClientApi)
 

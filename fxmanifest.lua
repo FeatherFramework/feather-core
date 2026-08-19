@@ -37,16 +37,14 @@ client_scripts {
     "/client/main.lua"
 }
 
+-- Minimal clipboard-relay page only -- the player HUD moved to feather-hud.
+-- See ui/index.html.
 ui_page {
-    "ui/shim.html"
+    "ui/index.html"
 }
 
 files {
-    "ui/shim.html",
-    "ui/js/*.*",
-    "ui/css/*.*",
-    "ui/fonts/*.*",
-    "ui/img/*.*"
+    "ui/index.html"
 }
 
 
