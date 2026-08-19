@@ -1,12 +1,12 @@
-fx_version "adamant"
-games { "rdr3" }
+fx_version "cerulean"
+game "rdr3"
 rdr3_warning "I acknowledge that this is a prerelease build of RedM, and I am aware my resources *will* become incompatible once RedM ships."
 lua54 "yes"
 
 description 'The Core service for the Feather Framework'
 author 'Feather @Bytesizd'
 name 'feather-core'
-version '0.1.4'
+version '0.1.5'
 
 github_version_check 'true'
 github_version_type 'release'
