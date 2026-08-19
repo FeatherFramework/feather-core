@@ -1,5 +1,5 @@
--- Shared client teleport mechanics. Calling resources remain responsible for
--- permissions, coordinate parsing, menu behavior, and user notifications.
+-- Shared client teleport controller. It owns fading, destination streaming,
+-- placement, physics settling, rollback, and cleanup for every caller.
 TeleportAPI = {}
 
 local teleporting = false
@@ -22,32 +22,146 @@ local function fadeIn(duration)
     if IsScreenFadedOut() or IsScreenFadingOut() then DoScreenFadeIn(duration) end
 end
 
-local function findRaycastSurface(x, y, entity, options)
+local function parseCoords(coords)
+    if coords == nil then return nil end
+    local kind = type(coords)
+    if kind ~= 'table' and kind ~= 'vector3' and kind ~= 'vector4' then return nil end
+
+    local x, y, z, heading
+    if kind == 'vector3' then
+        x, y, z = number(coords.x), number(coords.y), number(coords.z)
+    elseif kind == 'vector4' then
+        x, y, z, heading = number(coords.x), number(coords.y), number(coords.z), number(coords.w)
+    else
+        x = number(coords.x or coords[1])
+        y = number(coords.y or coords[2])
+        z = number(coords.z or coords[3])
+        heading = number(coords.w or coords.h or coords[4])
+    end
+    if not x or not y or not z then return nil end
+    return x, y, z, heading
+end
+
+local function requestDestination(entity, x, y, z, options)
+    local stageHeight = number(options.streamHeight) or 50.0
+    SetEntityCoordsNoOffset(entity, x, y, z + stageHeight, false, false, false)
+    local started = GetGameTimer()
+    local minimum = math.max(0, number(options.streamMinimum) or 1500)
+    local deadline = started + math.max(minimum, number(options.streamTimeout) or 5000)
+    repeat
+        RequestCollisionAtCoord(x, y, z)
+        RequestCollisionAtCoord(x, y, z + stageHeight)
+        Wait(0)
+    until (GetGameTimer() - started >= minimum and HasCollisionLoadedAroundEntity(entity))
+        or GetGameTimer() >= deadline
+    return GetGameTimer() - started >= minimum and HasCollisionLoadedAroundEntity(entity)
+end
+
+local function raycastSurface(x, y, entity, options)
     local top = number(options.probeTop) or 1000.0
     local bottom = number(options.probeBottom) or -100.0
     local ray = StartShapeTestRay(x, y, top, x, y, bottom, -1, entity, 7)
-    local deadline = GetGameTimer() + (number(options.surfaceTimeout) or 1000)
-
+    local deadline = GetGameTimer() + (number(options.raycastTimeout) or 750)
     while GetGameTimer() < deadline do
         local status, hit, hitCoords = GetShapeTestResult(ray)
-        if status == 2 then
-            return hit and hitCoords.z or nil
+        if status == 2 then return hit and hitCoords.z or nil end
+        Wait(0)
+    end
+end
+
+local function findStableSurface(x, y, fallbackZ, entity, options)
+    local started = GetGameTimer()
+    local minimum = math.max(0, number(options.surfaceMinimum) or 1000)
+    local deadline = started + math.max(minimum, number(options.surfaceTimeout) or 5000)
+    local required = math.max(1, math.floor(number(options.surfaceStableProbes) or 3))
+    local tolerance = math.max(0.0, number(options.surfaceTolerance) or 0.05)
+    local candidate
+    local stable = 0
+    while GetGameTimer() < deadline do
+        RequestCollisionAtCoord(x, y, fallbackZ)
+        local surface = raycastSurface(x, y, entity, options)
+        if surface then
+            if candidate and math.abs(surface - candidate) <= tolerance then
+                stable = stable + 1
+            else
+                candidate = surface
+                stable = 1
+            end
+            if stable >= required and GetGameTimer() - started >= minimum then return candidate, 'surface' end
+        else
+            stable = 0
         end
         Wait(0)
     end
 end
 
-local function findGround(x, y, options)
-    local top = math.floor(number(options.probeTop) or 1000)
-    local bottom = math.floor(number(options.groundBottom) or 0)
-    local step = math.max(1, math.floor(number(options.probeStep) or 25))
-
-    RequestCollisionAtCoord(x, y, number(options.collisionZ) or top + 0.0)
-    for height = top, bottom, -step do
-        local found, groundZ = GetGroundZAndNormalFor_3dCoord(x, y, height + 0.0)
-        if found then return groundZ end
+local function waitForExactSurface(x, y, z, entity, options)
+    if options.requireNearbySurface == false then return true end
+    local deadline = GetGameTimer() + (number(options.exactSurfaceTimeout) or 5000)
+    local top = number(options.exactProbeAbove) or 2.0
+    local bottom = number(options.exactProbeBelow) or 3.0
+    local stable = 0
+    local previous
+    while GetGameTimer() < deadline do
+        RequestCollisionAtCoord(x, y, z)
+        local ray = StartShapeTestRay(x, y, z + top, x, y, z - bottom, -1, entity, 7)
+        local rayDeadline = GetGameTimer() + 750
+        while GetGameTimer() < rayDeadline do
+            local status, hit, hitCoords = GetShapeTestResult(ray)
+            if status == 2 then
+                if hit then
+                    stable = previous and math.abs(hitCoords.z - previous) <= 0.05 and stable + 1 or 1
+                    previous = hitCoords.z
+                    if stable >= 3 then return true end
+                else
+                    stable = 0
+                end
+                break
+            end
+            Wait(0)
+        end
         Wait(0)
     end
+    return false
+end
+
+local function rollback(entity, coords, heading, fade, fadeDuration)
+    FreezeEntityPosition(entity, true)
+    SetEntityCoordsNoOffset(entity, coords.x, coords.y, coords.z, false, false, false)
+    SetEntityHeading(entity, heading)
+    SetEntityVelocity(entity, 0.0, 0.0, 0.0)
+    RequestCollisionAtCoord(coords.x, coords.y, coords.z)
+    local deadline = GetGameTimer() + 2000
+    while not HasCollisionLoadedAroundEntity(entity) and GetGameTimer() < deadline do Wait(0) end
+    FreezeEntityPosition(entity, false)
+    teleporting = false
+    activeEntity = nil
+    if fade then fadeIn(fadeDuration) end
+end
+
+local function waitUntilSettled(entity, x, y, z, options)
+    local started = GetGameTimer()
+    local minimum = math.max(0, number(options.settleMinimum) or 300)
+    local deadline = started + (number(options.settleTimeout) or 6000)
+    local required = math.max(1, math.floor(number(options.stableFrames) or 8))
+    local speedTolerance = math.max(0.0, number(options.speedTolerance) or 0.15)
+    local zTolerance = math.max(0.0, number(options.zTolerance) or 0.03)
+    local stable = 0
+    local previousZ = GetEntityCoords(entity).z
+    while GetGameTimer() < deadline do
+        RequestCollisionAtCoord(x, y, z)
+        local currentZ = GetEntityCoords(entity).z
+        local ready = GetGameTimer() - started >= minimum
+            and HasCollisionLoadedAroundEntity(entity)
+            and not IsEntityInAir(entity)
+            and GetEntitySpeed(entity) <= speedTolerance
+            and math.abs(currentZ - previousZ) <= zTolerance
+        stable = ready and stable + 1 or 0
+        if stable >= required then return true end
+        previousZ = currentZ
+        Wait(0)
+    end
+    return false
 end
 
 function TeleportAPI:IsBusy()
@@ -58,60 +172,33 @@ function TeleportAPI:FindSurface(x, y, fallbackZ, options)
     options = type(options) == 'table' and options or {}
     x, y, fallbackZ = number(x), number(y), number(fallbackZ)
     if not x or not y then return nil end
-
-    local entity = tonumber(options.entity) or PlayerPedId()
-    RequestCollisionAtCoord(x, y, fallbackZ or number(options.probeTop) or 1000.0)
-
-    local surfaceZ = findRaycastSurface(x, y, entity, options)
-    if surfaceZ then return surfaceZ, 'surface' end
-
-    local groundZ = findGround(x, y, options)
-    if groundZ then return groundZ, 'ground' end
-
-    if fallbackZ then return fallbackZ, 'fallback' end
-    return nil
+    return findStableSurface(x, y, fallbackZ or 0.0,
+        tonumber(options.entity) or PlayerPedId(), options)
 end
 
 function TeleportAPI:ToCoords(coords, options)
     options = type(options) == 'table' and options or {}
     if teleporting then return { success = false, reason = 'busy' } end
-
-    if coords == nil then return { success = false, reason = 'invalid_coordinates' } end
-
-    local coordsType = type(coords)
-    if coordsType ~= 'table' and coordsType ~= 'vector3' and coordsType ~= 'vector4' then
-        return { success = false, reason = 'invalid_coordinates' }
-    end
-
-    local x, y, fallbackZ, coordinateHeading
-    if coordsType == 'table' then
-        x = number(coords.x or coords[1])
-        y = number(coords.y or coords[2])
-        fallbackZ = number(coords.z or coords[3])
-        coordinateHeading = number(coords.w or coords.h or coords[4])
-    else
-        x, y, fallbackZ = number(coords.x), number(coords.y), number(coords.z)
-        if coordsType == 'vector4' then coordinateHeading = number(coords.w) end
-    end
-
-    local heading = number(options.heading) or coordinateHeading
-    if not x or not y or not fallbackZ then
-        return { success = false, reason = 'invalid_coordinates' }
-    end
+    local x, y, requestedZ, coordinateHeading = parseCoords(coords)
+    if not x then return { success = false, reason = 'invalid_coordinates' } end
 
     local entity = tonumber(options.entity) or PlayerPedId()
     if entity == 0 or not DoesEntityExist(entity) then
         return { success = false, reason = 'invalid_entity' }
     end
+
+    local mode = options.mode
+    if mode ~= 'exact' and mode ~= 'surface' then
+        mode = options.findSurface == true and 'surface' or 'exact'
+    end
+    local heading = number(options.heading) or coordinateHeading
+    local fade = options.fade ~= false
+    local fadeDuration = math.max(0, math.floor(number(options.fadeDuration) or 500))
     local originalCoords = GetEntityCoords(entity)
     local originalHeading = GetEntityHeading(entity)
 
     teleporting = true
-    local fade = options.fade ~= false
-    local freeze = options.freeze ~= false
-    activeEntity = freeze and entity or nil
-    local fadeDuration = math.max(0, math.floor(number(options.fadeDuration) or 500))
-
+    activeEntity = entity
     if fade and not waitForFadeOut(fadeDuration, math.max(fadeDuration, number(options.fadeTimeout) or 2000)) then
         teleporting = false
         activeEntity = nil
@@ -119,129 +206,61 @@ function TeleportAPI:ToCoords(coords, options)
         return { success = false, reason = 'fade_failed' }
     end
 
-    if freeze then FreezeEntityPosition(entity, true) end
-
-    -- Move into the destination streaming area before probing. Without this,
-    -- terrain may load before dock, bridge, or building collision and place the
-    -- entity on the surface underneath it.
-    if options.streamDestination ~= false then
-        local streamHeight = number(options.streamHeight) or 50.0
-        SetEntityCoordsNoOffset(entity, x, y, fallbackZ + streamHeight, false, false, false)
-        local streamStarted = GetGameTimer()
-        local streamMinimum = math.max(0, number(options.streamMinimum) or 1000)
-        local streamDeadline = streamStarted + (number(options.streamTimeout) or 1500)
-        repeat
-            RequestCollisionAtCoord(x, y, fallbackZ)
-            Wait(0)
-        until (GetGameTimer() - streamStarted >= streamMinimum and HasCollisionLoadedAroundEntity(entity))
-            or GetGameTimer() >= streamDeadline
+    FreezeEntityPosition(entity, true)
+    SetEntityVelocity(entity, 0.0, 0.0, 0.0)
+    if not requestDestination(entity, x, y, requestedZ, options) then
+        rollback(entity, originalCoords, originalHeading, fade, fadeDuration)
+        return { success = false, reason = 'stream_timeout' }
     end
 
-    local destinationZ, surfaceType
-    if options.findSurface == false then
-        destinationZ, surfaceType = fallbackZ, 'coordinates'
+    if mode == 'exact' and not waitForExactSurface(x, y, requestedZ, entity, options) then
+        rollback(entity, originalCoords, originalHeading, fade, fadeDuration)
+        return { success = false, reason = 'exact_surface_not_found' }
+    end
+
+    local destinationZ = requestedZ
+    local surfaceType = 'coordinates'
+    if mode == 'surface' then
+        destinationZ, surfaceType = findStableSurface(x, y, requestedZ, entity, options)
+        if not destinationZ then
+            rollback(entity, originalCoords, originalHeading, fade, fadeDuration)
+            return { success = false, reason = 'surface_not_found' }
+        end
+        destinationZ = destinationZ + (number(options.zOffset) or 0.0)
+        SetEntityCoords(entity, x, y, destinationZ, false, false, false, false)
     else
-        destinationZ, surfaceType = self:FindSurface(x, y, fallbackZ, {
-            entity = entity,
-            probeTop = options.probeTop,
-            probeBottom = options.probeBottom,
-            groundBottom = options.groundBottom,
-            probeStep = options.probeStep,
-            surfaceTimeout = options.surfaceTimeout,
-            collisionZ = fallbackZ
-        })
+        destinationZ = destinationZ + (number(options.zOffset) or 0.0)
+        SetEntityCoordsNoOffset(entity, x, y, destinationZ, false, false, false)
     end
 
-    if not destinationZ then
-        if freeze then FreezeEntityPosition(entity, false) end
-        teleporting = false
-        activeEntity = nil
-        if fade then fadeIn(fadeDuration) end
-        return { success = false, reason = 'surface_not_found' }
-    end
-
-    destinationZ = destinationZ + (number(options.zOffset) or 0.0)
-    -- SET_ENTITY_COORDS accounts for the entity's placement offset, which is
-    -- safer for peds on uneven or sloped collision than an exact no-offset set.
-    SetEntityCoords(entity, x, y, destinationZ, false, false, false, false)
     if heading then SetEntityHeading(entity, heading) end
     SetEntityVelocity(entity, 0.0, 0.0, 0.0)
-
     RequestCollisionAtCoord(x, y, destinationZ)
-    local collisionDeadline = GetGameTimer() + (number(options.collisionTimeout) or 2000)
-    while not HasCollisionLoadedAroundEntity(entity) and GetGameTimer() < collisionDeadline do Wait(0) end
+    Wait(0)
+    FreezeEntityPosition(entity, false)
 
-    local collisionLoaded = HasCollisionLoadedAroundEntity(entity)
-    if not collisionLoaded then
-        SetEntityCoordsNoOffset(entity, originalCoords.x, originalCoords.y, originalCoords.z, false, false, false)
-        SetEntityHeading(entity, originalHeading)
-        SetEntityVelocity(entity, 0.0, 0.0, 0.0)
-        RequestCollisionAtCoord(originalCoords.x, originalCoords.y, originalCoords.z)
-        if freeze then FreezeEntityPosition(entity, false) end
-        teleporting = false
-        activeEntity = nil
-        if fade then fadeIn(fadeDuration) end
-        return { success = false, reason = 'collision_timeout' }
-    end
-
-    local settled = not freeze
-    if freeze then
-        FreezeEntityPosition(entity, false)
-
-        -- Reveal only after physics and the camera have settled. Consecutive
-        -- stable frames avoid relying on a fixed delay that varies by client.
-        local settleStarted = GetGameTimer()
-        local settleMinimum = math.max(0, number(options.settleMinimum) or 250)
-        local settleDeadline = settleStarted + (number(options.settleTimeout) or 4000)
-        local requiredStableFrames = math.max(1, math.floor(number(options.stableFrames) or 10))
-        local speedTolerance = math.max(0.0, number(options.speedTolerance) or 0.05)
-        local zTolerance = math.max(0.0, number(options.zTolerance) or 0.01)
-        local stableFrames = 0
-        local previousZ = GetEntityCoords(entity).z
-
-        while GetGameTimer() < settleDeadline do
-            RequestCollisionAtCoord(x, y, destinationZ)
-            local currentZ = GetEntityCoords(entity).z
-            local stable = GetGameTimer() - settleStarted >= settleMinimum
-                and not IsEntityInAir(entity)
-                and GetEntitySpeed(entity) <= speedTolerance
-                and math.abs(currentZ - previousZ) <= zTolerance
-
-            stableFrames = stable and stableFrames + 1 or 0
-            previousZ = currentZ
-            if stableFrames >= requiredStableFrames then
-                settled = true
-                break
-            end
-            Wait(0)
-        end
+    if not waitUntilSettled(entity, x, y, destinationZ, options) then
+        rollback(entity, originalCoords, originalHeading, fade, fadeDuration)
+        return { success = false, reason = 'settle_timeout' }
     end
 
     local finalCoords = GetEntityCoords(entity)
     teleporting = false
     activeEntity = nil
     if fade then fadeIn(fadeDuration) end
-
-    return {
-        success = true,
-        coords = finalCoords,
-        heading = heading,
-        surface = surfaceType,
-        collisionLoaded = collisionLoaded,
-        settled = settled
-    }
+    return { success = true, coords = finalCoords, heading = heading,
+        surface = surfaceType, settled = true }
 end
 
 function TeleportAPI:ToWaypoint(options)
     if not IsWaypointActive() then return { success = false, reason = 'no_waypoint' } end
-
-    local waypoint = GetWaypointCoords()
-    return self:ToCoords(waypoint, options)
+    options = type(options) == 'table' and options or {}
+    options.mode = 'surface'
+    return self:ToCoords(GetWaypointCoords(), options)
 end
 
 AddEventHandler('onResourceStop', function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end
-
     if activeEntity and DoesEntityExist(activeEntity) then FreezeEntityPosition(activeEntity, false) end
     activeEntity = nil
     teleporting = false
