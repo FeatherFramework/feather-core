@@ -32,6 +32,7 @@ server_scripts {
 }
 
 client_scripts {
+    "/client/imports.lua",
     "/client/helpers/*.lua",
     "/client/services/*.lua",
     "/client/main.lua"
@@ -50,5 +51,6 @@ files {
 
 dependencies {
     'oxmysql',
-    'weathersync'
+    'weathersync',
+    'feather-menu'
 }

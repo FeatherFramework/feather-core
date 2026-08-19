@@ -38,6 +38,10 @@ Config.XP = {
     perLevel = 1900
 }
 
+Config.PlayerSettings = {
+    hotkey = "PGUP"
+}
+
 -- Per-source throttle applied to every RPC dispatched over the Feather:Call
 -- bus (see shared/services/arpc.lua). Framework-wide, not per-procedure --
 -- protects every resource's registered RPCs from spam without each one
