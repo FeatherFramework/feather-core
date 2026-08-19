@@ -119,6 +119,9 @@ function CharacterAPI.GetCharacter(opts)
 
     CacheAPI.UpdateCacheBySrc('character', self.src, key, current + amount)
     self.char = CacheAPI.GetCacheBySrc("character", self.src)
+    -- Live push so HUD-style displays (e.g. feather-hud's resource strip)
+    -- update immediately instead of only on the next spawn/full refresh.
+    TriggerClientEvent("Feather:Character:EconomyUpdated", self.src, self.char)
     return true
 end
 
@@ -154,6 +157,7 @@ function charClass:Subtract(key, amount)
 
     CacheAPI.UpdateCacheBySrc('character', self.src, key, current - amount)
     self.char = CacheAPI.GetCacheBySrc("character", self.src)
+    TriggerClientEvent("Feather:Character:EconomyUpdated", self.src, self.char)
     return true
 end
 
