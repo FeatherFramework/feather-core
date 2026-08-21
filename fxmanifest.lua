@@ -6,7 +6,7 @@ lua54 "yes"
 description 'The Core service for the Feather Framework'
 author 'Feather @Bytesizd'
 name 'feather-core'
-version '0.1.5'
+version '0.1.6'
 
 github_version_check 'true'
 github_version_type 'release'
