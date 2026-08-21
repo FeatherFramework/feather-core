@@ -68,9 +68,8 @@ local function revivePlayer()
     TriggerServerEvent('Feather:Character:Revived')
 end
 
--- Finds the nearest configured respawn point (Config.RespawnLocations) and
--- moves the ped there via TeleportAPI:ToCoords (client/services/teleport.lua),
--- which handles surface/ground detection and collision streaming.
+-- Finds the nearest configured respawn point and uses the teleport service
+-- in exact mode so the supplied hospital coordinates are preserved.
 local function teleportToClosestMedical()
     local closestIndex = 1
     local closestDistance = 99999999999999
@@ -85,22 +84,12 @@ local function teleportToClosestMedical()
     end
 
     local hospital = Config.RespawnLocations[closestIndex]
-    -- (CORE-28) Was a naive upward ground-probe (z=1..1000, one unit at a
-    -- time), which stops at the FIRST solid surface it crosses -- often a
-    -- dock, bridge, or floor slab below the real outdoor terrain -- instead
-    -- of the actual ground, and silently does nothing if the real terrain
-    -- sits above z=1000. TeleportAPI:ToCoords (this same resource's own
-    -- client/services/teleport.lua, already used by feather-admin's
-    -- teleport tooling) does this properly: it streams the destination first
-    -- and requires repeated downward raycasts to agree on the topmost surface.
-    -- fade=false because respawnPlayer() (the only caller) has already
-    -- faded to black and fades back in itself via hoursLaterDisplay().
     TeleportAPI:ToCoords(hospital.coords, {
         entity = player,
         heading = hospital.heading,
-        mode = 'surface',
+        mode = 'exact',
+        requireNearbySurface = false,
         streamTimeout = 10000,
-        surfaceTimeout = 10000,
         settleTimeout = 10000,
         fade = false
     })
@@ -113,8 +102,7 @@ local function hoursLaterDisplay()
     DoScreenFadeIn(2000)
 end
 
--- This respawns a player at the closes hospital.'
--- TODO: Add location to respawn at.
+-- Respawns the player at the nearest configured hospital.
 local function respawnPlayer()
     DoScreenFadeOut(2000)
     Wait(2000)
@@ -346,10 +334,9 @@ RegisterNetEvent("Feather:Character:Spawn", function(character)
 
     -- (CORE-28) `first_spawn` (see controllers/characters.lua, cleared
     -- one-shot by InitiateCharacter) tells a brand-new character's very
-    -- first placement -- a designer-picked town coordinate from
-    -- feather-character's creation flow, which may need surface-correction
-    -- the same way the hospital respawn locations do -- apart from every
-    -- later login, whose saved position was actually occupied (a dock,
+    -- first placement -- an approximate town coordinate from
+    -- feather-character's creation flow, which may need surface correction.
+    -- Every later login uses a saved position that was actually occupied (a dock,
     -- porch, upper floor, ...) and must be trusted exactly, never
     -- surface-corrected. fade=false because this handler owns its own
     -- loading-screen/fade choreography around the whole spawn sequence.
