@@ -49,7 +49,7 @@ local function TriggerRemoteEvent(eventName, source, ...)
 end
 
 -- Gets the response of the RPC, if available.
-local function GetResponseFunction(id, requestSource)
+local function GetResponseFunction(id, requestSource, expectedSession)
     if not id then
         return function() end
     end
@@ -57,6 +57,16 @@ local function GetResponseFunction(id, requestSource)
     return function(...)
         if responded then return end
         responded = true
+        if expectedSession and IsOnServer() then
+            if not CharacterAPI or not CharacterAPI.IsSessionCurrent
+                or not CharacterAPI.IsSessionCurrent(requestSource, expectedSession.sessionId, expectedSession.characterId) then
+                TriggerRemoteEvent("Feather:Response", requestSource, id, nil, {
+                    code = 'character_session_expired',
+                    message = 'Character session is no longer current.'
+                })
+                return
+            end
+        end
         TriggerRemoteEvent("Feather:Response", requestSource, id, ...)
     end
 end
@@ -185,6 +195,26 @@ AddEventHandler("Feather:Call", function(id, name, params)
         return
     end
 
+    local requestContext = nil
+    if IsOnServer() then
+        requestContext = {
+            source = requestSource,
+            correlationId = ('rpc:%s:%s:%s'):format(tostring(requestSource), tostring(GetGameTimer()), tostring(id or 'notify'))
+        }
+
+        if policy.requireCharacter then
+            local session = CharacterAPI and CharacterAPI.ResolveSession and CharacterAPI.ResolveSession(requestSource) or nil
+            if not session then
+                if id then TriggerRemoteEvent("Feather:Response", requestSource, id, nil,
+                    RpcError('character_required', 'A current character session is required.')) end
+                return
+            end
+            requestContext.characterId = session.characterId
+            requestContext.sessionId = session.sessionId
+            requestContext.character = session.character
+        end
+    end
+
     local encodedOk, encoded = pcall(json.encode, params)
     if not encodedOk or type(encoded) ~= 'string' or #encoded > policy.maxPayloadBytes then
         if id then TriggerRemoteEvent("Feather:Response", requestSource, id, nil, RpcError('payload_too_large', 'RPC payload is too large.')) end
@@ -192,7 +222,8 @@ AddEventHandler("Feather:Call", function(id, name, params)
     end
 
     local ok, returnValues = pcall(function()
-        return { registered.callback(params, GetResponseFunction(id, requestSource), requestSource) }
+        local responseSession = policy.requireCharacter and requestContext or nil
+        return { registered.callback(params, GetResponseFunction(id, requestSource, responseSession), requestSource, requestContext) }
     end)
     if not ok then
         print(("RPC procedure '%s' failed: %s"):format(name, tostring(returnValues)))
@@ -240,7 +271,8 @@ function RPCAPI.Register(name, callback, options)
     local policy = {
         windowMs = math.max(100, tonumber(options.windowMs) or tonumber(defaults.windowMs) or 1000),
         maxCalls = options.maxCalls and math.max(1, tonumber(options.maxCalls) or 1) or nil,
-        maxPayloadBytes = math.max(64, tonumber(options.maxPayloadBytes) or tonumber(defaults.maxPayloadBytes) or 65536)
+        maxPayloadBytes = math.max(64, tonumber(options.maxPayloadBytes) or tonumber(defaults.maxPayloadBytes) or 65536),
+        requireCharacter = options.requireCharacter == true
     }
     if Config.DevMode then
         print("Registered RPC: ", name)
