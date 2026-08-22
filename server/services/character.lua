@@ -3,6 +3,92 @@
 --------------------
 CharacterAPI = {}
 
+-- A character session identifies one specific source -> character binding.
+-- It is runtime-only: reconnecting, switching characters, or restarting core
+-- creates a different session and invalidates in-flight work.
+local CharacterSessions = {}
+local CharacterSessionGenerations = {}
+
+local function NextCharacterSessionId(src, characterId)
+    local generation = (CharacterSessionGenerations[src] or 0) + 1
+    CharacterSessionGenerations[src] = generation
+    return ('%s:%s:%s:%s'):format(tostring(src), tostring(characterId), tostring(generation), tostring(GetGameTimer()))
+end
+
+local function BeginCharacterSession(src, character)
+    local session = {
+        source = src,
+        characterId = character.id,
+        sessionId = NextCharacterSessionId(src, character.id),
+        state = 'ready',
+        startedAt = os.time()
+    }
+    CharacterSessions[src] = session
+    return session
+end
+
+local function BeginCharacterLeaving(src, reason)
+    local session = CharacterSessions[src]
+    if not session or session.state ~= 'ready' then return nil end
+
+    session.state = 'leaving'
+    session.reason = reason or 'logout'
+    session.leavingAt = os.time()
+    TriggerEvent('Feather:Server:Character:Leaving', session)
+    return session
+end
+
+local function CompleteCharacterLeaving(src, session)
+    if CharacterSessions[src] == session then CharacterSessions[src] = nil end
+    if not session then return end
+
+    session.state = 'left'
+    session.leftAt = os.time()
+    TriggerEvent('Feather:Server:Character:Left', session)
+end
+
+function CharacterAPI.GetSession(src)
+    local session = CharacterSessions[tonumber(src) or src]
+    if not session or session.state ~= 'ready' then return nil end
+    return {
+        source = session.source,
+        characterId = session.characterId,
+        sessionId = session.sessionId,
+        state = session.state,
+        startedAt = session.startedAt
+    }
+end
+
+function CharacterAPI.ResolveSession(src)
+    local session = CharacterAPI.GetSession(src)
+    if not session then return nil end
+
+    local character = CacheAPI.GetCacheBySrc('character', src)
+    if not character or tostring(character.id) ~= tostring(session.characterId) then return nil end
+    session.character = character
+    return session
+end
+
+function CharacterAPI.IsSessionCurrent(src, sessionId, characterId)
+    local session = CharacterSessions[tonumber(src) or src]
+    if not session or session.state ~= 'ready' or session.sessionId ~= sessionId then return false end
+    if characterId ~= nil and tostring(session.characterId) ~= tostring(characterId) then return false end
+    return true
+end
+
+function CharacterAPI.GetCapabilities()
+    return {
+        contractVersion = 1,
+        characterSessions = true,
+        lifecycle = {
+            ready = 'Feather:Server:Character:Ready',
+            leaving = 'Feather:Server:Character:Leaving',
+            left = 'Feather:Server:Character:Left'
+        },
+        rpc = { requireCharacter = true, correlationId = true, lateResponseRejection = true }
+    }
+end
+
 -- The only character fields resource code should mutate via Add/Subtract
 -- (see charClass below). Keeps economy mutation on one validated path.
 EconomyKeys = {
@@ -162,16 +248,21 @@ function charClass:Subtract(key, amount)
 end
 
     -- Misc Functions
-    function charClass:RemoveCharacter()
+    function charClass:RemoveCharacter(reason)
+        local session = BeginCharacterLeaving(self.src, reason)
+        if not session then return false end
+
         CreateThread(function()
             CacheAPI.ReloadDBFromCacheRecord("character", self.src)
             CacheAPI.RemoveFromCache("character", self.src)
             TriggerEvent("Feather:Character:Logout", self.src)
+            CompleteCharacterLeaving(self.src, session)
             DebugLog("Dropped Character Source", self.src)
         end)
+        return true
     end
     function charClass:Logout()
-        self:RemoveCharacter()
+        return self:RemoveCharacter('logout')
     end
 
     return charClass
@@ -266,6 +357,8 @@ function CharacterAPI.InitiateCharacter(src, charid)
 
     local char = CacheAPI.AddToCache("character", src, charid)
 
+    local session = BeginCharacterSession(src, char)
+
     -- `char.first_spawn` (see controllers/characters.lua) is read here and
     -- immediately cleared in the DB so this is the only spawn that ever
     -- sees it set -- the client uses it to decide whether to surface-find
@@ -286,6 +379,13 @@ function CharacterAPI.InitiateCharacter(src, charid)
     -- client can call directly with a forged character. TriggerEvent only,
     -- never networked.
     TriggerEvent("Feather:Server:Character:Spawned", char, src)
+    TriggerEvent("Feather:Server:Character:Ready", {
+        source = session.source,
+        characterId = session.characterId,
+        sessionId = session.sessionId,
+        state = session.state,
+        startedAt = session.startedAt
+    }, char)
     return true
 end
 
@@ -384,7 +484,7 @@ AddEventHandler('playerDropped', function()
     local char = CharacterAPI.GetCharacter({src = source})
 
     if char ~= nil then
-        char:RemoveCharacter()
+        char:RemoveCharacter('disconnect')
     end
 end)
 
