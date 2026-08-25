@@ -21,7 +21,7 @@ local function pullData(event, eventDataStruct) -- Memory address pull
 
     for p = 0, event.datasize - 1, 1 do
         local current_data_element = event.dataelements[p]
-        if current_data_element.type == 'float' then
+        if current_data_element and current_data_element.type == 'float' then
             datafields[#datafields + 1] = eventDataStruct:GetFloat32(8 * p) 
         else
             --? Defaults to int
@@ -35,7 +35,7 @@ end
 local function allocateData(event, eventDataStruct) --memory pre-allocation
     for p = 0, event.datasize - 1, 1 do
         local current_data_element = event.dataelements[p]
-        if current_data_element.type == 'float' then
+        if current_data_element and current_data_element.type == 'float' then
             eventDataStruct:SetFloat32(8 * p, 0)
         else
             --? Defaults to int
