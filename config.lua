@@ -2,6 +2,25 @@ Config = {}
 
 Config.DevMode = false
 
+Config.Logging = {
+    level = "info" -- debug, info, warn, or error
+}
+
+Config.EventBroker = {
+    maxPayloadBytes = 32768,
+    maxDepth = 12,
+    maxNodes = 2048,
+    maxSubscribers = 128
+}
+
+Config.ProviderRegistry = {
+    maxPerKind = 16
+}
+
+Config.GuardRegistry = {
+    maxPerAction = 64
+}
+
 Config.DefaultLang = "en_us" -- Default Language that will be used when we can not get the individual players preferred language.
 
 Config.IdleAnimation = true
