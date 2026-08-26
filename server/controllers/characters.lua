@@ -14,17 +14,6 @@ CharacterController = {}
 -- CharacterAPI.InitiateCharacter's one-shot read+clear of it below, and the
 -- client's use of it in client/services/character.lua's
 -- "Feather:Character:Spawn" handler.
-local function EnsureFirstSpawnColumn()
-    local columns = MySQL.query.await("SHOW COLUMNS FROM `characters` LIKE 'first_spawn';")
-    if #columns < 1 then
-        MySQL.query.await("ALTER TABLE `characters` ADD COLUMN `first_spawn` TINYINT(1) NOT NULL DEFAULT 1;")
-    end
-end
-
-CreateThread(function()
-    EnsureFirstSpawnColumn()
-end)
-
 -- One-shot: clears the flag once a character has actually been placed at
 -- its first spawn so every later login skips surface-finding.
 function CharacterController.ClearFirstSpawn(characterID)
