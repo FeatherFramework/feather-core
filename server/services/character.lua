@@ -3,60 +3,28 @@
 --------------------
 CharacterAPI = {}
 
--- A character session identifies one specific source -> character binding.
--- It is runtime-only: reconnecting, switching characters, or restarting core
--- creates a different session and invalidates in-flight work.
-local CharacterSessions = {}
-local CharacterSessionGenerations = {}
-
-local function NextCharacterSessionId(src, characterId)
-    local generation = (CharacterSessionGenerations[src] or 0) + 1
-    CharacterSessionGenerations[src] = generation
-    return ('%s:%s:%s:%s'):format(tostring(src), tostring(characterId), tostring(generation), tostring(GetGameTimer()))
-end
-
 local function BeginCharacterSession(src, character)
-    local session = {
-        source = src,
-        characterId = character.id,
-        sessionId = NextCharacterSessionId(src, character.id),
-        state = 'ready',
-        startedAt = os.time()
-    }
-    CharacterSessions[src] = session
-    return session
+    local result = CoreSessions.Activate(src, character.id)
+    return result.ok and result.value or nil, result
 end
 
 local function BeginCharacterLeaving(src, reason)
-    local session = CharacterSessions[src]
-    if not session or session.state ~= 'ready' then return nil end
-
-    session.state = 'leaving'
-    session.reason = reason or 'logout'
-    session.leavingAt = os.time()
+    local result = CoreSessions.BeginLeaving(src, reason)
+    if not result.ok then return nil end
+    local session = result.value
     TriggerEvent('Feather:Server:Character:Leaving', session)
     return session
 end
 
 local function CompleteCharacterLeaving(src, session)
-    if CharacterSessions[src] == session then CharacterSessions[src] = nil end
     if not session then return end
-
-    session.state = 'left'
-    session.leftAt = os.time()
-    TriggerEvent('Feather:Server:Character:Left', session)
+    local result = CoreSessions.CompleteLeaving(src, session.sessionId)
+    if result.ok then TriggerEvent('Feather:Server:Character:Left', result.value) end
 end
 
 function CharacterAPI.GetSession(src)
-    local session = CharacterSessions[tonumber(src) or src]
-    if not session or session.state ~= 'ready' then return nil end
-    return {
-        source = session.source,
-        characterId = session.characterId,
-        sessionId = session.sessionId,
-        state = session.state,
-        startedAt = session.startedAt
-    }
+    local result = CoreSessions.Get(src)
+    return result.ok and result.value or nil
 end
 
 function CharacterAPI.ResolveSession(src)
@@ -70,10 +38,7 @@ function CharacterAPI.ResolveSession(src)
 end
 
 function CharacterAPI.IsSessionCurrent(src, sessionId, characterId)
-    local session = CharacterSessions[tonumber(src) or src]
-    if not session or session.state ~= 'ready' or session.sessionId ~= sessionId then return false end
-    if characterId ~= nil and tostring(session.characterId) ~= tostring(characterId) then return false end
-    return true
+    return CoreSessions.IsCurrent(src, sessionId, characterId)
 end
 
 function CharacterAPI.GetCapabilities()
@@ -253,7 +218,11 @@ end
         if not session then return false end
 
         CreateThread(function()
-            CacheAPI.ReloadDBFromCacheRecord("character", self.src)
+            local persisted, persistenceError = pcall(CacheAPI.ReloadDBFromCacheRecord, "character", self.src)
+            if not persisted then
+                print(('[feather-core] Character persistence failed while leaving session %s: %s')
+                    :format(tostring(session.sessionId), tostring(persistenceError)))
+            end
             CacheAPI.RemoveFromCache("character", self.src)
             TriggerEvent("Feather:Character:Logout", self.src)
             CompleteCharacterLeaving(self.src, session)
@@ -357,7 +326,12 @@ function CharacterAPI.InitiateCharacter(src, charid)
 
     local char = CacheAPI.AddToCache("character", src, charid)
 
-    local session = BeginCharacterSession(src, char)
+    local session, sessionResult = BeginCharacterSession(src, char)
+    if not session then
+        CacheAPI.RemoveFromCache('character', src)
+        print(('[feather-core] Rejected InitiateCharacter: %s'):format(sessionResult.message))
+        return false
+    end
 
     -- `char.first_spawn` (see controllers/characters.lua) is read here and
     -- immediately cleared in the DB so this is the only spawn that ever
@@ -384,7 +358,9 @@ function CharacterAPI.InitiateCharacter(src, charid)
         characterId = session.characterId,
         sessionId = session.sessionId,
         state = session.state,
-        startedAt = session.startedAt
+        startedAt = session.activatedAt,
+        accountId = session.accountId,
+        generation = session.generation
     }, char)
     return true
 end
