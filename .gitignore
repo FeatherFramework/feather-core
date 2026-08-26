@@ -37,5 +37,5 @@ AUDIT*
 # Planning docs live in Discord, not in the public repo. Kept locally --
 # code comments cite their sections and those references stay valid
 # against the copies the team shares there.
-MASTER_PLAN.md
+MASTER_PLAN*
 DEPENDENCY_SUPPORT_PLAN.md
