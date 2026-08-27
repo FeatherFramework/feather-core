@@ -142,6 +142,49 @@ RPCAPI.Register("LeaveInstance", function(_, res, player)
     return res()
 end)
 
+local function InstanceEnterPayload(payload)
+    if type(payload) ~= 'table' then return false, 'Payload must be a table.' end
+    for key in pairs(payload) do
+        if key ~= 'instanceId' then return false, 'Only instanceId is accepted.' end
+    end
+    return payload.instanceId == nil or tonumber(payload.instanceId) ~= nil,
+        'instanceId must be numeric when provided.'
+end
+
+local enterContract = RPCAPI.RegisterContract('core.instance.enter.v1', function(payload, player)
+    local requestedId = tonumber(payload.instanceId)
+    if requestedId ~= nil and not (Config.PublicInstanceIds and Config.PublicInstanceIds[requestedId]) then
+        requestedId = nil
+    end
+    local instanceId = InstanceAPI.create(requestedId, player)
+    if not instanceId then return CoreResults.Err('instance_unavailable', 'A routing instance could not be created.') end
+    return CoreResults.Ok({ instanceId = instanceId })
+end, {
+    contract = 1, direction = 'client_to_server', requireCharacter = false,
+    windowMs = 5000, maxCalls = 3, maxPayloadBytes = 96, maxDepth = 2, maxNodes = 4,
+    validatePayload = InstanceEnterPayload
+})
+if not enterContract.ok then
+    error(('Unable to register core.instance.enter.v1: %s'):format(enterContract.message or enterContract.code or 'unknown error'))
+end
+
+local leaveContract = RPCAPI.RegisterContract('core.instance.leave.v1', function(_, player)
+    if not InstanceAPI.leave(player) then
+        return CoreResults.Err('instance_unavailable', 'The routing instance could not be left.')
+    end
+    return CoreResults.Ok({ instanceId = 0 })
+end, {
+    contract = 1, direction = 'client_to_server', requireCharacter = false,
+    windowMs = 5000, maxCalls = 3, maxPayloadBytes = 64, maxDepth = 2, maxNodes = 4,
+    validatePayload = function(payload)
+        return type(payload) == 'table' and next(payload) == nil,
+            'core.instance.leave.v1 does not accept payload fields.'
+    end
+})
+if not leaveContract.ok then
+    error(('Unable to register core.instance.leave.v1: %s'):format(leaveContract.message or leaveContract.code or 'unknown error'))
+end
+
 -- (CORE-19 / info-disclosure follow-up) Was referencing the undefined
 -- global `id` instead of `params.id`, so it always operated on nil and
 -- returned {} -- but naively fixing that to `params.id` without adding
