@@ -100,14 +100,10 @@ for lang in pairs(LocalesAPI.translations) do
         label = languageLabel(lang),
         slot = 'content'
     }, function()
-        -- Mirrors feather-hud/client/services/ui.lua's old 'updatelocale'
-        -- NUI callback: sync from what the server actually persisted (not
-        -- `lang` directly), since UpdatePlayerLang silently rejects unknown
-        -- languages and leaves the character's lang unchanged.
-        local updated = RPCAPI.CallAsync("UpdatePlayerLang", lang)
-        if updated then
-            LocalesAPI.SetClientLang(updated.lang)
-            languageButton:update({ label = languageButtonLabel(updated.lang) })
+        local updated = RPCAPI.CallAsync('core.account.settings.update.v1', { locale = lang })
+        if type(updated) == 'table' and updated.ok == true then
+            LocalesAPI.SetClientLang(updated.value.locale)
+            languageButton:update({ label = languageButtonLabel(updated.value.locale) })
             refreshTranslations()
         end
         mainPage:RouteTo()
@@ -139,7 +135,10 @@ function PlayerSettingsUI.Toggle()
     refreshTranslations()
     pvpToggle:update({ value = PVPAPI.active, label = pvpLabel(PVPAPI.active) })
 
-    local currentLang = RPCAPI.CallAsync("GetCharLang", {})
+    local settings = RPCAPI.CallAsync('core.account.settings.get.v1', {})
+    local currentLang = type(settings) == 'table' and settings.ok == true
+        and settings.value.locale or Config.DefaultLang
+    LocalesAPI.SetClientLang(currentLang)
     languageButton:update({ label = languageButtonLabel(currentLang) })
 end
 
