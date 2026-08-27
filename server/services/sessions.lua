@@ -152,6 +152,9 @@ end
 exports('GetSessionContext', CoreSessions.Get)
 exports('RequireSession', CoreSessions.Get)
 exports('IsSessionCurrent', CoreSessions.IsCurrent)
+exports('ActivateSession', CoreSessions.Activate)
+exports('BeginSessionLeaving', CoreSessions.BeginLeaving)
+exports('CompleteSessionLeaving', CoreSessions.CompleteLeaving)
 
 RegisterCommand('CoreSessionSmokeTest', function(source, args)
     if source ~= 0 then return end
