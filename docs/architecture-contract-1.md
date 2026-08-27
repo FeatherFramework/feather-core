@@ -58,10 +58,23 @@ The final architecture has no backward-compatibility requirement. During constru
 - Durable public account and character IDs will be UUIDs.
 - Session IDs are server-generated UUIDs and unique for every activation.
 - A source is a temporary transport address, never durable identity.
+
+## Account settings
+
+- Player locale is an account preference, not character-domain state.
+- `core.account.settings.get.v1` returns the authenticated account's settings.
+- `core.account.settings.update.v1` accepts only registered locale codes and
+  derives the account identity from the connection context.
+- Settings persist in `core_account_settings`; clients never submit an
+  account ID and cannot update another account.
 - Delayed character work must carry a session ID and verify it again before commit or success.
 - Simultaneous activation of the same character is rejected by default.
-
-The exact UUID implementation will be chosen with the persistence slice.
+- Feather-owned SQL schemas store UUID values as `CHAR(36)` for compatibility
+  with MariaDB versions that predate the native `UUID` datatype.
+- UUIDs are generated explicitly by server persistence code. Schemas do not
+  rely on `DEFAULT UUID()` expression support.
+- Server consumers may resolve only the normalized primary license anchor through
+  `GetPrimaryIdentifier`; the complete identifier collection remains private to Core.
 
 ## Transport
 
@@ -77,6 +90,19 @@ The exact UUID implementation will be chosen with the persistence slice.
 - The policy provider evaluates actions and returns an envelope.
 - Provider failure and indeterminate decisions fail closed.
 - Synchronous guards retain `true` or `false, reason` callback results because transaction-time guard evaluation cannot yield through an asynchronous envelope protocol.
+
+## Notifications
+
+- Core exposes provider-based notification dispatch rather than requiring consumers to import its legacy API table.
+- Server dispatch supports the `right` style. Local client dispatch supports
+  `right` and `top_banner`, with validated text and duration.
+- Providers return result envelopes and provider failures never report successful delivery.
+- Additional styles may be added as explicit capabilities without changing the request envelope.
+
+## Localization
+
+- Locale registration and translation are available through named exports and return result envelopes.
+- Consumers unwrap translated strings at their own UI boundary and do not import Core's monolithic API table for localization.
 
 ## Persistence
 
