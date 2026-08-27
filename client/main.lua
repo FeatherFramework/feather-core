@@ -8,7 +8,7 @@ function RunCore()
     StartKeyListeners()
     StartPopulationDensity()
     StartInteriorsFix()
-    StartCharacterEssentials()
+    StartPlayerRuntime()
     StartWagonFix()
 
     ClientReady = true
