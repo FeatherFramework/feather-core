@@ -1,34 +1,40 @@
 LocalesAPI = {}
 LocalesAPI.translations = {}
 
--- (CORE-17) `LocalesAPI.translate` used to round-trip the "GetCharLang" RPC
--- to the server on every single call -- every translated string in every
--- UI, every frame it's redrawn. Cache the resolved language client-side
--- instead: seeded from the character payload the server already sends on
--- spawn (no extra RPC needed for that), refreshed by LocalesAPI.SetClientLang
--- whenever the language actually changes (see client/services/ui.lua's
--- 'updatelocale' NUI callback), and falls back to the RPC only if translate()
--- is ever called before either of those has populated it.
+-- Locale preference is account-scoped, so it is available before character
+-- selection and remains stable while switching characters. The client keeps
+-- a local copy and only reads the versioned account-settings route when the
+-- cache has not been initialized yet.
 local ClientLangCache = nil
 
 function LocalesAPI.SetClientLang(lang)
     ClientLangCache = lang
 end
 
+function LocalesAPI.RefreshClientLang()
+    if IsOnServer() then return false end
+    local settings = RPCAPI.CallAsync('core.account.settings.get.v1', {})
+    if type(settings) ~= 'table' or settings.ok ~= true then return false end
+    ClientLangCache = settings.value.locale
+    return true
+end
+
 if not IsOnServer() then
-    RegisterNetEvent("Feather:Character:Spawn", function(character)
-        ClientLangCache = character and character.lang or ClientLangCache
+    AddEventHandler('playerSpawned', function()
+        CreateThread(function()
+            for _ = 1, 10 do
+                if LocalesAPI.RefreshClientLang() then return end
+                Wait(1000)
+            end
+        end)
     end)
 end
 
 local function getLang(src)
     if IsOnServer() then
-        local char = CharacterAPI.GetCharacter({ src = src})
-        if not char or not char.char or not char.char.lang then
-            return Config.DefaultLang
-        else
-            return char.char.lang
-        end
+        local settings = CoreAccountSettings and CoreAccountSettings.GetBySource(src)
+        return type(settings) == 'table' and settings.ok == true
+            and settings.value.locale or Config.DefaultLang
     else
         print('Not for use on client')
     end
@@ -65,18 +71,6 @@ RPCAPI.Register("SyncTranslations", function(params, res, player)
     return res(true)
 end)
 
-if IsOnServer() then
-    RPCAPI.Register("GetCharLang", function(params, res, player)
-        return res(getLang(player))
-    end)
-
-    RPCAPI.Register("SetCharLang", function(params, res, player)
-        local char = CharacterAPI.GetCharacter({ src = player })
-        char:UpdateLang(params.lang)
-        return res(LocalesAPI.translations[params.lang])
-    end)
-end
-
 function LocalesAPI.register(key, translation)
     if LocalesAPI.translations[key] == nil then
         LocalesAPI.translations[key] = translation
@@ -107,7 +101,7 @@ function LocalesAPI.translate(src, str, ...)
         lang = getLang(src)
     else
         if ClientLangCache == nil then
-            ClientLangCache = RPCAPI.CallAsync("GetCharLang", {})
+            if not LocalesAPI.RefreshClientLang() then ClientLangCache = Config.DefaultLang end
         end
         lang = ClientLangCache
     end
@@ -123,3 +117,25 @@ function LocalesAPI.translate(src, str, ...)
         return 'Locale [' .. lang .. '] does not exist'
     end
 end
+
+local function RegisterLocale(key, translations)
+    if type(key) ~= 'string' or key == '' or type(translations) ~= 'table' then
+        return CoreResults.Err('invalid_input', 'Locale name and translation table are required.')
+    end
+    LocalesAPI.register(key, translations)
+    return CoreResults.Ok({ locale = key })
+end
+
+local function TranslateLocale(src, key, ...)
+    if type(key) ~= 'string' or key == '' then
+        return CoreResults.Err('invalid_input', 'Translation key is required.')
+    end
+    local ok, translated = pcall(LocalesAPI.translate, src, key, ...)
+    if not ok then
+        return CoreResults.Err('internal_error', 'Translation failed.')
+    end
+    return CoreResults.Ok(translated)
+end
+
+exports('RegisterLocale', RegisterLocale)
+exports('TranslateLocale', TranslateLocale)
