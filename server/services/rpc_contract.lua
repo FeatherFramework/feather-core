@@ -53,9 +53,9 @@ RegisterCommand('CoreRpcSmokeTest', function(source)
             end
         },
         {
-            name = 'legacy bridge',
+            name = 'session kernel binding',
             run = function()
-                return FindRoute('GetCharacter') ~= nil
+                return type(CoreSessions) == 'table' and type(CoreSessions.IsCurrent) == 'function'
             end
         },
         {
@@ -81,4 +81,3 @@ RegisterCommand('CoreRpcSmokeTest', function(source)
     end
     print(('[CoreRpcSmokeTest] done %d/%d passed'):format(passed, #tests))
 end, true)
-
