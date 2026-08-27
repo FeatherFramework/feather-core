@@ -58,8 +58,8 @@ local function GetResponseFunction(id, requestSource, expectedSession)
         if responded then return end
         responded = true
         if expectedSession and IsOnServer() then
-            if not CharacterAPI or not CharacterAPI.IsSessionCurrent
-                or not CharacterAPI.IsSessionCurrent(requestSource, expectedSession.sessionId, expectedSession.characterId) then
+            if not CoreSessions or not CoreSessions.IsCurrent
+                or not CoreSessions.IsCurrent(requestSource, expectedSession.sessionId, expectedSession.characterId) then
                 TriggerRemoteEvent("Feather:Response", requestSource, id, nil, {
                     code = 'character_session_expired',
                     message = 'Character session is no longer current.'
@@ -247,17 +247,23 @@ AddEventHandler("Feather:Call", function(id, name, params)
         if account and account.ok then requestContext.accountId = account.value.accountId end
 
         if policy.requireCharacter then
-            local session = CharacterAPI and CharacterAPI.ResolveSession and CharacterAPI.ResolveSession(requestSource) or nil
+            local sessionResult = CoreSessions and CoreSessions.Get and CoreSessions.Get(requestSource) or nil
+            local session = sessionResult and sessionResult.ok and sessionResult.value or nil
             if not session then
                 if id then TriggerRemoteEvent("Feather:Response", requestSource, id, nil,
                     RpcError('character_required', 'A current character session is required.')) end
                 return
             end
+            -- Temporary construction detail: legacy consumers may still use
+            -- the cached character record. Contract routes receive identity
+            -- from CoreSessions and do not require that legacy cache to exist.
+            local legacyCharacter = CacheAPI and CacheAPI.GetCacheBySrc
+                and CacheAPI.GetCacheBySrc('character', requestSource) or nil
             requestContext.characterId = session.characterId
             requestContext.sessionId = session.sessionId
             requestContext.accountId = session.accountId
             requestContext.generation = session.generation
-            requestContext.character = session.character
+            requestContext.character = legacyCharacter
         end
     end
 
@@ -468,3 +474,12 @@ function RPCAPI.CallAsync(name, params, source, timeoutMs)
     -- Unpack the "awaited" promise. (Waits for the promise to be "done"/resolved)
     return table.unpack(Citizen.Await(p))
 end
+
+-- Named exports are the Contract 1 access boundary. The legacy initiate()
+-- table remains available only while first-party consumers are migrated.
+exports('RegisterRPC', RPCAPI.Register)
+exports('RegisterContractRPC', RPCAPI.RegisterContract)
+exports('GetRPCRoutes', function() return CoreResults.Ok(RPCAPI.GetRoutes()) end)
+exports('NotifyRPC', RPCAPI.Notify)
+exports('CallRPC', RPCAPI.Call)
+exports('CallRPCAsync', RPCAPI.CallAsync)
