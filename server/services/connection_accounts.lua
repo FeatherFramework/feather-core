@@ -56,13 +56,13 @@ local function NormalizeIdentifiers(src)
     return normalized
 end
 
-local function HasPrimaryIdentifier(identifiers)
+local function PrimaryIdentifiers(identifiers)
+    local fallback
     for _, identifier in ipairs(identifiers) do
-        if identifier.type == 'license' or identifier.type == 'license2' then
-            return true
-        end
+        if identifier.type == 'license' then return { identifier } end
+        if identifier.type == 'license2' and not fallback then fallback = identifier end
     end
-    return false
+    return fallback and { fallback } or {}
 end
 
 local function Fingerprint(identifiers)
@@ -174,8 +174,8 @@ function CoreAccounts.Resolve(src, displayName)
         return CoreResults.Err('invalid_input', 'A valid player source and display name are required.')
     end
 
-    local identifiers = NormalizeIdentifiers(src)
-    if not HasPrimaryIdentifier(identifiers) then
+    local identifiers = PrimaryIdentifiers(NormalizeIdentifiers(src))
+    if #identifiers == 0 then
         return CoreResults.Err('unauthenticated', 'A Rockstar license identifier is required.')
     end
 
@@ -201,6 +201,24 @@ function CoreAccounts.GetContext(src)
     end
     return CoreResults.Ok(PublicContext(context))
 end
+
+function CoreAccounts.GetPrimaryIdentifier(src)
+    local context = connectedBySource[tonumber(src)]
+    if not context then
+        return CoreResults.Err('not_found', 'No connected Core account context exists for that source.')
+    end
+    local identifier = context.identifiers and context.identifiers[1] or nil
+    if not identifier or (identifier.type ~= 'license' and identifier.type ~= 'license2') then
+        return CoreResults.Err('not_found', 'No primary account identifier is available.')
+    end
+    return CoreResults.Ok({
+        type = identifier.type,
+        value = identifier.value,
+        identifier = identifier.type .. ':' .. identifier.value
+    })
+end
+
+exports('GetPrimaryIdentifier', CoreAccounts.GetPrimaryIdentifier)
 
 function CoreAccounts.GetCounts()
     local pending, connected = 0, 0
@@ -252,7 +270,7 @@ end
 
 AddEventHandler('playerJoining', function()
     local src = source
-    local currentFingerprint = Fingerprint(NormalizeIdentifiers(src))
+    local currentFingerprint = Fingerprint(PrimaryIdentifiers(NormalizeIdentifiers(src)))
     local pending = pendingByFingerprint[currentFingerprint]
     if not pending then
         logger.Error('account.context_missing', { source = src })
@@ -289,6 +307,20 @@ AddEventHandler('playerDropped', function(reason)
         local snapshot = PublicContext(context)
         CoreEventBroker.PublishInternal('core.account.disconnected.v1', snapshot)
         TriggerEvent('core.account.disconnected.v1', snapshot, snapshot.reason)
+    end
+end)
+
+AddEventHandler('core.connection.rejected.v1', function(src, gateName)
+    src = tonumber(src)
+    for fingerprint, pending in pairs(pendingByFingerprint) do
+        if pending.connectingSource == src then
+            pendingByFingerprint[fingerprint] = nil
+            logger.Info('account.pending_released', {
+                source = src,
+                accountId = pending.accountId,
+                rejectedBy = tostring(gateName or 'unknown')
+            })
+        end
     end
 end)
 
@@ -348,6 +380,19 @@ RegisterCommand('CoreAccountSmokeTest', function(source, args)
             end
         },
         {
+            name = 'license-only anchor',
+            run = function()
+                local result = CoreAccounts.GetContext(target)
+                if not result.ok then return false end
+                local rows = MySQL.query.await([[
+                    SELECT `identifier_type` FROM `core_account_identifiers`
+                    WHERE `account_id` = ?
+                ]], { result.value.accountId }) or {}
+                if #rows ~= 1 then return false end
+                return rows[1].identifier_type == 'license' or rows[1].identifier_type == 'license2'
+            end
+        },
+        {
             name = 'defensive snapshot',
             run = function()
                 local first = CoreAccounts.GetContext(target)
@@ -370,4 +415,98 @@ RegisterCommand('CoreAccountSmokeTest', function(source, args)
         end
     end
     print(('[CoreAccountSmokeTest] done %d/%d passed source=%s'):format(passed, #tests, target))
+end, true)
+
+RegisterCommand('CoreSplitConnectedAccount', function(source, args)
+    if source ~= 0 then return end
+    local target = tonumber(args and args[1])
+    if not target or args[2] ~= 'CONFIRM' then
+        print('[CoreSplitConnectedAccount] usage: CoreSplitConnectedAccount <serverId> CONFIRM')
+        return
+    end
+
+    local contextResult = CoreAccounts.GetContext(target)
+    local sessionResult = CoreSessions and CoreSessions.Get(target) or nil
+    local targetAnchors = PrimaryIdentifiers(NormalizeIdentifiers(target))
+    if not contextResult.ok or not sessionResult or not sessionResult.ok or #targetAnchors ~= 1 then
+        print('[CoreSplitConnectedAccount] target requires a connected account and active Character session')
+        return
+    end
+
+    local oldAccountId = contextResult.value.accountId
+    local targetAnchor = targetAnchors[1]
+    local keeperSource, keeperAnchor
+    for _, rawSource in ipairs(GetPlayers()) do
+        local candidate = tonumber(rawSource)
+        if candidate and candidate ~= target then
+            local candidateContext = CoreAccounts.GetContext(candidate)
+            if candidateContext.ok and candidateContext.value.accountId == oldAccountId then
+                if keeperSource then
+                    print('[CoreSplitConnectedAccount] multiple other connected sources share this account; split refused')
+                    return
+                end
+                local anchors = PrimaryIdentifiers(NormalizeIdentifiers(candidate))
+                if #anchors ~= 1 then
+                    print('[CoreSplitConnectedAccount] the account keeper has no unique license anchor')
+                    return
+                end
+                keeperSource, keeperAnchor = candidate, anchors[1]
+            end
+        end
+    end
+    if not keeperAnchor or (keeperAnchor.type == targetAnchor.type and keeperAnchor.value == targetAnchor.value) then
+        print('[CoreSplitConnectedAccount] a distinct connected account keeper is required')
+        return
+    end
+
+    local newAccountId, failure
+    local executed, committed = pcall(MySQL.startTransaction, function(query)
+        local ownerRows = query([[SELECT `account_id` FROM `core_account_identifiers`
+            WHERE `identifier_type` = ? AND `identifier_value` = ? FOR UPDATE]],
+            { targetAnchor.type, targetAnchor.value }) or {}
+        local profileRows = query([[SELECT `account_id` FROM `character_profiles`
+            WHERE `character_id` = ? FOR UPDATE]], { sessionResult.value.characterId }) or {}
+        if not ownerRows[1] or ownerRows[1].account_id ~= oldAccountId
+            or not profileRows[1] or profileRows[1].account_id ~= oldAccountId then
+            failure = 'anchor or Character ownership changed'
+            return false
+        end
+
+        local uuidRows = query('SELECT UUID() AS `id`') or {}
+        newAccountId = uuidRows[1] and uuidRows[1].id or nil
+        if not newAccountId then failure = 'UUID generation failed'; return false end
+        query([[INSERT INTO `core_accounts` (`id`, `display_name`, `status`)
+            VALUES (?, ?, 'active')]], { newAccountId, GetPlayerName(target) or ('Source %s'):format(target) })
+        query([[DELETE FROM `core_account_identifiers` WHERE `account_id` = ?]], { oldAccountId })
+        query([[INSERT INTO `core_account_identifiers` (`account_id`, `identifier_type`, `identifier_value`)
+            VALUES (?, ?, ?), (?, ?, ?)]],
+            { oldAccountId, keeperAnchor.type, keeperAnchor.value,
+              newAccountId, targetAnchor.type, targetAnchor.value })
+        query([[INSERT INTO `character_account_state` (`account_id`) VALUES (?)
+            ON DUPLICATE KEY UPDATE `account_id` = VALUES(`account_id`)]], { newAccountId })
+        query([[UPDATE `character_profiles` SET `account_id` = ?
+            WHERE `character_id` = ? AND `account_id` = ?]],
+            { newAccountId, sessionResult.value.characterId, oldAccountId })
+        query([[DELETE FROM `character_creation_requests` WHERE `character_id` = ?]],
+            { sessionResult.value.characterId })
+        local verified = query([[SELECT
+            (SELECT COUNT(*) FROM `core_account_identifiers` WHERE `account_id` = ?) AS old_anchors,
+            (SELECT COUNT(*) FROM `core_account_identifiers` WHERE `account_id` = ?) AS new_anchors,
+            (SELECT COUNT(*) FROM `character_profiles` WHERE `character_id` = ? AND `account_id` = ?) AS profile_moved]],
+            { oldAccountId, newAccountId, sessionResult.value.characterId, newAccountId }) or {}
+        local row = verified[1] or {}
+        if tonumber(row.old_anchors) ~= 1 or tonumber(row.new_anchors) ~= 1
+            or tonumber(row.profile_moved) ~= 1 then
+            failure = 'post-write verification failed'
+            return false
+        end
+        return true
+    end)
+
+    if not executed or committed ~= true then
+        print(('[CoreSplitConnectedAccount] split failed and rolled back: %s'):format(tostring(failure or committed)))
+        return
+    end
+    print(('[CoreSplitConnectedAccount] split complete source=%s oldAccount=%s newAccount=%s character=%s keeperSource=%s; reconnect source %s now'):format(
+        target, oldAccountId, newAccountId, sessionResult.value.characterId, keeperSource, target))
 end, true)
