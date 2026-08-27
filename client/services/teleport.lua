@@ -259,6 +259,11 @@ function TeleportAPI:ToWaypoint(options)
     return self:ToCoords(GetWaypointCoords(), options)
 end
 
+-- Narrow cross-resource contract for safe, streamed coordinate placement.
+exports('TeleportToCoords', function(coords, options)
+    return TeleportAPI:ToCoords(coords, options)
+end)
+
 AddEventHandler('onResourceStop', function(resourceName)
     if resourceName ~= GetCurrentResourceName() then return end
     if activeEntity and DoesEntityExist(activeEntity) then FreezeEntityPosition(activeEntity, false) end
