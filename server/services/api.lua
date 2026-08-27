@@ -5,7 +5,6 @@ function StartAPI()
     
     CoreServerApi.User = UserAPI
     CoreServerApi.Files = FilesAPI
-    CoreServerApi.Character = CharacterAPI
     CoreServerApi.Instance = InstanceAPI
     CoreServerApi.Notify = SNotifyAPI
     CoreServerApi.Database = DatabaseAPI
