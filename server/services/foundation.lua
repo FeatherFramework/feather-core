@@ -84,6 +84,9 @@ local function ValidateConfiguration()
         Check('config.exists', type(Config) == 'table', 'invalid_config', 'Config must be a table.'),
         Check('config.default_language', type(Config and Config.DefaultLang) == 'string' and Config.DefaultLang ~= '',
             'invalid_config', 'Config.DefaultLang must be a non-empty string.'),
+        Check('config.default_language_registered', type(Config and Config.DefaultLang) == 'string'
+                and type(LocalesAPI and LocalesAPI.translations[Config.DefaultLang]) == 'table',
+            'invalid_config', 'Config.DefaultLang must name a registered Core locale.'),
         Check('config.rpc', type(Config and Config.RPCRateLimit) == 'table',
             'invalid_config', 'Config.RPCRateLimit must be a table.')
     }
@@ -123,6 +126,13 @@ local function ValidateConfiguration()
             and Config.GuardRegistry.maxPerAction > 0,
         'invalid_config', 'Config.GuardRegistry.maxPerAction must be a positive number.',
         { path = 'Config.GuardRegistry.maxPerAction' })
+    for _, field in ipairs({ 'maxMessageLength', 'maxDurationMs' }) do
+        checks[#checks + 1] = Check('config.notifications.' .. field,
+            type(Config and Config.NotificationRegistry and Config.NotificationRegistry[field]) == 'number'
+                and Config.NotificationRegistry[field] > 0,
+            'invalid_config', ('Config.NotificationRegistry.%s must be a positive number.'):format(field),
+            { path = 'Config.NotificationRegistry.' .. field })
+    end
 
     for _, result in ipairs(checks) do
         if not result.ok then
@@ -145,12 +155,20 @@ function CoreFoundation.GetCapabilities()
             logging = 1,
             configValidation = 1,
             accountContext = 1,
+            primaryIdentifier = 1,
+            connectionGates = 1,
             sessions = 1,
             rpc = 1,
+            namedRpcAccess = 1,
             events = 1,
             providers = 1,
             policy = 1,
-            guards = 1
+            guards = 1,
+            notifications = 1,
+            clientNotifications = 1,
+            localization = 1,
+            accountSettings = 1,
+            instances = 1
         }
     })
 end
