@@ -29,6 +29,38 @@ AddEventHandler("Feather:Notify", function(notifyType, options)
     notifyFn(table.unpack(options))
 end)
 
+local function ShowNotification(request)
+    if type(request) ~= 'table' then
+        return CoreResults.Err('invalid_input', 'Notification request must be a table.')
+    end
+    local style = request.style or 'right'
+    if style ~= 'right' and style ~= 'top_banner' then
+        return CoreResults.Err('invalid_input', 'Notification style is unsupported.', { style = style })
+    end
+    local message = request.message
+    local maximum = math.max(1, math.floor(tonumber(Config.NotificationRegistry.maxMessageLength) or 512))
+    if type(message) ~= 'string' or message == '' or #message > maximum then
+        return CoreResults.Err('invalid_input', 'Notification message is invalid.', { maxLength = maximum })
+    end
+    local duration = tonumber(request.duration) or DEFAULT_DURATION
+    local maxDuration = math.max(1, math.floor(tonumber(Config.NotificationRegistry.maxDurationMs) or 15000))
+    if duration < 1 or duration > maxDuration or duration % 1 ~= 0 then
+        return CoreResults.Err('invalid_input', 'Notification duration is invalid.', { maxDurationMs = maxDuration })
+    end
+    if style == 'top_banner' then
+        local title = request.title
+        if type(title) ~= 'string' or title == '' or #title > maximum then
+            return CoreResults.Err('invalid_input', 'Notification title is invalid.', { maxLength = maximum })
+        end
+        NotifyAPI.TopBanner(title, message, duration)
+    else
+        NotifyAPI.RightNotify(message, duration)
+    end
+    return CoreResults.Ok({ displayed = true, style = style })
+end
+
+exports('ShowNotification', ShowNotification)
+
 function NotifyAPI.ToolTip(text, duration)
     text, duration = normalizeNotification(text, duration)
     local vartext = Citizen.InvokeNative(0xFA925AC00EB830B9, 10, "LITERAL_STRING", text, Citizen.ResultAsLong())
