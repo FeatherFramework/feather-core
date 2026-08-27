@@ -1,19 +1,14 @@
--- Entry point, run once when the resource starts. Order matters: StartAPI()
--- (server/services/api.lua) must run before any other resource's
--- `exports['feather-core'].initiate()` call can succeed, and SetupCache()/
--- SetupPlayerEvents() must be wired up before the first playerJoining event
--- can be handled correctly.
+-- Entry point, run once when the resource starts. The temporary non-Character
+-- legacy API is registered before migrations, and account cache/connection
+-- handlers are installed before players may join.
 function RunCore()
     local foundation = CoreFoundation.BeginStartup()
     if not foundation.ok then
         error(('[%s] %s'):format(foundation.code, foundation.message))
     end
 
-    -- Temporary construction bridge: first-party resources still import the
-    -- legacy API during their own script initialization. Register it before
-    -- the migration runner performs its first yielding database call. The
-    -- Contract 1 readiness exports continue to report `migrating` until the
-    -- database and remaining Core services are actually ready.
+    -- Temporary non-Character compatibility surface. Character domain state
+    -- and behavior are no longer exposed here.
     StartAPI()
 
     local migrations = CoreMigrationRunner.Run()
@@ -31,6 +26,11 @@ function RunCore()
     StartVersioner()
     SetupAccountIdentity()
     SetupPlayerEvents()
+
+    local notificationProvider = SetupNotificationProvider()
+    if not notificationProvider.ok then
+        error(('[%s] %s'):format(notificationProvider.code, notificationProvider.message))
+    end
 
     local ready = CoreFoundation.MarkReady()
     if not ready.ok then
