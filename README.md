@@ -8,38 +8,24 @@
 
 Follow our easy [Guide](https://featherframework.net/guide)
 
-## Features
+## Responsibilities
 
-- Interiors Fixes
-- Population density control
-- Easy Developer API's
-  - Discord Webhook API
-  - User Management
-  - Character Management
-  - Remote Procedure Callbacks (RPC)
-  - PrettyPrint
-  - Dataview
-  - Game Events
-  - Prompts
-  - Pedestrians
-  - Objects
-  - Notifications
-  - Text Rendering
-  - Blips
-  - Files
-- Global per player locale
-- Death handling
-  - Death Camera
-  - Death Timer
-  - Hospital Spawner
-- Position Syncing
+Feather Core is the framework kernel. It owns:
 
-# TODO
-- Job API/Docs
-- Logout functionality + character script. (currently logout does not take you to character select)
-- Make the UI configurable
-- Optimization pass
-- Migrate user/character ID's to UUID
+- UUID account identity and connection gates;
+- authoritative character-session bindings;
+- result envelopes, readiness, health, logging, and migrations;
+- named RPC transport and lifecycle events;
+- provider, policy, guard, notification-dispatch, and locale primitives;
+- minimal account-scoped settings persistence.
+
+Gameplay and presentation are owned by focused resources: Character, Inventory,
+Weapons, Admin, HUD, Routing, Notify, World, PVP, and Settings. Reusable future
+client utilities are provided separately by Toolkit.
+
+Optional operator-owned GitHub release reporting is provided separately by
+Versioner. Core readiness and resource compatibility never depend on that
+service or on GitHub availability.
 
 ## API Documentation and usage
 [https://featherframework.net/api](https://featherframework.net/)
@@ -59,17 +45,18 @@ local result = exports['feather-core']:SendNotification({
 ```
 
 The result uses the standard Core envelope. Notification providers can be
-registered through `RegisterNotificationProvider`; the built-in provider is the
-default while notification rendering is extracted from Core.
+registered through `RegisterNotificationProvider`. Core does not install a
+presentation provider; `feather-notify` supplies the default provider.
 
-Client resources can display the same validated style locally through the named
-`ShowNotification` export.
+Client resources display notifications through
+`exports['feather-notify']:ShowNotification(request)`.
 
 Locale registration and translation are available in both runtimes through the
 named `RegisterLocale` and `TranslateLocale` exports. Both return standard Core
 result envelopes.
 
-The clean-slate Core rebuild has begun. The existing `initiate()` export remains temporarily available while first-party resources are moved to the new contracts.
+The clean-slate Core extraction is complete. The legacy `initiate()` API and all
+first-party consumers of it have been removed.
 
 New server exports:
 

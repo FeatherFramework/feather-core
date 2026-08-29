@@ -1,7 +1,15 @@
 CoreNotifications = {}
 
 local logger = CoreLogging.Create(GetCurrentResourceName(), 'notifications')
-local supportedStyles = { right = true }
+local supportedStyles = {
+    tooltip=true, advanced=true, location=true, right=true, left=true, top_banner=true,
+    advanced_right=true, top=true, center=true, standard=true, bottom_right=true,
+    mission_failed=true, dead_player=true, warning=true
+}
+local optionalFields = {
+    title=true, location=true, dictionary=true, icon=true, color=true, quality=true,
+    audioSource=true, audioName=true
+}
 
 local function Copy(value, seen)
     if type(value) ~= 'table' then return value end
@@ -40,7 +48,15 @@ local function Validate(request)
         return CoreResults.Err('invalid_input', 'Notification duration is invalid.', { maxDurationMs = maxDuration })
     end
 
-    return CoreResults.Ok({ source = source, style = style, message = message, duration = duration })
+    local normalized = { source = source, style = style, message = message, duration = duration }
+    for key in pairs(optionalFields) do
+        if request[key] ~= nil then normalized[key] = Copy(request[key]) end
+    end
+    if (style == 'top_banner' or style == 'advanced' or style == 'mission_failed' or style == 'warning')
+        and (type(normalized.title) ~= 'string' or normalized.title == '') then
+        return CoreResults.Err('invalid_input', 'This notification style requires a title.')
+    end
+    return CoreResults.Ok(normalized)
 end
 
 function CoreNotifications.RegisterProvider(name, implementation, options)
@@ -74,22 +90,6 @@ function CoreNotifications.Send(request, providerName)
         return CoreResults.Err('provider_unavailable', 'Notification provider returned an invalid result.')
     end
     return result
-end
-
-function SetupNotificationProvider()
-    return CoreNotifications.RegisterProvider('feather-core', {
-        Send = function(request)
-            TriggerClientEvent('Feather:Notify', request.source, 'RightNotify', {
-                request.message,
-                request.duration
-            })
-            return CoreResults.Ok({ delivered = true, style = request.style })
-        end
-    }, {
-        contract = 1,
-        default = true,
-        capabilities = { styles = { right = true } }
-    })
 end
 
 exports('RegisterNotificationProvider', CoreNotifications.RegisterProvider)

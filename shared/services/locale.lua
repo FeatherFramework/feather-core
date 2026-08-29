@@ -40,37 +40,6 @@ local function getLang(src)
     end
 end
 
---This handles syncing the translations between client/server.
--- (CORE-01) Previously did `LocalesAPI.translations = params.translations`,
--- which let any unauthenticated caller (this RPC has no IsOnServer guard,
--- since e.g. feather-admin's client-only translations legitimately need to
--- reach the server this way) replace the ENTIRE global translation table,
--- wiping every other resource's locale strings for every player. Fixed to
--- merge additively instead -- same "first writer wins" semantics as
--- LocalesAPI.register below -- so a caller can only fill in keys nobody has
--- registered yet, never overwrite or wipe existing ones.
-RPCAPI.Register("SyncTranslations", function(params, res, player)
-    if not params or type(params.translations) ~= "table" then
-        return res(false)
-    end
-
-    for lang, translations in pairs(params.translations) do
-        if type(translations) == "table" then
-            if LocalesAPI.translations[lang] == nil then
-                LocalesAPI.translations[lang] = translations
-            else
-                for tkey, tvalue in pairs(translations) do
-                    if LocalesAPI.translations[lang][tkey] == nil then
-                        LocalesAPI.translations[lang][tkey] = tvalue
-                    end
-                end
-            end
-        end
-    end
-
-    return res(true)
-end)
-
 function LocalesAPI.register(key, translation)
     if LocalesAPI.translations[key] == nil then
         LocalesAPI.translations[key] = translation
@@ -87,12 +56,6 @@ function LocalesAPI.register(key, translation)
     end
 
     
-    -- Client-only resource translations need to reach the server. The server
-    -- already owns its local table and must not broadcast a callback RPC to
-    -- every client, since a callback has exactly one expected responder.
-    if not IsOnServer() then
-        RPCAPI.CallAsync("SyncTranslations", { translations = LocalesAPI.translations })
-    end
 end
 
 function LocalesAPI.translate(src, str, ...)
@@ -139,3 +102,11 @@ end
 
 exports('RegisterLocale', RegisterLocale)
 exports('TranslateLocale', TranslateLocale)
+exports('SetClientLocale', function(locale)
+    if IsOnServer() then return CoreResults.Err('invalid_context', 'Client locale can only be set on a client.') end
+    if type(locale) ~= 'string' or LocalesAPI.translations[locale] == nil then
+        return CoreResults.Err('invalid_input', 'Locale is not registered.', { locale = locale })
+    end
+    LocalesAPI.SetClientLang(locale)
+    return CoreResults.Ok({ locale = locale })
+end)

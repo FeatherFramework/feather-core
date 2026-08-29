@@ -28,6 +28,10 @@ RegisterCommand('CoreLegacyCharacterRemovalSmokeTest', function(source, args)
                 and LoadResourceFile('feather-core', 'server/controllers/characters.lua') == nil
                 and LoadResourceFile('feather-core', 'client/services/character.lua') == nil
                 and LoadResourceFile('feather-core', 'client/services/character-camera.lua') == nil
+                and LoadResourceFile('feather-core', 'server/controllers/users.lua') == nil
+                and LoadResourceFile('feather-core', 'server/services/users.lua') == nil
+                and LoadResourceFile('feather-core', 'server/services/cache.lua') == nil
+                and LoadResourceFile('feather-core', 'server/services/api.lua') == nil
                 and LoadResourceFile('feather-core', 'server/migrations/002_legacy_character_first_spawn.lua') == nil
         },
         {
@@ -39,8 +43,8 @@ RegisterCommand('CoreLegacyCharacterRemovalSmokeTest', function(source, args)
                 and routes.CharacterDeath == nil
         },
         {
-            name = 'user cache isolated',
-            passed = type(UserCache) == 'table' and CacheAPI.GetCacheBySrc('character', target or 0) == nil
+            name = 'legacy caches absent',
+            passed = UserCache == nil and CacheAPI == nil and CharacterCache == nil
         },
         {
             name = 'consumers cut over',

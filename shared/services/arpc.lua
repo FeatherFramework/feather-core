@@ -254,16 +254,10 @@ AddEventHandler("Feather:Call", function(id, name, params)
                     RpcError('character_required', 'A current character session is required.')) end
                 return
             end
-            -- Temporary construction detail: legacy consumers may still use
-            -- the cached character record. Contract routes receive identity
-            -- from CoreSessions and do not require that legacy cache to exist.
-            local legacyCharacter = CacheAPI and CacheAPI.GetCacheBySrc
-                and CacheAPI.GetCacheBySrc('character', requestSource) or nil
             requestContext.characterId = session.characterId
             requestContext.sessionId = session.sessionId
             requestContext.accountId = session.accountId
             requestContext.generation = session.generation
-            requestContext.character = legacyCharacter
         end
     end
 

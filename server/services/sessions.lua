@@ -140,6 +140,27 @@ function CoreSessions.CompleteLeaving(src, sessionId)
     return CoreResults.Ok(snapshot)
 end
 
+function CoreSessions.Disconnect(src, reason)
+    src = tonumber(src)
+    local session = bySource[src]
+    if not session then
+        return CoreResults.Ok({ released = false, source = src })
+    end
+
+    if session.state == 'ready' then
+        local leaving = CoreSessions.BeginLeaving(src, reason or 'disconnect')
+        if not leaving.ok then return leaving end
+        session = bySource[src]
+    end
+    if session and session.state == 'leaving' then
+        local completed = CoreSessions.CompleteLeaving(src, session.sessionId)
+        if not completed.ok then return completed end
+        completed.value.released = true
+        return completed
+    end
+    return CoreResults.Err('session_stale', 'The disconnected character session could not be finalized.')
+end
+
 function CoreSessions.GetCounts()
     local ready, leaving = 0, 0
     for _, session in pairs(bySource) do
@@ -155,6 +176,18 @@ exports('IsSessionCurrent', CoreSessions.IsCurrent)
 exports('ActivateSession', CoreSessions.Activate)
 exports('BeginSessionLeaving', CoreSessions.BeginLeaving)
 exports('CompleteSessionLeaving', CoreSessions.CompleteLeaving)
+
+AddEventHandler('playerDropped', function(reason)
+    local disconnectedSource = source
+    local result = CoreSessions.Disconnect(disconnectedSource, 'disconnect')
+    if not result.ok then
+        logger.Error('session.disconnect_failed', {
+            source = disconnectedSource,
+            reason = tostring(reason),
+            code = result.code
+        })
+    end
+end)
 
 RegisterCommand('CoreSessionSmokeTest', function(source, args)
     if source ~= 0 then return end

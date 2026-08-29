@@ -165,10 +165,8 @@ function CoreFoundation.GetCapabilities()
             policy = 1,
             guards = 1,
             notifications = 1,
-            clientNotifications = 1,
             localization = 1,
-            accountSettings = 1,
-            instances = 1
+            accountSettings = 1
         }
     })
 end
