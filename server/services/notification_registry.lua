@@ -2,19 +2,38 @@ CoreNotifications = {}
 
 local logger = CoreLogging.Create(GetCurrentResourceName(), 'notifications')
 local supportedStyles = {
-    tooltip=true, advanced=true, location=true, right=true, left=true, top_banner=true,
-    advanced_right=true, top=true, center=true, standard=true, bottom_right=true,
-    mission_failed=true, dead_player=true, warning=true
+    tooltip = true,
+    advanced = true,
+    location = true,
+    right = true,
+    left = true,
+    top_banner = true,
+    advanced_right = true,
+    top = true,
+    center = true,
+    standard = true,
+    bottom_right = true,
+    mission_failed = true,
+    dead_player = true,
+    warning = true
 }
 local optionalFields = {
-    title=true, location=true, dictionary=true, icon=true, color=true, quality=true,
-    audioSource=true, audioName=true
+    title = true,
+    location = true,
+    dictionary = true,
+    icon = true,
+    color = true,
+    quality = true,
+    audioSource = true,
+    audioName = true
 }
 
 local function Copy(value, seen)
     if type(value) ~= 'table' then return value end
+
     seen = seen or {}
     if seen[value] then return nil end
+
     local output = {}
     seen[value] = output
     for key, child in pairs(value) do output[Copy(key, seen)] = Copy(child, seen) end
@@ -52,6 +71,7 @@ local function Validate(request)
     for key in pairs(optionalFields) do
         if request[key] ~= nil then normalized[key] = Copy(request[key]) end
     end
+
     if (style == 'top_banner' or style == 'advanced' or style == 'mission_failed' or style == 'warning')
         and (type(normalized.title) ~= 'string' or normalized.title == '') then
         return CoreResults.Err('invalid_input', 'This notification style requires a title.')
@@ -72,6 +92,7 @@ function CoreNotifications.Send(request, providerName)
 
     local provider = CoreProviders.Get('notification', providerName, 1)
     if not provider.ok then return provider end
+
     local implementation = provider.value.implementation
     if type(implementation) ~= 'table' or not IsCallable(implementation.Send) then
         return CoreResults.Err('provider_unavailable', 'The notification provider does not implement Send.')
@@ -86,6 +107,7 @@ function CoreNotifications.Send(request, providerName)
         })
         return CoreResults.Err('provider_unavailable', 'Notification delivery failed.')
     end
+
     if not CoreResults.Is(result) then
         return CoreResults.Err('provider_unavailable', 'Notification provider returned an invalid result.')
     end
@@ -97,6 +119,7 @@ exports('SendNotification', CoreNotifications.Send)
 
 RegisterCommand('CoreNotificationSmokeTest', function(source)
     if source ~= 0 then return end
+
     CoreProviders.Unregister('notification', 'core-notification-smoke')
     local received
     local registered = CoreNotifications.RegisterProvider('core-notification-smoke', {
@@ -116,11 +139,11 @@ RegisterCommand('CoreNotificationSmokeTest', function(source)
     local removed = CoreProviders.Unregister('notification', 'core-notification-smoke')
 
     local tests = {
-        { name = 'provider registered', passed = registered.ok },
-        { name = 'delivery envelope', passed = delivered.ok and delivered.value.delivered == true },
-        { name = 'request normalized', passed = received and received.source == 1 and received.duration == 1000 },
+        { name = 'provider registered',    passed = registered.ok },
+        { name = 'delivery envelope',      passed = delivered.ok and delivered.value.delivered == true },
+        { name = 'request normalized',     passed = received and received.source == 1 and received.duration == 1000 },
         { name = 'invalid style rejected', passed = not invalid.ok and invalid.code == 'invalid_input' },
-        { name = 'provider removed', passed = removed.ok }
+        { name = 'provider removed',       passed = removed.ok }
     }
     local passed = 0
     for _, test in ipairs(tests) do

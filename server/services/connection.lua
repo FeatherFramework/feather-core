@@ -46,6 +46,7 @@ function ConnectionAPI.RegisterGate(name, callback, options, registeredOwner)
             :format(name, callback.resource, owner))
         return false
     end
+
     local existing = gates[name]
     if existing and existing.owner ~= owner then
         print(("[feather-core] Connection gate '%s' belongs to %s; registration from %s rejected.")
@@ -76,6 +77,7 @@ end
 function ConnectionAPI.UnregisterGate(name)
     local gate = gates[name]
     if not gate or gate.owner ~= ownerResource() then return false end
+
     gates[name] = nil
     return true
 end
@@ -86,6 +88,7 @@ exports('RegisterConnectionGate', function(name, callback, options)
     if type(descriptorOwner) ~= 'string' or descriptorOwner == '' then
         return ConnectionAPI.RegisterGate(name, callback, options, caller)
     end
+
     if caller ~= GetCurrentResourceName() and caller ~= descriptorOwner then
         print(("[feather-core] Connection gate '%s' descriptor owner %s does not match caller %s.")
             :format(tostring(name), descriptorOwner, caller))
@@ -116,6 +119,7 @@ end)
 
 RegisterCommand('CoreConnectionGates', function(source)
     if source ~= 0 then return end
+
     for _, gate in ipairs(ConnectionAPI.GetGates()) do
         print(('[CoreConnectionGates] name=%s owner=%s priority=%s type=%s failClosed=%s'):format(
             gate.name, gate.owner, gate.priority, gate.type, tostring(gate.failClosed)))
@@ -143,6 +147,7 @@ local function runGate(gate, src, playerName)
 
     local deadline = GetGameTimer() + gate.timeoutMs
     while not completed and GetGameTimer() < deadline do Wait(0) end
+
     if not completed then
         completed = true
         print(("[feather-core] Connection gate '%s' timed out after %sms."):format(gate.name, gate.timeoutMs))
@@ -155,6 +160,7 @@ local function runGate(gate, src, playerName)
     end
 
     if result == nil or result == false then return nil end
+
     if type(result) ~= 'string' or result == '' then
         print(("[feather-core] Connection gate '%s' returned an invalid rejection value."):format(gate.name))
         return gate.failClosed and gate.failureMessage or nil

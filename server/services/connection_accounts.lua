@@ -207,10 +207,12 @@ function CoreAccounts.GetPrimaryIdentifier(src)
     if not context then
         return CoreResults.Err('not_found', 'No connected Core account context exists for that source.')
     end
+
     local identifier = context.identifiers and context.identifiers[1] or nil
     if not identifier or (identifier.type ~= 'license' and identifier.type ~= 'license2') then
         return CoreResults.Err('not_found', 'No primary account identifier is available.')
     end
+
     return CoreResults.Ok({
         type = identifier.type,
         value = identifier.value,
@@ -223,7 +225,9 @@ exports('GetPrimaryIdentifier', CoreAccounts.GetPrimaryIdentifier)
 function CoreAccounts.GetCounts()
     local pending, connected = 0, 0
     for _ in pairs(pendingByFingerprint) do pending = pending + 1 end
+
     for _ in pairs(connectedBySource) do connected = connected + 1 end
+
     return { pending = pending, connected = connected }
 end
 
@@ -246,6 +250,7 @@ local function AccountIdentityGate(src, playerName)
         logger.Warn('account.connection_duplicate', { source = src, accountId = context.accountId })
         return 'This account is already connecting. Please wait and try again.'
     end
+
     pendingByFingerprint[fingerprint] = context
     logger.Info('account.resolved', {
         source = src,
@@ -298,6 +303,7 @@ AddEventHandler('playerDropped', function(reason)
             pendingByFingerprint[fingerprint] = nil
         end
     end
+
     local context = connectedBySource[src]
     connectedBySource[src] = nil
     if context then
@@ -342,11 +348,13 @@ end)
 
 RegisterCommand('CoreAccountSmokeTest', function(source, args)
     if source ~= 0 then return end
+
     local target = tonumber(args and args[1])
     if not target then
         local players = GetPlayers()
         target = players[1] and tonumber(players[1]) or nil
     end
+
     if not target then
         print('[CoreAccountSmokeTest] no connected player is available')
         return
@@ -373,6 +381,7 @@ RegisterCommand('CoreAccountSmokeTest', function(source, args)
             run = function()
                 local result = CoreAccounts.GetContext(target)
                 if not result.ok then return false end
+
                 return tonumber(MySQL.scalar.await(
                     'SELECT COUNT(*) FROM `core_accounts` WHERE `id` = ?',
                     { result.value.accountId }
@@ -384,11 +393,13 @@ RegisterCommand('CoreAccountSmokeTest', function(source, args)
             run = function()
                 local result = CoreAccounts.GetContext(target)
                 if not result.ok then return false end
+
                 local rows = MySQL.query.await([[
                     SELECT `identifier_type` FROM `core_account_identifiers`
                     WHERE `account_id` = ?
                 ]], { result.value.accountId }) or {}
                 if #rows ~= 1 then return false end
+
                 return rows[1].identifier_type == 'license' or rows[1].identifier_type == 'license2'
             end
         },
@@ -397,6 +408,7 @@ RegisterCommand('CoreAccountSmokeTest', function(source, args)
             run = function()
                 local first = CoreAccounts.GetContext(target)
                 if not first.ok then return false end
+
                 first.value.state = 'tampered'
                 local second = CoreAccounts.GetContext(target)
                 return second.ok and second.value.state == 'connected'
@@ -419,6 +431,7 @@ end, true)
 
 RegisterCommand('CoreSplitConnectedAccount', function(source, args)
     if source ~= 0 then return end
+
     local target = tonumber(args and args[1])
     if not target or args[2] ~= 'CONFIRM' then
         print('[CoreSplitConnectedAccount] usage: CoreSplitConnectedAccount <serverId> CONFIRM')
@@ -445,6 +458,7 @@ RegisterCommand('CoreSplitConnectedAccount', function(source, args)
                     print('[CoreSplitConnectedAccount] multiple other connected sources share this account; split refused')
                     return
                 end
+
                 local anchors = PrimaryIdentifiers(NormalizeIdentifiers(candidate))
                 if #anchors ~= 1 then
                     print('[CoreSplitConnectedAccount] the account keeper has no unique license anchor')
@@ -454,6 +468,7 @@ RegisterCommand('CoreSplitConnectedAccount', function(source, args)
             end
         end
     end
+
     if not keeperAnchor or (keeperAnchor.type == targetAnchor.type and keeperAnchor.value == targetAnchor.value) then
         print('[CoreSplitConnectedAccount] a distinct connected account keeper is required')
         return
@@ -464,8 +479,10 @@ RegisterCommand('CoreSplitConnectedAccount', function(source, args)
         local ownerRows = query([[SELECT `account_id` FROM `core_account_identifiers`
             WHERE `identifier_type` = ? AND `identifier_value` = ? FOR UPDATE]],
             { targetAnchor.type, targetAnchor.value }) or {}
+
         local profileRows = query([[SELECT `account_id` FROM `character_profiles`
             WHERE `character_id` = ? FOR UPDATE]], { sessionResult.value.characterId }) or {}
+
         if not ownerRows[1] or ownerRows[1].account_id ~= oldAccountId
             or not profileRows[1] or profileRows[1].account_id ~= oldAccountId then
             failure = 'anchor or Character ownership changed'
@@ -475,20 +492,27 @@ RegisterCommand('CoreSplitConnectedAccount', function(source, args)
         local uuidRows = query('SELECT UUID() AS `id`') or {}
         newAccountId = uuidRows[1] and uuidRows[1].id or nil
         if not newAccountId then failure = 'UUID generation failed'; return false end
+
         query([[INSERT INTO `core_accounts` (`id`, `display_name`, `status`)
             VALUES (?, ?, 'active')]], { newAccountId, GetPlayerName(target) or ('Source %s'):format(target) })
+
         query([[DELETE FROM `core_account_identifiers` WHERE `account_id` = ?]], { oldAccountId })
+
         query([[INSERT INTO `core_account_identifiers` (`account_id`, `identifier_type`, `identifier_value`)
             VALUES (?, ?, ?), (?, ?, ?)]],
             { oldAccountId, keeperAnchor.type, keeperAnchor.value,
               newAccountId, targetAnchor.type, targetAnchor.value })
+
         query([[INSERT INTO `character_account_state` (`account_id`) VALUES (?)
             ON DUPLICATE KEY UPDATE `account_id` = VALUES(`account_id`)]], { newAccountId })
+
         query([[UPDATE `character_profiles` SET `account_id` = ?
             WHERE `character_id` = ? AND `account_id` = ?]],
             { newAccountId, sessionResult.value.characterId, oldAccountId })
+
         query([[DELETE FROM `character_creation_requests` WHERE `character_id` = ?]],
             { sessionResult.value.characterId })
+
         local verified = query([[SELECT
             (SELECT COUNT(*) FROM `core_account_identifiers` WHERE `account_id` = ?) AS old_anchors,
             (SELECT COUNT(*) FROM `core_account_identifiers` WHERE `account_id` = ?) AS new_anchors,

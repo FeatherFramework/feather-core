@@ -18,6 +18,7 @@ function SetupConnectionRuntime()
         label = 'credentials',
         failureMessage = 'Credential validation could not be completed. Please try again.'
     })
+
     if not registered then error('Core credential gate could not be registered.') end
 
     AddEventHandler('playerConnecting', function(name, _, deferrals)
@@ -35,4 +36,3 @@ function SetupConnectionRuntime()
         deferrals.done()
     end)
 end
-

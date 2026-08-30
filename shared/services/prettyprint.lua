@@ -55,7 +55,7 @@ local function SetColors(str)
             index = index + 1
             assert(buffer, "Unknown color key: " .. word) --IF output is not existent, throw an error
         end
-    
+
         return buffer
     end)
     return str

@@ -11,6 +11,7 @@ end
 
 local function Copy(value)
     if type(value) ~= 'table' then return value end
+
     local output = {}
     for key, child in pairs(value) do output[key] = Copy(child) end
     return output
@@ -21,9 +22,11 @@ local function ValidatePlainData(value, limits, depth, seen, count)
     if valueType == 'nil' or valueType == 'boolean' or valueType == 'string' then
         return true, count + 1
     end
+
     if valueType == 'number' then
         return value == value and value ~= math.huge and value ~= -math.huge, count + 1
     end
+
     if valueType ~= 'table' or depth >= limits.maxDepth or seen[value] then
         return false, count
     end
@@ -31,6 +34,7 @@ local function ValidatePlainData(value, limits, depth, seen, count)
     seen[value] = true
     count = count + 1
     if count > limits.maxNodes then return false, count end
+
     for key, child in pairs(value) do
         local keyType = type(key)
         if keyType ~= 'string' and keyType ~= 'number' then return false, count end
@@ -38,6 +42,7 @@ local function ValidatePlainData(value, limits, depth, seen, count)
         valid, count = ValidatePlainData(child, limits, depth + 1, seen, count)
         if not valid or count > limits.maxNodes then return false, count end
     end
+
     seen[value] = nil
     return true, count
 end
@@ -47,6 +52,7 @@ function CoreEventBroker.Declare(name, options)
     if type(name) ~= 'string' or not name:match('%.v%d+$') then
         return CoreResults.Err('invalid_input', 'Contract event names must end with a version suffix such as .v1.')
     end
+
     if declarations[name] then
         return CoreResults.Err('conflict', 'That event is already declared.', { event = name })
     end
@@ -70,7 +76,8 @@ function CoreEventBroker.Declare(name, options)
         maxPayloadBytes = math.max(64, tonumber(options.maxPayloadBytes) or tonumber(defaults.maxPayloadBytes) or 32768),
         maxDepth = math.max(1, math.min(32, tonumber(options.maxDepth) or tonumber(defaults.maxDepth) or 12)),
         maxNodes = math.max(1, math.min(10000, tonumber(options.maxNodes) or tonumber(defaults.maxNodes) or 2048)),
-        maxSubscribers = math.max(1, math.floor(tonumber(options.maxSubscribers) or tonumber(defaults.maxSubscribers) or 128)),
+        maxSubscribers = math.max(1,
+            math.floor(tonumber(options.maxSubscribers) or tonumber(defaults.maxSubscribers) or 128)),
         nextSequence = 0,
         subscribers = {}
     }
@@ -82,12 +89,14 @@ function CoreEventBroker.Subscribe(name, callback)
     if not declaration then
         return CoreResults.Err('not_found', 'That event has not been declared.', { event = name })
     end
+
     if not IsCallable(callback) then
         return CoreResults.Err('invalid_input', 'Event subscriptions require a callable listener.')
     end
 
     local count = 0
     for _ in pairs(declaration.subscribers) do count = count + 1 end
+
     if count >= declaration.maxSubscribers then
         return CoreResults.Err('limit_exceeded', 'That event has reached its subscriber limit.', { event = name })
     end
@@ -108,6 +117,7 @@ function CoreEventBroker.Unsubscribe(token)
     if type(token) ~= 'string' or token == '' then
         return CoreResults.Err('invalid_input', 'A subscription token is required.')
     end
+
     local owner = OwnerResource()
     for _, declaration in pairs(declarations) do
         local subscription = declaration.subscribers[token]
@@ -127,15 +137,18 @@ local function Dispatch(declaration, name, payload)
     if not plain then
         return CoreResults.Err('invalid_input', 'Event payload must contain bounded plain data.', { event = name })
     end
+
     local encodedOk, encoded = pcall(json.encode, payload)
     if not encodedOk or type(encoded) ~= 'string' or #encoded > declaration.maxPayloadBytes then
         return CoreResults.Err('payload_too_large', 'Event payload is too large.', { event = name })
     end
+
     if declaration.validator then
         local valid, reason = declaration.validator(payload)
         if valid ~= true then
             return CoreResults.Is(reason) and reason
-                or CoreResults.Err('invalid_input', type(reason) == 'string' and reason or 'Event payload validation failed.')
+                or CoreResults.Err('invalid_input',
+                    type(reason) == 'string' and reason or 'Event payload validation failed.')
         end
     end
 
@@ -183,6 +196,7 @@ function CoreEventBroker.PublishInternal(name, payload)
     if not declaration then
         return CoreResults.Err('not_found', 'That event has not been declared.', { event = name })
     end
+
     if declaration.owner ~= GetCurrentResourceName() then
         return CoreResults.Err('forbidden', 'Internal publication is limited to Core-owned events.', { event = name })
     end
@@ -237,16 +251,16 @@ local function RequireFields(fields)
 end
 
 local coreEvents = {
-    { 'core.account.connected.v1', { 'source', 'accountId', 'state' } },
-    { 'core.account.disconnected.v1', { 'source', 'accountId', 'state' } },
-    { 'core.session.ready.v1', { 'source', 'accountId', 'characterId', 'sessionId', 'state' } },
-    { 'core.session.leaving.v1', { 'source', 'accountId', 'characterId', 'sessionId', 'state' } },
-    { 'core.session.left.v1', { 'source', 'accountId', 'characterId', 'sessionId', 'state' } },
-    { 'core.provider.registered.v1', { 'kind', 'name', 'owner', 'contract' } },
+    { 'core.account.connected.v1',     { 'source', 'accountId', 'state' } },
+    { 'core.account.disconnected.v1',  { 'source', 'accountId', 'state' } },
+    { 'core.session.ready.v1',         { 'source', 'accountId', 'characterId', 'sessionId', 'state' } },
+    { 'core.session.leaving.v1',       { 'source', 'accountId', 'characterId', 'sessionId', 'state' } },
+    { 'core.session.left.v1',          { 'source', 'accountId', 'characterId', 'sessionId', 'state' } },
+    { 'core.provider.registered.v1',   { 'kind', 'name', 'owner', 'contract' } },
     { 'core.provider.unregistered.v1', { 'kind', 'name', 'owner', 'contract', 'reason' } },
-    { 'core.policy.evaluated.v1', { 'action', 'source', 'caller', 'correlationId', 'allowed', 'outcome' } },
-    { 'core.guard.evaluated.v1', { 'action', 'guard', 'owner', 'correlationId', 'allowed', 'outcome' } },
-    { 'core.framework.smoke.v1', { 'value' } }
+    { 'core.policy.evaluated.v1',      { 'action', 'source', 'caller', 'correlationId', 'allowed', 'outcome' } },
+    { 'core.guard.evaluated.v1',       { 'action', 'guard', 'owner', 'correlationId', 'allowed', 'outcome' } },
+    { 'core.framework.smoke.v1',       { 'value' } }
 }
 
 for _, definition in ipairs(coreEvents) do
@@ -270,12 +284,15 @@ RegisterCommand('CoreEventSmokeTest', function(source)
     local published = CoreEventBroker.Publish('core.framework.smoke.v1', { value = 'original' })
 
     local tests = {
-        { name = 'declared event', passed = declarations['core.framework.smoke.v1'] ~= nil },
+        { name = 'declared event',         passed = declarations['core.framework.smoke.v1'] ~= nil },
         { name = 'deterministic delivery', passed = published.ok and published.value.delivered == 2 and firstValue == 'original' },
-        { name = 'payload isolation', passed = secondValue == 'original' },
-        { name = 'listener cleanup', passed = first.ok and second.ok
-            and CoreEventBroker.Unsubscribe(first.value.token).ok
-            and CoreEventBroker.Unsubscribe(second.value.token).ok }
+        { name = 'payload isolation',      passed = secondValue == 'original' },
+        {
+            name = 'listener cleanup',
+            passed = first.ok and second.ok
+                and CoreEventBroker.Unsubscribe(first.value.token).ok
+                and CoreEventBroker.Unsubscribe(second.value.token).ok
+        }
     }
 
     local passed = 0

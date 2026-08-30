@@ -16,11 +16,12 @@ function CreateThread(cb) end
 function Wait(ms) end
 
 ---@param eventName string
----@param cb function
+---@param cb? function Optional inline handler; callers may register separately with AddEventHandler.
 function RegisterNetEvent(eventName, cb) end
 
 ---@param eventName string
----@param cb function
+---@param cb? function Optional inline handler; callers may register separately with AddEventHandler.
+---@deprecated Use RegisterNetEvent.
 function RegisterServerEvent(eventName, cb) end
 
 ---@param eventName string
@@ -52,9 +53,10 @@ function CancelEvent() end
 ---@param restricted? boolean
 function RegisterCommand(commandName, cb, restricted) end
 
----@param resourceName string
----@return table
-function exports(resourceName) end
+---@param name string Resource name when reading exports, or export name when registering one.
+---@param cb? function Export callback when registering an export.
+---@return table?
+function exports(name, cb) end
 
 ---@return number
 function GetGameTimer() end
@@ -71,6 +73,12 @@ function GetInvokingResource() end
 ---@param resourceName string
 ---@return string
 function GetResourceState(resourceName) end
+
+---@param resourceName string
+---@param metadataKey string
+---@param index? number
+---@return string|nil
+function GetResourceMetadata(resourceName, metadataKey, index) end
 
 ---@return boolean
 function IsDuplicityVersion() end
@@ -102,6 +110,32 @@ function PlayerId() end
 
 ---@return table
 function GetPlayers() end
+
+---@param player number|string
+---@param reason string
+function DropPlayer(player, reason) end
+
+---@param player number|string
+---@return string[]
+function GetPlayerIdentifiers(player) end
+
+---@param player number|string
+---@return number
+function GetNumPlayerIdentifiers(player) end
+
+---@param player number|string
+---@param index number
+---@return string
+function GetPlayerIdentifier(player, index) end
+
+---@param player number|string
+---@return number
+function GetNumPlayerTokens(player) end
+
+---@param player number|string
+---@param index number
+---@return string
+function GetPlayerToken(player, index) end
 
 ---@param netId number
 ---@return number
@@ -145,6 +179,20 @@ function Citizen.Wait(ms) end
 
 ---@param msg string
 function Citizen.Trace(msg) end
+
+---@param value CfxPromise
+---@return any
+function Citizen.Await(value) end
+
+---@class CfxPromise
+---@field resolve fun(self: CfxPromise, ...: any)
+---@field reject fun(self: CfxPromise, ...: any)
+
+---@class CfxPromiseLibrary
+promise = {}
+
+---@return CfxPromise
+function promise.new() end
 
 json = {}
 

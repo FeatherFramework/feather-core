@@ -44,4 +44,3 @@ function CoreResults.Is(value)
     return type(value.code) == 'string' and value.code ~= ''
         and type(value.message) == 'string' and value.message ~= ''
 end
-

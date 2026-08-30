@@ -8,27 +8,19 @@ end
 
 function StringChain(...)
     local args = { ... }
+    local combined
 
-    local comb
-    for i, v in ipairs(args) do
-        if IsCallable(v) then
-            comb = v(comb)
+    for _, value in ipairs(args) do
+        if IsCallable(value) then
+            combined = value(combined)
         else
-            comb = v
+            combined = value
         end
     end
 
-    return comb
+    return combined
 end
 
 function IsOnServer()
     return IsDuplicityVersion()
-end
-
-function CheckVar(val, def)
-    if val == nil then
-        return def
-    end
-
-    return val
 end

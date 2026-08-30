@@ -1,101 +1,97 @@
-# **THIS IS A WORK IN PROGRESS AND NOT READY FOR PRODUCTION USE YET!**
+# Feather Core
 
-# Feather Core (Alpha)
+Feather Core is the required foundation for the Feather Framework. It manages
+player accounts, active character sessions, database migrations, framework
+communication, and the shared services used by other Feather resources.
 
-> Welcome to Feather Core, the beating heart of the Feather Framework; An extraordinary open-source RedM framework designed to bring the ultimate RedM server vision to life.
+Core does not provide gameplay by itself. Character creation, inventory,
+weapons, administration, notifications, HUD, world behavior, and player
+settings are supplied by their respective Feather resources.
 
-## First time setup
+## Requirements
 
-Follow our easy [Guide](https://featherframework.net/guide)
+- A current RedM/FXServer artifact
+- [`oxmysql`](https://github.com/overextended/oxmysql)
+- A MySQL or MariaDB database configured for `oxmysql`
 
-## Responsibilities
+For the easiest setup, install Feather with the official recipe. If you install
+or update resources manually, download each required resource from its official
+Feather release and follow any compatibility instructions in its release notes.
 
-Feather Core is the framework kernel. It owns:
+## Installation
 
-- UUID account identity and connection gates;
-- authoritative character-session bindings;
-- result envelopes, readiness, health, logging, and migrations;
-- named RPC transport and lifecycle events;
-- provider, policy, guard, notification-dispatch, and locale primitives;
-- minimal account-scoped settings persistence.
+1. Download the `feather-core` release for the version
+   you intend to run.
+2. Place the complete `feather-core` folder in your server's resources folder.
+   When updating, replace the complete old folder instead of copying individual
+   files over it.
+3. Configure and start `oxmysql` before Feather Core.
+4. Start Core before every Feather resource that depends on it.
 
-Gameplay and presentation are owned by focused resources: Character, Inventory,
-Weapons, Admin, HUD, Routing, Notify, World, PVP, and Settings. Reusable future
-client utilities are provided separately by Toolkit.
+A typical startup order is:
 
-Optional operator-owned GitHub release reporting is provided separately by
-Versioner. Core readiness and resource compatibility never depend on that
-service or on GitHub availability.
-
-## API Documentation and usage
-[https://featherframework.net/api](https://featherframework.net/)
-
-## Contract 1 foundation
-
-Contract 1 includes a provider-backed notification boundary. Server resources can
-send a validated right-side notification without importing the legacy Core API:
-
-```lua
-local result = exports['feather-core']:SendNotification({
-    source = playerId,
-    style = 'right',
-    message = 'Inventory updated.',
-    duration = 3000
-})
+```cfg
+ensure oxmysql
+ensure feather-menu
+ensure feather-core
+ensure feather-routing
+ensure feather-notify
+ensure feather-world
+ensure feather-pvp
+ensure feather-toolkit
+ensure feather-hud
+ensure feather-character
+ensure feather-inventory
+ensure feather-weapons
+ensure feather-admin
+ensure feather-settings
+ensure feather-versioner
 ```
 
-The result uses the standard Core envelope. Notification providers can be
-registered through `RegisterNotificationProvider`. Core does not install a
-presentation provider; `feather-notify` supplies the default provider.
+The official Feather recipe manages this order automatically. See the
+[installation guide](https://featherframework.net/guide) for the complete server
+setup.
 
-Client resources display notifications through
-`exports['feather-notify']:ShowNotification(request)`.
+## Configuration
 
-Locale registration and translation are available in both runtimes through the
-named `RegisterLocale` and `TranslateLocale` exports. Both return standard Core
-result envelopes.
+Settings are documented directly in [`config.lua`](config.lua). Most server
+owners only need to review:
 
-The clean-slate Core extraction is complete. The legacy `initiate()` API and all
-first-party consumers of it have been removed.
+- `Config.DevMode` — keep `false` on a production server.
+- `Config.DefaultLang` — fallback language code used for account settings. The
+  selected language must be registered by an installed Feather resource.
+- `Config.Logging.level` — minimum Core log level: `debug`, `info`, `warn`, or
+  `error`.
 
-New server exports:
+The remaining values are framework safety and capacity limits. Leave them at
+their defaults unless a resource developer identifies a specific need to change
+them.
 
-```lua
-local capabilities = exports['feather-core']:GetCapabilities()
-local health = exports['feather-core']:GetHealth()
-local ready = exports['feather-core']:AwaitReady(10000)
-```
+## Database setup
 
-All three exports return a standard result envelope. Successful results use `{ ok = true, value = ... }`; expected failures use `{ ok = false, code = ..., message = ... }`.
+Core creates and updates its own tables automatically during startup. There is
+no SQL file to import manually.
 
-RPC transport is also available through named exports on the server and client:
-`RegisterRPC`, `RegisterContractRPC`, `GetRPCRoutes`, `NotifyRPC`, `CallRPC`,
-and `CallRPCAsync`. First-party resources should use these instead of obtaining
-the RPC table through `initiate()`.
+Migrations are ordered and checksummed. Never edit an applied migration, remove
+migration-ledger records, or manually recreate Core tables. New releases add a
+new migration when the schema needs to change.
 
-After starting or restarting `feather-core`, run this in the server console:
+Before an upgrade, back up the complete database, server configuration, and all
+coordinated Feather resource folders.
+
+## Verifying an installation (Optional)
+
+With the default `warn` logging level, a successful `ready` transition is not
+printed. Confirm there are no manifest, Lua, SQL, or Core error messages, then
+run:
 
 ```text
 CoreContractSmokeTest
-```
-
-The foundation is healthy when all four checks report `PASS`. See `docs/architecture-contract-1.md` for the frozen initial decisions and `MASTER_PLAN.md` for the full build plan.
-
-Core now runs ordered, content-checksummed database migrations before reporting ready. To verify the migration ledger, minimal account tables, and safe reruns, run:
-
-```text
 CoreMigrationSmokeTest
+CoreRpcSmokeTest
 ```
 
-The account identity service resolves one normalized Rockstar `license` identifier
-(`license2` only when `license` is unavailable) to a UUID-backed Core account and
-exposes immutable server-side contexts through `GetAccountContext(source)`. Steam,
-Discord, Cfx, and other secondary identifiers never merge accounts.
-
-Server consumers that require the normalized connection anchor can use
-`GetPrimaryIdentifier(source)`. Connection-gate owners register through the named
-`RegisterConnectionGate` export. `GetConnectionGates` returns safe runtime
-diagnostics without exposing gate callbacks.
+All checks should report `PASS`.
 
 With a player connected, run:
 
@@ -103,45 +99,31 @@ With a player connected, run:
 CoreAccountSmokeTest [serverId]
 ```
 
-For clean-slate development only, `database/development_identity_reset.sql`
-removes account/Character ownership and dependent runtime state while preserving
-the Inventory item catalog and migration ledgers. Stop the server before running
-it; the operation is destructive and is not a production migration.
-
-After selecting and spawning a character, verify the UUID-backed session kernel with:
+After that player selects and spawns a character, run:
 
 ```text
 CoreSessionSmokeTest [serverId]
 ```
 
-Contract 1 RPC routes use versioned names, standard result envelopes, bounded plain-data payloads, authoritative account/session context, and explicit ownership metadata. Verify the route registry with:
+These verification commands can be run only from the server console.
 
-```text
-CoreRpcSmokeTest
-```
+## Updating
 
-Contract 1 server-local events are versioned and declared by one publisher. Payloads are validated and copied per listener, listener failures are isolated, and resource-owned declarations/subscriptions are removed automatically when that resource stops.
+Use a controlled full server restart for Core updates. Core holds live account
+sessions and registrations in memory, so restarting only Core can temporarily
+disconnect dependent resources from their providers and contracts.
 
-```text
-CoreEventSmokeTest
-```
+To update safely:
 
-Contract 1 providers publish their real contract and capabilities, have an explicit owning resource, support one named default per kind, expose health through result envelopes, and are removed when their owner stops.
+1. Stop new connections and shut down the server cleanly.
+2. Back up the database and deployed resource folders.
+3. Replace complete resource folders with one coordinated release set.
+4. Start the server and confirm there are no Core startup errors.
+5. Run `CoreContractSmokeTest` to verify readiness, then test character login
+   and logout.
 
-```text
-CoreProviderSmokeTest
-```
+## Support
 
-The Contract 1 policy layer derives authoritative account/session actor context and asks one registered policy provider to evaluate named actions. Denials are successful decisions with `allowed = false`; missing, crashing, or malformed providers fail closed.
-
-```text
-CorePolicySmokeTest
-```
-
-No production policy provider is installed yet, so existing admin permission behavior remains unchanged until its coordinated cutover.
-
-Contract 1 guards are synchronous, priority-ordered precondition checks for transaction-time and pre-mutation decisions. A callback returns `true` or `false, reason`; callback errors and malformed decisions fail closed.
-
-```text
-CoreGuardSmokeTest
-```
+When requesting help, include the Core version, FXServer artifact version,
+database version, startup order, the first relevant console error, and the exact
+smoke-test output.

@@ -15,11 +15,15 @@ end
 
 local function Copy(value, seen)
     if type(value) ~= 'table' then return value end
+
     seen = seen or {}
     if seen[value] then return nil end
+
     local output = {}
     seen[value] = output
-    for key, child in pairs(value) do output[Copy(key, seen)] = Copy(child, seen) end
+    for key, child in pairs(value) do
+        output[Copy(key, seen)] = Copy(child, seen)
+    end
     return output
 end
 
@@ -37,6 +41,7 @@ function CoreGuards.Register(action, name, callback, options)
     if not ValidName(action) or not ValidName(name) or not IsCallable(callback) then
         return CoreResults.Err('invalid_input', 'Guard action, name, and callback are required.')
     end
+
     options = type(options) == 'table' and options or {}
     guardsByAction[action] = guardsByAction[action] or {}
     if guardsByAction[action][name] then
@@ -45,6 +50,7 @@ function CoreGuards.Register(action, name, callback, options)
 
     local count = 0
     for _ in pairs(guardsByAction[action]) do count = count + 1 end
+
     local maximum = math.max(1, math.floor(tonumber(Config.GuardRegistry.maxPerAction) or 64))
     if count >= maximum then
         return CoreResults.Err('limit_exceeded', 'That action has reached its guard limit.', { action = action })
@@ -74,9 +80,11 @@ function CoreGuards.Unregister(action, name)
     if not guard then
         return CoreResults.Err('not_found', 'That guard is not registered.', { action = action, guard = name })
     end
+
     if guard.owner ~= OwnerResource() then
         return CoreResults.Err('forbidden', 'That guard belongs to another resource.')
     end
+
     guardsByAction[action][name] = nil
     if next(guardsByAction[action]) == nil then guardsByAction[action] = nil end
     return CoreResults.Ok(true)
@@ -115,6 +123,7 @@ function CoreGuards.Evaluate(action, context)
                 owner = guard.owner
             })
         end
+
         if type(allowed) ~= 'boolean' then
             CoreEventBroker.PublishInternal('core.guard.evaluated.v1', {
                 action = action,
@@ -130,6 +139,7 @@ function CoreGuards.Evaluate(action, context)
                 owner = guard.owner
             })
         end
+
         if not allowed then
             local safeReason = type(reason) == 'string' and reason or 'guard_rejected'
             CoreEventBroker.PublishInternal('core.guard.evaluated.v1', {
@@ -176,6 +186,7 @@ function CoreGuards.GetGuards()
             }
         end
     end
+
     table.sort(output, function(left, right)
         if left.action == right.action then
             if left.priority == right.priority then return left.sequence < right.sequence end
@@ -202,6 +213,7 @@ end)
 
 RegisterCommand('CoreGuardSmokeTest', function(source)
     if source ~= 0 then return end
+
     CoreGuards.Unregister('smoke.guard', 'first')
     CoreGuards.Unregister('smoke.guard', 'second')
     local order = {}
@@ -225,11 +237,17 @@ RegisterCommand('CoreGuardSmokeTest', function(source)
 
     local tests = {
         { name = 'guards registered', passed = first.ok and second.ok },
-        { name = 'priority order', passed = order[1] == 'first' and order[2] == 'second' },
-        { name = 'veto envelope', passed = decision.ok and decision.value.allowed == false
-            and decision.value.reason == 'smoke_veto' },
-        { name = 'guards cleaned', passed = cleanupOne.ok and cleanupTwo.ok
-            and smokeRemaining == 0 }
+        { name = 'priority order',    passed = order[1] == 'first' and order[2] == 'second' },
+        {
+            name = 'veto envelope',
+            passed = decision.ok and decision.value.allowed == false
+                and decision.value.reason == 'smoke_veto'
+        },
+        {
+            name = 'guards cleaned',
+            passed = cleanupOne.ok and cleanupTwo.ok
+                and smokeRemaining == 0
+        }
     }
     local passed = 0
     for _, test in ipairs(tests) do

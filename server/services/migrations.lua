@@ -48,6 +48,7 @@ local function ValidateDefinition(migration)
             migrationId = migration.id
         })
     end
+
     if migration.up and (type(migration.checksumSource) ~= 'string' or migration.checksumSource == '') then
         return CoreResults.Err('invalid_migration', 'A functional migration requires checksumSource.', {
             migrationId = migration.id
@@ -78,6 +79,7 @@ local function Apply(migration, checksum)
                 migrationId = migration.id
             })
         end
+
         if not result.ok then
             return result
         end
@@ -108,6 +110,7 @@ function CoreMigrationRunner.Run()
             if not validation.ok then
                 return validation
             end
+
             if seen[migration.id] then
                 return CoreResults.Err('duplicate_migration', 'A Core migration ID is duplicated.', {
                     migrationId = migration.id
@@ -176,6 +179,15 @@ RegisterCommand('CoreMigrationSmokeTest', function(source)
                 return tonumber(MySQL.scalar.await([[
                     SELECT COUNT(*) FROM information_schema.TABLES
                     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'core_account_identifiers'
+                ]])) == 1
+            end
+        },
+        {
+            name = 'account settings',
+            run = function()
+                return tonumber(MySQL.scalar.await([[
+                    SELECT COUNT(*) FROM information_schema.TABLES
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'core_account_settings'
                 ]])) == 1
             end
         },

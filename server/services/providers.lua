@@ -11,6 +11,7 @@ end
 
 local function Copy(value)
     if type(value) ~= 'table' then return value end
+
     local output = {}
     for key, child in pairs(value) do
         if type(child) ~= 'function' then output[key] = Copy(child) end
@@ -43,8 +44,10 @@ end
 local function RemoveProvider(provider, reason)
     local bucket = providers[provider.kind]
     if not bucket or bucket[provider.name] ~= provider then return end
+
     bucket[provider.name] = nil
     if next(bucket) == nil then providers[provider.kind] = nil end
+
     if defaults[provider.kind] == provider.name then defaults[provider.kind] = nil end
 
     CoreEventBroker.PublishInternal('core.provider.unregistered.v1', {
@@ -66,9 +69,11 @@ function CoreProviders.Register(kind, name, implementation, options)
     if not contract or contract < 1 or contract % 1 ~= 0 then
         return CoreResults.Err('invalid_input', 'Provider contract must be a positive integer.')
     end
+
     if options.capabilities ~= nil and type(options.capabilities) ~= 'table' then
         return CoreResults.Err('invalid_input', 'Provider capabilities must be a table.')
     end
+
     if options.health ~= nil and not IsCallable(options.health) then
         return CoreResults.Err('invalid_input', 'Provider health must be callable when provided.')
     end
@@ -77,10 +82,13 @@ function CoreProviders.Register(kind, name, implementation, options)
     if providers[kind][name] then
         return CoreResults.Err('conflict', 'That provider is already registered.', { kind = kind, name = name })
     end
+
     local maximum = math.max(1, math.floor(tonumber(Config.ProviderRegistry.maxPerKind) or 16))
     if ProviderCount(kind) >= maximum then
-        return CoreResults.Err('limit_exceeded', 'That provider kind has reached its registration limit.', { kind = kind })
+        return CoreResults.Err('limit_exceeded', 'That provider kind has reached its registration limit.',
+            { kind = kind })
     end
+
     if options.default == true and defaults[kind] then
         return CoreResults.Err('conflict', 'That provider kind already has a default.', {
             kind = kind,
@@ -111,9 +119,11 @@ function CoreProviders.Unregister(kind, name)
     if not provider then
         return CoreResults.Err('not_found', 'That provider is not registered.', { kind = kind, name = name })
     end
+
     if provider.owner ~= OwnerResource() then
         return CoreResults.Err('forbidden', 'That provider belongs to another resource.')
     end
+
     RemoveProvider(provider, 'unregistered')
     return CoreResults.Ok(true)
 end
@@ -122,6 +132,7 @@ function CoreProviders.Get(kind, name, minimumContract)
     if not ValidName(kind) or (name ~= nil and not ValidName(name)) then
         return CoreResults.Err('invalid_input', 'A valid provider kind and optional name are required.')
     end
+
     name = name or defaults[kind]
     local provider = name and providers[kind] and providers[kind][name] or nil
     if not provider then
@@ -135,6 +146,7 @@ function CoreProviders.Get(kind, name, minimumContract)
     if minimumContract < 1 or minimumContract % 1 ~= 0 then
         return CoreResults.Err('invalid_input', 'Minimum provider contract must be a positive integer.')
     end
+
     if provider.contract < minimumContract then
         return CoreResults.Err('unsupported_contract', 'The provider contract is too old.', {
             kind = kind,
@@ -153,6 +165,7 @@ end
 function CoreProviders.Health(kind, name)
     local resolved = CoreProviders.Get(kind, name, 1)
     if not resolved.ok then return resolved end
+
     local provider = providers[kind][resolved.value.provider.name]
     if not provider.health then
         return CoreResults.Ok({ state = 'available' })
@@ -168,6 +181,7 @@ function CoreProviders.Health(kind, name)
         })
         return CoreResults.Err('provider_unavailable', 'Provider health evaluation failed.')
     end
+
     if not CoreResults.Is(result) then
         return CoreResults.Err('internal_error', 'Provider health returned an invalid result.')
     end
@@ -179,6 +193,7 @@ function CoreProviders.GetProviders()
     for _, bucket in pairs(providers) do
         for _, provider in pairs(bucket) do output[#output + 1] = PublicRecord(provider) end
     end
+
     table.sort(output, function(left, right)
         if left.kind == right.kind then return left.name < right.name end
         return left.kind < right.kind
@@ -199,11 +214,15 @@ AddEventHandler('onResourceStop', function(stoppedResource)
             if provider.owner == stoppedResource then removal[#removal + 1] = provider end
         end
     end
-    for _, provider in ipairs(removal) do RemoveProvider(provider, 'owner_stopped') end
+
+    for _, provider in ipairs(removal) do
+        RemoveProvider(provider, 'owner_stopped')
+    end
 end)
 
 RegisterCommand('CoreProviderSmokeTest', function(source)
     if source ~= 0 then return end
+
     CoreProviders.Unregister('core-smoke', 'primary')
 
     local registered = CoreProviders.Register('core-smoke', 'primary', {
@@ -220,9 +239,9 @@ RegisterCommand('CoreProviderSmokeTest', function(source)
 
     local tests = {
         { name = 'provider registered', passed = registered.ok and registered.value.isDefault == true },
-        { name = 'default resolved', passed = resolved.ok and resolved.value.implementation.Ping() == 'pong' },
-        { name = 'health envelope', passed = health.ok and health.value.state == 'healthy' },
-        { name = 'provider removed', passed = removed.ok and not CoreProviders.Get('core-smoke', nil, 1).ok }
+        { name = 'default resolved',    passed = resolved.ok and resolved.value.implementation.Ping() == 'pong' },
+        { name = 'health envelope',     passed = health.ok and health.value.state == 'healthy' },
+        { name = 'provider removed',    passed = removed.ok and not CoreProviders.Get('core-smoke', nil, 1).ok }
     }
     local passed = 0
     for _, test in ipairs(tests) do

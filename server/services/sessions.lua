@@ -5,8 +5,15 @@ local bySource = {}
 local sourceByCharacter = {}
 local generationBySource = {}
 
+local function NormalizeSource(value)
+    local src = tonumber(value)
+    if not src or src <= 0 or src % 1 ~= 0 then return nil end
+    return src
+end
+
 local function Copy(value)
     if type(value) ~= 'table' then return value end
+
     local output = {}
     for key, child in pairs(value) do output[key] = Copy(child) end
     return output
@@ -25,8 +32,8 @@ local function NewSessionId()
 end
 
 function CoreSessions.Activate(src, characterId)
-    src = tonumber(src)
-    if not src or src <= 0 or characterId == nil then
+    src = NormalizeSource(src)
+    if not src or characterId == nil then
         return CoreResults.Err('invalid_input', 'A valid source and character ID are required.')
     end
 
@@ -60,8 +67,7 @@ function CoreSessions.Activate(src, characterId)
         characterId = characterId,
         generation = generation,
         state = 'ready',
-        activatedAt = activatedAt,
-        startedAt = activatedAt -- temporary legacy field; Contract 1 uses activatedAt
+        activatedAt = activatedAt
     }
     bySource[src] = session
     sourceByCharacter[characterKey] = src
@@ -80,7 +86,8 @@ function CoreSessions.Activate(src, characterId)
 end
 
 function CoreSessions.Get(src)
-    local session = bySource[tonumber(src)]
+    src = NormalizeSource(src)
+    local session = src and bySource[src] or nil
     if not session or session.state ~= 'ready' then
         return CoreResults.Err('character_required', 'A current character session is required.')
     end
@@ -88,10 +95,12 @@ function CoreSessions.Get(src)
 end
 
 function CoreSessions.IsCurrent(src, sessionId, characterId)
-    local session = bySource[tonumber(src)]
+    src = NormalizeSource(src)
+    local session = src and bySource[src] or nil
     if not session or session.state ~= 'ready' or session.sessionId ~= sessionId then
         return false
     end
+
     if characterId ~= nil and CharacterKey(session.characterId) ~= CharacterKey(characterId) then
         return false
     end
@@ -99,8 +108,8 @@ function CoreSessions.IsCurrent(src, sessionId, characterId)
 end
 
 function CoreSessions.BeginLeaving(src, reason)
-    src = tonumber(src)
-    local session = bySource[src]
+    src = NormalizeSource(src)
+    local session = src and bySource[src] or nil
     if not session or session.state ~= 'ready' then
         return CoreResults.Err('character_required', 'A current character session is required.')
     end
@@ -115,9 +124,9 @@ function CoreSessions.BeginLeaving(src, reason)
 end
 
 function CoreSessions.CompleteLeaving(src, sessionId)
-    src = tonumber(src)
-    local session = bySource[src]
-    if not session or session.state ~= 'leaving' or session.sessionId ~= sessionId then
+    src = NormalizeSource(src)
+    local session = src and bySource[src] or nil
+    if not src or not session or session.state ~= 'leaving' or session.sessionId ~= sessionId then
         return CoreResults.Err('session_stale', 'The character session is no longer leaving.')
     end
 
@@ -141,8 +150,8 @@ function CoreSessions.CompleteLeaving(src, sessionId)
 end
 
 function CoreSessions.Disconnect(src, reason)
-    src = tonumber(src)
-    local session = bySource[src]
+    src = NormalizeSource(src)
+    local session = src and bySource[src] or nil
     if not session then
         return CoreResults.Ok({ released = false, source = src })
     end
@@ -152,6 +161,7 @@ function CoreSessions.Disconnect(src, reason)
         if not leaving.ok then return leaving end
         session = bySource[src]
     end
+
     if session and session.state == 'leaving' then
         local completed = CoreSessions.CompleteLeaving(src, session.sessionId)
         if not completed.ok then return completed end
@@ -191,11 +201,13 @@ end)
 
 RegisterCommand('CoreSessionSmokeTest', function(source, args)
     if source ~= 0 then return end
+
     local target = tonumber(args and args[1])
     if not target then
         local players = GetPlayers()
         target = players[1] and tonumber(players[1]) or nil
     end
+
     if not target then
         print('[CoreSessionSmokeTest] no connected player is available')
         return

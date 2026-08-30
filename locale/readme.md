@@ -1,1 +1,0 @@
-The file name should follow https://www.andiamo.co.uk/resources/iso-language-codes/

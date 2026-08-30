@@ -4,8 +4,10 @@ local logger = CoreLogging.Create(GetCurrentResourceName(), 'policy')
 
 local function Copy(value, seen)
     if type(value) ~= 'table' then return value end
+
     seen = seen or {}
     if seen[value] then return nil end
+
     local output = {}
     seen[value] = output
     for key, child in pairs(value) do output[Copy(key, seen)] = Copy(child, seen) end
@@ -58,6 +60,7 @@ end
 
 local function EvaluateProvider(providerResult, action, context)
     if not providerResult.ok then return providerResult end
+
     local implementation = providerResult.value.implementation
     if type(implementation) ~= 'table' or not IsCallable(implementation.Evaluate) then
         return CoreResults.Err('provider_unavailable', 'The policy provider does not implement Evaluate.')
@@ -73,6 +76,7 @@ local function EvaluateProvider(providerResult, action, context)
         })
         return CoreResults.Err('provider_unavailable', 'Policy evaluation failed.')
     end
+
     if not CoreResults.Is(decision)
         or not decision.ok
         or type(decision.value) ~= 'table'
@@ -87,7 +91,7 @@ end
 
 function CorePolicy.RegisterProvider(name, implementation, options)
     options = type(options) == 'table' and options or {}
-    local registration = Copy(options)
+    local registration = Copy(options) or {}
     registration.default = registration.default ~= false
     return CoreProviders.Register('policy', name, implementation, registration)
 end
@@ -99,6 +103,7 @@ function CorePolicy.Authorize(action, request)
 
     local contextResult = BuildContext(action, request)
     if not contextResult.ok then return contextResult end
+
     local context = contextResult.value
     local provider = CoreProviders.Get('policy', nil, 1)
     local decision = EvaluateProvider(provider, action, context)
@@ -132,6 +137,7 @@ exports('Authorize', CorePolicy.Authorize)
 
 RegisterCommand('CorePolicySmokeTest', function(source)
     if source ~= 0 then return end
+
     CoreProviders.Unregister('core-policy-smoke', 'test')
     local registered = CoreProviders.Register('core-policy-smoke', 'test', {
         Evaluate = function(action)

@@ -12,7 +12,12 @@ local redactedKeys = {
     secret = true,
     token = true,
     webhook = true,
-    authorization = true
+    authorization = true,
+    credential = true,
+    identifier = true,
+    license = true,
+    api_key = true,
+    apikey = true
 }
 
 local function Redact(value, depth)
@@ -54,8 +59,8 @@ function CoreLogging.Create(resourceName, subsystem)
     end
 
     local logger = {}
-    local threshold = Config and Config.Logging and Config.Logging.level or 'info'
-    threshold = levels[threshold] or levels.info
+    local configuredLevel = Config and Config.Logging and Config.Logging.level or 'info'
+    local threshold = levels[configuredLevel] or levels.info
 
     local function Write(level, eventName, fields)
         if levels[level] < threshold then

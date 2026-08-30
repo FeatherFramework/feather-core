@@ -82,11 +82,13 @@ end
 local function ValidateConfiguration()
     local checks = {
         Check('config.exists', type(Config) == 'table', 'invalid_config', 'Config must be a table.'),
+
+        Check('config.development_mode', type(Config and Config.DevMode) == 'boolean',
+            'invalid_config', 'Config.DevMode must be true or false.'),
+
         Check('config.default_language', type(Config and Config.DefaultLang) == 'string' and Config.DefaultLang ~= '',
             'invalid_config', 'Config.DefaultLang must be a non-empty string.'),
-        Check('config.default_language_registered', type(Config and Config.DefaultLang) == 'string'
-                and type(LocalesAPI and LocalesAPI.translations[Config.DefaultLang]) == 'table',
-            'invalid_config', 'Config.DefaultLang must name a registered Core locale.'),
+
         Check('config.rpc', type(Config and Config.RPCRateLimit) == 'table',
             'invalid_config', 'Config.RPCRateLimit must be a table.')
     }
@@ -121,11 +123,13 @@ local function ValidateConfiguration()
             and Config.ProviderRegistry.maxPerKind > 0,
         'invalid_config', 'Config.ProviderRegistry.maxPerKind must be a positive number.',
         { path = 'Config.ProviderRegistry.maxPerKind' })
+
     checks[#checks + 1] = Check('config.guards.maxPerAction',
         type(Config and Config.GuardRegistry and Config.GuardRegistry.maxPerAction) == 'number'
             and Config.GuardRegistry.maxPerAction > 0,
         'invalid_config', 'Config.GuardRegistry.maxPerAction must be a positive number.',
         { path = 'Config.GuardRegistry.maxPerAction' })
+
     for _, field in ipairs({ 'maxMessageLength', 'maxDurationMs' }) do
         checks[#checks + 1] = Check('config.notifications.' .. field,
             type(Config and Config.NotificationRegistry and Config.NotificationRegistry[field]) == 'number'
@@ -189,6 +193,7 @@ function CoreFoundation.AwaitReady(timeoutMs)
     if health.state == 'ready' then
         return CoreResults.Ok(CoreFoundation.GetHealth())
     end
+
     if health.state == 'failed' then
         return CoreResults.Err('not_ready', 'Feather Core failed to start.', { health = CoreFoundation.GetHealth() })
     end
@@ -260,9 +265,13 @@ RegisterCommand('CoreContractSmokeTest', function(source)
             name = 'health',
             run = function()
                 local current = CoreFoundation.GetHealth()
-                return current.state == 'ready'
-                    and current.checks['config.exists'].ok == true
-                    and current.checks['database.migrations'].ok == true
+                local checks = type(current) == 'table' and type(current.checks) == 'table'
+                    and current.checks or {}
+                local configCheck = checks['config.exists']
+                local migrationCheck = checks['database.migrations']
+                return type(current) == 'table' and current.state == 'ready'
+                    and type(configCheck) == 'table' and configCheck.ok == true
+                    and type(migrationCheck) == 'table' and migrationCheck.ok == true
             end
         },
         {
@@ -282,6 +291,7 @@ RegisterCommand('CoreContractSmokeTest', function(source)
             passed = passed + 1
         end
         print(('[CoreContractSmokeTest] %-24s %s'):format(test.name, success and 'PASS' or 'FAIL'))
+
         if not ok then
             logger.Error('contract_smoke_test.errored', { test = test.name, reason = tostring(result) })
         end
@@ -293,9 +303,11 @@ AddEventHandler('onResourceStop', function(stoppedResource)
     if stoppedResource ~= resourceName then
         return
     end
+
     if health.state ~= 'stopped' and health.state ~= 'stopping' then
         SetState('stopping', 'resource_stopping')
     end
+
     if health.state == 'stopping' then
         SetState('stopped', 'resource_stopped')
     end

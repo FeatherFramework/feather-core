@@ -7,14 +7,22 @@ LocalesAPI.translations = {}
 -- cache has not been initialized yet.
 local ClientLangCache = nil
 
+local function DebugLocale(message)
+    if Config.DevMode then
+        print(('[feather-core] [locale] %s'):format(message))
+    end
+end
+
 function LocalesAPI.SetClientLang(lang)
     ClientLangCache = lang
 end
 
 function LocalesAPI.RefreshClientLang()
     if IsOnServer() then return false end
+
     local settings = RPCAPI.CallAsync('core.account.settings.get.v1', {})
     if type(settings) ~= 'table' or settings.ok ~= true then return false end
+
     ClientLangCache = settings.value.locale
     return true
 end
@@ -43,19 +51,17 @@ end
 function LocalesAPI.register(key, translation)
     if LocalesAPI.translations[key] == nil then
         LocalesAPI.translations[key] = translation
-        DebugLog("Locale (" .. key .. ") registered")
+        DebugLocale("Locale (" .. key .. ") registered")
     else
         for tkey, tvalue in pairs(translation) do
             if LocalesAPI.translations[key][tkey] == nil then
                 LocalesAPI.translations[key][tkey] = tvalue
-                DebugLog("Locale (" .. key .. ") translation (" .. tkey .. ") registered")
+                DebugLocale("Locale (" .. key .. ") translation (" .. tkey .. ") registered")
             else
-                DebugLog("Locale (" .. key .. ") translation (" .. tkey .. ") already registered")
+                DebugLocale("Locale (" .. key .. ") translation (" .. tkey .. ") already registered")
             end
         end
     end
-
-    
 end
 
 function LocalesAPI.translate(src, str, ...)
@@ -85,6 +91,7 @@ local function RegisterLocale(key, translations)
     if type(key) ~= 'string' or key == '' or type(translations) ~= 'table' then
         return CoreResults.Err('invalid_input', 'Locale name and translation table are required.')
     end
+
     LocalesAPI.register(key, translations)
     return CoreResults.Ok({ locale = key })
 end
@@ -93,10 +100,12 @@ local function TranslateLocale(src, key, ...)
     if type(key) ~= 'string' or key == '' then
         return CoreResults.Err('invalid_input', 'Translation key is required.')
     end
+
     local ok, translated = pcall(LocalesAPI.translate, src, key, ...)
     if not ok then
         return CoreResults.Err('internal_error', 'Translation failed.')
     end
+
     return CoreResults.Ok(translated)
 end
 
@@ -104,9 +113,11 @@ exports('RegisterLocale', RegisterLocale)
 exports('TranslateLocale', TranslateLocale)
 exports('SetClientLocale', function(locale)
     if IsOnServer() then return CoreResults.Err('invalid_context', 'Client locale can only be set on a client.') end
+
     if type(locale) ~= 'string' or LocalesAPI.translations[locale] == nil then
         return CoreResults.Err('invalid_input', 'Locale is not registered.', { locale = locale })
     end
+
     LocalesAPI.SetClientLang(locale)
     return CoreResults.Ok({ locale = locale })
 end)

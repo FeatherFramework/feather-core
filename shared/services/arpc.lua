@@ -1,6 +1,5 @@
-------- File Information --------
--- Redm RPC
--- Inspired by: https://github.com/egerdnc/redm-rpc
+-- Originally based on https://github.com/egerdnc/redm-rpc;
+-- substantially extended for Feather's Contract 1 transport.
 -----------------------------------
 
 --  Track all queued callbacks
@@ -19,15 +18,9 @@ RPCAPI = {}
 -- Wait for resource to start before executing rpc's
 RPCAPI.isWaitingForResourceStart = true
 
-if IsOnServer() then
-    -- Server event registry
-    RegisterServerEvent("Feather:Call")
-    RegisterServerEvent("Feather:Response")
-else
-    -- Client event registry
-    RegisterNetEvent("Feather:Call")
-    RegisterNetEvent("Feather:Response")
-end
+-- Shared RPC transport events are network-enabled in both runtimes.
+RegisterNetEvent("Feather:Call")
+RegisterNetEvent("Feather:Response")
 
 ----------------------
 -- Helper functions --
@@ -137,6 +130,7 @@ local function ValidatePlainData(value, limits, depth, seen, count)
     seen[value] = true
     count = count + 1
     if count > limits.maxNodes then return false, count end
+
     for key, child in pairs(value) do
         local keyType = type(key)
         if keyType ~= 'string' and keyType ~= 'number' then return false, count end
@@ -144,6 +138,7 @@ local function ValidatePlainData(value, limits, depth, seen, count)
         valid, count = ValidatePlainData(child, limits, depth + 1, seen, count)
         if not valid or count > limits.maxNodes then return false, count end
     end
+
     seen[value] = nil
     return true, count
 end
@@ -177,6 +172,7 @@ local function CallRemoteProcedures(name, params, callback, source, timeoutMs)
         SetTimeout(math.max(1000, timeout), function()
             local pending = pendingCallbacks[id]
             if not pending then return end
+
             pendingCallbacks[id] = nil
             local ok, err = pcall(pending.callback, nil, RpcError('timeout', ('RPC timed out: %s'):format(tostring(name))))
             if not ok then print(('RPC timeout callback failed: %s'):format(tostring(err))) end
@@ -211,6 +207,7 @@ AddEventHandler("Feather:Call", function(id, name, params)
         if id then TriggerRemoteEvent("Feather:Response", requestSource, id, nil, RpcError('invalid_request', 'RPC name must be a string.')) end
         return
     end
+
     if not registeredProcedures[name] then
         print("Procedure is not registered:", name)
         if id then TriggerRemoteEvent("Feather:Response", requestSource, id, nil, RpcError('not_found', 'RPC procedure is not registered.')) end
@@ -228,6 +225,7 @@ AddEventHandler("Feather:Call", function(id, name, params)
             return
         end
     end
+
     if IsProcedureRateLimited(requestSource, name, policy) then
         if id then TriggerRemoteEvent("Feather:Response", requestSource, id, nil, RpcError('rate_limited', 'RPC procedure rate limit exceeded.')) end
         return
@@ -254,6 +252,7 @@ AddEventHandler("Feather:Call", function(id, name, params)
                     RpcError('character_required', 'A current character session is required.')) end
                 return
             end
+
             requestContext.characterId = session.characterId
             requestContext.sessionId = session.sessionId
             requestContext.accountId = session.accountId
@@ -280,11 +279,13 @@ AddEventHandler("Feather:Call", function(id, name, params)
         local responseSession = policy.requireCharacter and requestContext or nil
         return { registered.callback(params, GetResponseFunction(id, requestSource, responseSession), requestSource, requestContext) }
     end)
+
     if not ok then
         print(("RPC procedure '%s' failed: %s"):format(name, tostring(returnValues)))
         if id then TriggerRemoteEvent("Feather:Response", requestSource, id, nil, RpcError('internal_error', 'RPC procedure failed.')) end
         return
     end
+
     if #returnValues > 0 and id then
         TriggerRemoteEvent("Feather:Response", requestSource, id, table.unpack(returnValues))
     end
@@ -293,8 +294,10 @@ end)
 -- Handle the incomming response from the rpc
 AddEventHandler("Feather:Response", function(id, ...)
     if type(id) ~= 'number' then return end
+
     local pending = pendingCallbacks[id]
     if not pending then return end
+
     if IsOnServer() and pending.expectedSource ~= source then return end
 
     pendingCallbacks[id] = nil
@@ -313,6 +316,7 @@ function RPCAPI.Register(name, callback, options)
             :format(tostring(name), type(callback)))
         return false
     end
+
     options = type(options) == 'table' and options or {}
     local owner = GetInvokingResource and GetInvokingResource() or nil
     owner = owner or GetCurrentResourceName()
@@ -351,9 +355,11 @@ function RPCAPI.RegisterContract(name, callback, options)
     if type(name) ~= 'string' or not name:match('%.v%d+$') then
         return CoreResults.Err('invalid_input', 'Contract RPC route names must end with a version suffix such as .v1.')
     end
+
     if not IsCallable(callback) then
         return CoreResults.Err('invalid_input', 'Contract RPC routes require a callable handler.')
     end
+
     if registeredProcedures[name] then
         return CoreResults.Err('conflict', 'That RPC route is already registered.', { route = name })
     end
@@ -369,6 +375,7 @@ function RPCAPI.RegisterContract(name, callback, options)
     if payloadValidator ~= nil and not IsCallable(payloadValidator) then
         return CoreResults.Err('invalid_input', 'validatePayload must be callable when provided.')
     end
+
     if responseValidator ~= nil and not IsCallable(responseValidator) then
         return CoreResults.Err('invalid_input', 'validateResponse must be callable when provided.')
     end
@@ -408,6 +415,7 @@ function RPCAPI.RegisterContract(name, callback, options)
     if not RPCAPI.Register(name, wrapped, registrationOptions) then
         return CoreResults.Err('registration_failed', 'RPC route registration failed.', { route = name })
     end
+
     local registered = registeredProcedures[name]
     return CoreResults.Ok({
         route = name,
@@ -431,6 +439,7 @@ function RPCAPI.GetRoutes()
             maxNodes = registered.policy.maxNodes
         }
     end
+
     table.sort(routes, function(left, right) return left.route < right.route end)
     return routes
 end
@@ -469,8 +478,7 @@ function RPCAPI.CallAsync(name, params, source, timeoutMs)
     return table.unpack(Citizen.Await(p))
 end
 
--- Named exports are the Contract 1 access boundary. The legacy initiate()
--- table remains available only while first-party consumers are migrated.
+-- Named exports are the Contract 1 access boundary.
 exports('RegisterRPC', RPCAPI.Register)
 exports('RegisterContractRPC', RPCAPI.RegisterContract)
 exports('GetRPCRoutes', function() return CoreResults.Ok(RPCAPI.GetRoutes()) end)

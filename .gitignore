@@ -1,41 +1,10 @@
-html
-ui/node_modules
+# Local editor settings
+.vscode/
+.idea/
 
-# Logs
-ui/logs
-ui/*.log
-ui/npm-debug.log*
-ui/yarn-debug.log*
-ui/yarn-error.log*
-ui/pnpm-debug.log*
-ui/lerna-debug.log*
+# Operating-system metadata
+.DS_Store
+Thumbs.db
 
-ui/node_modules
-ui/.DS_Store
-ui/dist
-ui/dist-ssr
-ui/coverage
-ui/*.local
-
-/cypress/videos/
-/cypress/screenshots/
-
-# Editor directories and files
-ui/.vscode/*
-ui/!.vscode/extensions.json
-ui/.idea
-ui/*.suo
-ui/*.ntvs*
-ui/*.njsproj
-ui/*.sln
-ui/*.sw?
-
-.vscode
-
-AUDIT*
-
-# Planning docs live in Discord, not in the public repo. Kept locally --
-# code comments cite their sections and those references stay valid
-# against the copies the team shares there.
-MASTER_PLAN*
-DEPENDENCY_SUPPORT_PLAN.md
+# Local diagnostic output
+*.log
