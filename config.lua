@@ -4,7 +4,7 @@ Config = {}
 Config.DevMode = false
 
 -- Locale used when a player's saved language is unavailable or invalid.
-Config.DefaultLang = 'en'
+Config.DefaultLang = 'en_us'
 
 Config.Logging = {
     -- Minimum log severity: debug, info, warn, or error.
