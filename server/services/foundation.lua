@@ -155,6 +155,7 @@ function CoreFoundation.GetCapabilities()
         features = {
             lifecycle = 1,
             health = 1,
+            clientReadiness = 1,
             results = 1,
             logging = 1,
             configValidation = 1,

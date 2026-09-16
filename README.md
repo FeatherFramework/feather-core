@@ -93,6 +93,17 @@ CoreRpcSmokeTest
 
 All checks should report `PASS`.
 
+Clients can use the same bounded readiness boundary as server resources:
+
+```lua
+local ready = exports['feather-core']:AwaitReady(30000)
+if not ready.ok then return end
+```
+
+The client export polls Core's versioned health contract and does not treat
+resource start order as proof that server migrations and services are ready.
+Run `CoreClientReadinessSmokeTest` in F8 to verify this path.
+
 With a player connected, run:
 
 ```text
