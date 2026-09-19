@@ -202,6 +202,22 @@ function CoreAccounts.GetContext(src)
     return CoreResults.Ok(PublicContext(context))
 end
 
+function CoreAccounts.GetIdentity(accountId)
+    if type(accountId) ~= 'string' or #accountId ~= 36
+        or not accountId:match('^%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$') then
+        return CoreResults.Err('invalid_input', 'A valid account UUID is required.')
+    end
+    local row = MySQL.single.await('SELECT `id`,`status` FROM `core_accounts` WHERE `id`=? LIMIT 1', {
+        accountId:lower()
+    })
+    if not row then return CoreResults.Err('account_not_found', 'Account was not found.') end
+    if type(row.status) ~= 'string' or #row.status < 1 or #row.status > 32
+        or not row.status:match('^[a-z][a-z0-9_]*$') then
+        return CoreResults.Err('invalid_persistence', 'Persisted account status is invalid.')
+    end
+    return CoreResults.Ok({ accountId = row.id, status = row.status })
+end
+
 function CoreAccounts.GetPrimaryIdentifier(src)
     local context = connectedBySource[tonumber(src)]
     if not context then
@@ -232,6 +248,32 @@ function CoreAccounts.GetCounts()
 end
 
 exports('GetAccountContext', CoreAccounts.GetContext)
+exports('GetAccountIdentity', CoreAccounts.GetIdentity)
+
+RegisterCommand('CoreAccountIdentityContractSmokeTest', function(source, args)
+    if source ~= 0 then return end
+    local target = tonumber(args and args[1])
+    local context = target and CoreAccounts.GetContext(target) or nil
+    local identity = context and context.ok and CoreAccounts.GetIdentity(context.value.accountId) or nil
+    local missing = CoreAccounts.GetIdentity('00000000-0000-4000-8000-000000000000')
+    local invalid = CoreAccounts.GetIdentity('not-a-uuid')
+    local tests = {
+        { 'connected context', context and context.ok == true },
+        { 'canonical identity', identity and identity.ok == true
+            and identity.value.accountId == context.value.accountId },
+        { 'bounded fields', identity and identity.ok == true and identity.value.status ~= nil
+            and identity.value.displayName == nil and identity.value.identifiers == nil },
+        { 'missing rejected', missing.ok == false and missing.code == 'account_not_found' },
+        { 'invalid rejected', invalid.ok == false and invalid.code == 'invalid_input' }
+    }
+    local passed = 0
+    for _, test in ipairs(tests) do
+        if test[2] then passed = passed + 1 end
+        print(('[CoreAccountIdentityContractSmokeTest] %-20s %s'):format(
+            test[1], test[2] and 'PASS' or 'FAIL'))
+    end
+    print(('[CoreAccountIdentityContractSmokeTest] done %d/%d passed (read-only)'):format(passed, #tests))
+end, true)
 
 local function AccountIdentityGate(src, playerName)
     local result = CoreAccounts.Resolve(src, playerName)
