@@ -130,13 +130,38 @@ local function ValidateConfiguration()
         'invalid_config', 'Config.GuardRegistry.maxPerAction must be a positive number.',
         { path = 'Config.GuardRegistry.maxPerAction' })
 
-    for _, field in ipairs({ 'maxMessageLength', 'maxDurationMs' }) do
+    for _, field in ipairs({
+        'maxMessageLength', 'maxTitleLength', 'maxLocationLength',
+        'maxIdentifierLength', 'maxDurationMs'
+    }) do
         checks[#checks + 1] = Check('config.notifications.' .. field,
             type(Config and Config.NotificationRegistry and Config.NotificationRegistry[field]) == 'number'
                 and Config.NotificationRegistry[field] > 0,
             'invalid_config', ('Config.NotificationRegistry.%s must be a positive number.'):format(field),
             { path = 'Config.NotificationRegistry.' .. field })
     end
+
+    local minimumQuality = Config and Config.NotificationRegistry and Config.NotificationRegistry.minQuality
+    local maximumQuality = Config and Config.NotificationRegistry and Config.NotificationRegistry.maxQuality
+    checks[#checks + 1] = Check('config.notifications.qualityRange',
+        type(minimumQuality) == 'number' and minimumQuality % 1 == 0
+            and type(maximumQuality) == 'number' and maximumQuality % 1 == 0
+            and minimumQuality >= -2147483648 and maximumQuality <= 2147483647
+            and minimumQuality <= maximumQuality,
+        'invalid_config', 'Config.NotificationRegistry quality bounds must be ordered signed 32-bit integers.',
+        { path = 'Config.NotificationRegistry.minQuality/maxQuality' })
+
+    local notificationRateWindow = Config and Config.NotificationRegistry
+        and Config.NotificationRegistry.rateWindowMs
+    local notificationRateCalls = Config and Config.NotificationRegistry
+        and Config.NotificationRegistry.maxCallsPerWindow
+    checks[#checks + 1] = Check('config.notifications.rateLimit',
+        type(notificationRateWindow) == 'number' and notificationRateWindow % 1 == 0
+            and notificationRateWindow >= 100 and notificationRateWindow <= 60000
+            and type(notificationRateCalls) == 'number' and notificationRateCalls % 1 == 0
+            and notificationRateCalls >= 1 and notificationRateCalls <= 1000,
+        'invalid_config', 'Notification rate limits must be bounded positive integers.',
+        { path = 'Config.NotificationRegistry.rateWindowMs/maxCallsPerWindow' })
 
     for _, result in ipairs(checks) do
         if not result.ok then

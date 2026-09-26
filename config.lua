@@ -31,8 +31,15 @@ Config.GuardRegistry = {
 }
 
 Config.NotificationRegistry = {
-    maxMessageLength = 512, -- Maximum notification message length in characters.
-    maxDurationMs = 15000   -- Longest notification display duration, in milliseconds.
+    maxMessageLength = 512,   -- Maximum notification message length in bytes.
+    maxTitleLength = 256,     -- Maximum notification title length in bytes.
+    maxLocationLength = 256,  -- Maximum notification location label length in bytes.
+    maxIdentifierLength = 128,-- Maximum dictionary, icon, color, or audio identifier length in bytes.
+    maxDurationMs = 15000,    -- Longest notification display duration, in milliseconds.
+    minQuality = -2147483648, -- Native presentation quality is packed as a signed 32-bit integer.
+    maxQuality = 2147483647,
+    rateWindowMs = 1000,      -- Fixed per-player dispatch-rate window.
+    maxCallsPerWindow = 20    -- Maximum accepted dispatches per player in one window.
 }
 
 -- Framework-wide limits applied to each player's RPC traffic.

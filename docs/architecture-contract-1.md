@@ -108,8 +108,12 @@ closed when required capabilities are unavailable.
 - Core exposes provider-based notification dispatch rather than presentation.
 - Server dispatch validates all styles advertised by `feather-notify`, including
   tooltip, banner, location, advanced, mission, warning, and standard variants.
+- Dispatch requires a currently connected target and rejects styles not advertised by the selected provider.
+- Providers advertise request limits; Core enforces them before calling the provider.
+- Core applies a bounded per-player dispatch rate; excess requests return `rate_limited`.
 - Client presentation is owned by `feather-notify`.
-- Providers return result envelopes and provider failures never report successful delivery.
+- Providers return result envelopes and provider failures never report successful dispatch.
+- `dispatched = true` means the provider accepted and emitted a notification request; it does not claim confirmed client display.
 - Additional styles may be added as explicit capabilities without changing the request envelope.
 
 ## Localization
