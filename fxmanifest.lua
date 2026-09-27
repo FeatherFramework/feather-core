@@ -6,7 +6,7 @@ lua54 'yes'
 description 'The Core service for the Feather Framework'
 author 'Feather Framework'
 name 'feather-core'
-version '0.4.0'
+version '0.5.0'
 
 shared_scripts {
     '/config.lua',
@@ -15,7 +15,7 @@ shared_scripts {
 }
 
 server_scripts {
-    '@oxmysql/lib/MySQL.lua',
+    '@feather-mysql/lib/DB.lua',
     '/server/migrations/*.lua',
     '/server/helpers/*.lua',
     '/server/services/*.lua',
@@ -23,5 +23,5 @@ server_scripts {
 }
 
 dependencies {
-    'oxmysql'
+    'feather-mysql'
 }

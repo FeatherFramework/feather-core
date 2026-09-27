@@ -15,9 +15,9 @@ function CoreAccountSettings.Get(accountId)
         return CoreResults.Err('invalid_input', 'accountId must be a UUID.')
     end
 
-    local locale = MySQL.scalar.await(
+    local locale = DB.value(
         'SELECT `locale` FROM `core_account_settings` WHERE `account_id` = ? LIMIT 1',
-        { accountId })
+        accountId)
     if not ValidLocale(locale) then locale = Config.DefaultLang end
 
     if not ValidLocale(locale) then
@@ -43,10 +43,10 @@ function CoreAccountSettings.Set(accountId, locale)
         return CoreResults.Err('locale_invalid', 'The requested locale is not registered.')
     end
 
-    MySQL.query.await([[
+    DB.exec([[
         INSERT INTO `core_account_settings` (`account_id`, `locale`) VALUES (?, ?)
         ON DUPLICATE KEY UPDATE `locale` = VALUES(`locale`)
-    ]], { accountId, locale })
+    ]], accountId, locale)
     return CoreResults.Ok({ locale = locale })
 end
 
@@ -131,7 +131,7 @@ RegisterCommand('CoreAccountSettingsSmokeTest', function(source, args)
         { name = 'account context', passed = account.ok == true },
         {
             name = 'settings table',
-            passed = tonumber(MySQL.scalar.await([[
+            passed = tonumber(DB.value([[
             SELECT COUNT(*) FROM information_schema.TABLES
             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'core_account_settings'
         ]])) == 1

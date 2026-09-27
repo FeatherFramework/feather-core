@@ -24,7 +24,7 @@ local function CharacterKey(characterId)
 end
 
 local function NewSessionId()
-    local sessionId = MySQL.scalar.await('SELECT UUID()')
+    local sessionId = DB.value('SELECT UUID()')
     if type(sessionId) ~= 'string' or sessionId == '' then
         return nil
     end
