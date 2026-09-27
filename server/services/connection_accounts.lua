@@ -75,7 +75,8 @@ end
 
 local function ResolveInTransaction(src, displayName, identifiers)
     local bodyResult, bodyError
-    local executed, committed = pcall(MySQL.startTransaction, function(query)
+    local executed, committed = pcall(DB.transaction, function(tx)
+        local function query(sql, params) return tx.raw(sql, table.unpack(params or {})) end
         local clauses, params = {}, {}
         for _, identifier in ipairs(identifiers) do
             clauses[#clauses + 1] = '(`identifier_type` = ? AND `identifier_value` = ?)'
@@ -207,9 +208,7 @@ function CoreAccounts.GetIdentity(accountId)
         or not accountId:match('^%x%x%x%x%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%-%x%x%x%x%x%x%x%x%x%x%x%x$') then
         return CoreResults.Err('invalid_input', 'A valid account UUID is required.')
     end
-    local row = MySQL.single.await('SELECT `id`,`status` FROM `core_accounts` WHERE `id`=? LIMIT 1', {
-        accountId:lower()
-    })
+    local row = DB.one('SELECT `id`,`status` FROM `core_accounts` WHERE `id`=? LIMIT 1', accountId:lower())
     if not row then return CoreResults.Err('account_not_found', 'Account was not found.') end
     if type(row.status) ~= 'string' or #row.status < 1 or #row.status > 32
         or not row.status:match('^[a-z][a-z0-9_]*$') then
@@ -424,9 +423,9 @@ RegisterCommand('CoreAccountSmokeTest', function(source, args)
                 local result = CoreAccounts.GetContext(target)
                 if not result.ok then return false end
 
-                return tonumber(MySQL.scalar.await(
+                return tonumber(DB.value(
                     'SELECT COUNT(*) FROM `core_accounts` WHERE `id` = ?',
-                    { result.value.accountId }
+                    result.value.accountId
                 )) == 1
             end
         },
@@ -436,10 +435,10 @@ RegisterCommand('CoreAccountSmokeTest', function(source, args)
                 local result = CoreAccounts.GetContext(target)
                 if not result.ok then return false end
 
-                local rows = MySQL.query.await([[
+                local rows = DB.query([[
                     SELECT `identifier_type` FROM `core_account_identifiers`
                     WHERE `account_id` = ?
-                ]], { result.value.accountId }) or {}
+                ]], result.value.accountId) or {}
                 if #rows ~= 1 then return false end
 
                 return rows[1].identifier_type == 'license' or rows[1].identifier_type == 'license2'
@@ -517,7 +516,8 @@ RegisterCommand('CoreSplitConnectedAccount', function(source, args)
     end
 
     local newAccountId, failure
-    local executed, committed = pcall(MySQL.startTransaction, function(query)
+    local executed, committed = pcall(DB.transaction, function(tx)
+        local function query(sql, params) return tx.raw(sql, table.unpack(params or {})) end
         local ownerRows = query([[SELECT `account_id` FROM `core_account_identifiers`
             WHERE `identifier_type` = ? AND `identifier_value` = ? FOR UPDATE]],
             { targetAnchor.type, targetAnchor.value }) or {}

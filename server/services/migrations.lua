@@ -18,7 +18,7 @@ local function Checksum(migration)
 end
 
 local function EnsureLedger()
-    MySQL.query.await([[
+    DB.exec([[
         CREATE TABLE IF NOT EXISTS `core_schema_migrations` (
             `id` VARCHAR(100) NOT NULL,
             `checksum` VARCHAR(64) NOT NULL,
@@ -29,7 +29,7 @@ local function EnsureLedger()
 end
 
 local function LoadApplied()
-    local rows = MySQL.query.await('SELECT `id`, `checksum`, `applied_at` FROM `core_schema_migrations`') or {}
+    local rows = DB.query('SELECT `id`, `checksum`, `applied_at` FROM `core_schema_migrations`') or {}
     local applied = {}
     for _, row in ipairs(rows) do
         applied[row.id] = row
@@ -68,7 +68,7 @@ local function Apply(migration, checksum)
                     statementIndex = index
                 })
             end
-            MySQL.query.await(statement)
+            DB.raw(statement)
         end
     end
 
@@ -85,9 +85,9 @@ local function Apply(migration, checksum)
         end
     end
 
-    MySQL.insert.await(
+    DB.insert(
         'INSERT INTO `core_schema_migrations` (`id`, `checksum`) VALUES (?, ?)',
-        { migration.id, checksum }
+        migration.id, checksum
     )
     logger.Info('migration.applied', { migrationId = migration.id })
     return CoreResults.Ok(true)
@@ -158,7 +158,7 @@ RegisterCommand('CoreMigrationSmokeTest', function(source)
         {
             name = 'migration ledger',
             run = function()
-                return tonumber(MySQL.scalar.await([[
+                return tonumber(DB.value([[
                     SELECT COUNT(*) FROM information_schema.TABLES
                     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'core_schema_migrations'
                 ]])) == 1
@@ -167,7 +167,7 @@ RegisterCommand('CoreMigrationSmokeTest', function(source)
         {
             name = 'accounts table',
             run = function()
-                return tonumber(MySQL.scalar.await([[
+                return tonumber(DB.value([[
                     SELECT COUNT(*) FROM information_schema.TABLES
                     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'core_accounts'
                 ]])) == 1
@@ -176,7 +176,7 @@ RegisterCommand('CoreMigrationSmokeTest', function(source)
         {
             name = 'account identifiers',
             run = function()
-                return tonumber(MySQL.scalar.await([[
+                return tonumber(DB.value([[
                     SELECT COUNT(*) FROM information_schema.TABLES
                     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'core_account_identifiers'
                 ]])) == 1
@@ -185,7 +185,7 @@ RegisterCommand('CoreMigrationSmokeTest', function(source)
         {
             name = 'account settings',
             run = function()
-                return tonumber(MySQL.scalar.await([[
+                return tonumber(DB.value([[
                     SELECT COUNT(*) FROM information_schema.TABLES
                     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'core_account_settings'
                 ]])) == 1
