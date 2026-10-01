@@ -14,7 +14,9 @@ local function DebugLocale(message)
 end
 
 function LocalesAPI.SetClientLang(lang)
+    local changed = ClientLangCache ~= lang
     ClientLangCache = lang
+    if changed and not IsOnServer() then TriggerEvent('feather-core:locale:changed', lang) end
 end
 
 function LocalesAPI.RefreshClientLang()
@@ -23,7 +25,7 @@ function LocalesAPI.RefreshClientLang()
     local settings = RPCAPI.CallAsync('core.account.settings.get.v1', {})
     if type(settings) ~= 'table' or settings.ok ~= true then return false end
 
-    ClientLangCache = settings.value.locale
+    LocalesAPI.SetClientLang(settings.value.locale)
     return true
 end
 
