@@ -6,7 +6,7 @@ lua54 'yes'
 description 'The Core service for the Feather Framework'
 author 'Feather Framework'
 name 'feather-core'
-version '0.5.1'
+version '0.5.2'
 
 shared_scripts {
     '/config.lua',
